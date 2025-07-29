@@ -1,0 +1,49 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# Dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# Testing
+/coverage
+
+# Next.js build output
+/.next/
+/out/
+
+# Production build files
+/build
+
+# Static exports
+/dist
+
+# Misc
+.DS_Store
+*.pem
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Local .env files
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Turborepo
+.turbo
+
+#vercel
+.vercel
+
+# Exclude specific files and folders from the project that are not relevant for the app
+# For example:
+# currentProgress.txt
+# Readme-gemini.md
+# Readme-v0.md
+# package.txt
+# components/CreateInvestmentForm.MD
