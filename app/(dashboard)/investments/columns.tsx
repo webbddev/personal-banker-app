@@ -16,7 +16,7 @@ import {
 import Link from 'next/link';
 import { FinancialInstrument } from '@/types/investment-schema';
 import {
-  INVESTMENT_TYPE_OPTIONS,
+  investmentTypeOptions,
   INVESTMENT_TYPES,
 } from '@/utils/investment-constants';
 import {
@@ -62,7 +62,7 @@ export const columns: ColumnDef<FinancialInstrument>[] = [
     ),
     cell: ({ row }) => {
       const investmentType = row.getValue('investmentType') as string;
-      const option = INVESTMENT_TYPE_OPTIONS.find(
+      const option = investmentTypeOptions.find(
         (opt) =>
           opt.value === investmentType ||
           opt.value ===

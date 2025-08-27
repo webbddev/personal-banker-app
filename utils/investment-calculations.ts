@@ -1,10 +1,16 @@
 import { FinancialInstrument } from '@/types/investment-schema';
-import { convertCurrency, SupportedCurrency } from './currency-formatter';
+// import { convertCurrency, SupportedCurrencyCode } from './currency-formatter';
+import {
+  convertCurrency,
+  ExchangeRates,
+  SupportedCurrencyCode,
+} from './currency-formatter';
 
 export type CurrencyTotals = {
   MDL: number;
   EUR: number;
   GBP: number;
+  USD: number;
 };
 
 /**
@@ -26,10 +32,13 @@ export function calculateCurrencyTotals(
         case 'GBP':
           totals.GBP += amount;
           break;
+        case 'USD':
+          totals.USD += amount;
+          break;
       }
       return totals;
     },
-    { MDL: 0, EUR: 0, GBP: 0 }
+    { MDL: 0, EUR: 0, GBP: 0, USD: 0 }
   );
 }
 // worked well
@@ -49,12 +58,17 @@ export function calculateCurrencyTotals(
 /**
  * Calculate total amount in MDL (legacy function)
  */
-export function calculateTotalAmount(data: FinancialInstrument[]): number {
+// export function calculateTotalAmount(data: FinancialInstrument[]): number {
+export function calculateTotalAmount(
+  data: FinancialInstrument[],
+  exchangeRates: ExchangeRates
+): number {
   return data.reduce((acc, investment) => {
     const amountInMDL = convertCurrency(
       investment.investmentAmount,
-      investment.currency as SupportedCurrency,
-      'MDL'
+      investment.currency as SupportedCurrencyCode,
+      'MDL',
+      exchangeRates
     );
     return acc + amountInMDL;
   }, 0);
@@ -145,10 +159,13 @@ export function calculateMonthlyReturns(
         case 'GBP':
           totals.GBP += monthlyReturn;
           break;
+        case 'USD':
+          totals.USD += monthlyReturn;
+          break;
       }
       return totals;
     },
-    { MDL: 0, EUR: 0, GBP: 0 }
+    { MDL: 0, EUR: 0, GBP: 0, USD: 0 }
   );
 }
 

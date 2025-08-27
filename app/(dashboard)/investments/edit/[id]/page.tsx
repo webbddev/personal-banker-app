@@ -25,16 +25,16 @@ import { CalendarIcon } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
-import { useInvestmentStore } from '@/store/financialInvestmentsStore';
-import {
-  InvestmentType,
-} from '@/utils/investment-constants';
 import {
   formatAmount,
-  SupportedCurrency,
+  SupportedCurrencyCode,
 } from '@/utils/currency-formatter';
-import React, { use } from 'react';
+import React, { useTransition, useEffect, useState, use } from 'react';
 import { FinancialInstrument } from '@/types/investment-schema';
+import {
+  updateInvestmentAction,
+  getInvestmentById,
+} from '@/app/actions/investmentActions';
 
 const formSchema = z.object({
   organisationName: z
@@ -71,65 +71,112 @@ const FinancialInstrumentEditPage = ({
   const { id } = use(params);
   const { toast } = useToast();
   const router = useRouter();
-  const { investments, updateInvestment } = useInvestmentStore();
-
-  const investment = investments.find((inv) => inv.id === id);
+  const [isPending, startTransition] = useTransition();
+  const [investment, setInvestment] = useState<FinancialInstrument | null>(
+    null
+  );
+  const [isLoading, setIsLoading] = useState(true);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: investment
-      ? {
-          organisationName: investment.organisationName,
-          investmentAmount: investment.investmentAmount,
-          interestRate: investment.interestRate,
-          expirationDate: new Date(investment.expirationDate),
-          incomeTax: investment.incomeTax,
-          currency: investment.currency,
-          investmentType: investment.investmentType,
-        }
-      : undefined,
   });
 
+  useEffect(() => {
+    const loadInvestment = async () => {
+      setIsLoading(true);
+      try {
+        const foundInvestment = await getInvestmentById(id);
+        if (foundInvestment) {
+          setInvestment(foundInvestment);
+          form.reset({
+            organisationName: foundInvestment.organisationName,
+            investmentAmount: foundInvestment.investmentAmount,
+            interestRate: foundInvestment.interestRate,
+            expirationDate: new Date(foundInvestment.expirationDate),
+            incomeTax: foundInvestment.incomeTax,
+            currency: foundInvestment.currency,
+            investmentType: foundInvestment.investmentType,
+          });
+        }
+      } catch (error) {
+        console.error('Failed to load investment:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadInvestment();
+  }, [id, form]);
+
+  if (isLoading) {
+    return (
+      <div className='max-w-3xl mx-auto p-4'>
+        <div className='flex items-center justify-center h-32'>
+          <div className='text-lg'>Loading investment details...</div>
+        </div>
+      </div>
+    );
+  }
+
   if (!investment) {
-    return <div>Investment not found</div>;
+    return (
+      <div className='max-w-3xl mx-auto p-4'>
+        <BackButton text='Go Back' link='/investments' />
+        <div className='flex items-center justify-center h-32'>
+          <div className='text-lg text-red-600'>Investment not found</div>
+        </div>
+      </div>
+    );
   }
 
   const onSubmit = async (values: FormValues) => {
-    try {
-      const updatedInvestment: FinancialInstrument = {
-        ...investment,
-        ...values,
-        investmentType: values.investmentType as InvestmentType,
-        currency: values.currency as SupportedCurrency,
-      };
+    startTransition(async () => {
+      try {
+        const formData = new FormData();
+        formData.append('id', investment.id);
+        formData.append('organisationName', values.organisationName);
+        formData.append('investmentAmount', values.investmentAmount.toString());
+        formData.append('interestRate', values.interestRate.toString());
+        formData.append('incomeTax', values.incomeTax.toString());
+        formData.append('expirationDate', values.expirationDate.toISOString());
+        formData.append('currency', values.currency);
+        formData.append('investmentType', values.investmentType);
 
-      updateInvestment(id, updatedInvestment);
+        const result = await updateInvestmentAction(formData);
 
-      const message = `Investment for ${
-        values.organisationName
-      } has been updated to ${formatAmount(
-        values.investmentAmount,
-        values.currency as SupportedCurrency
-      )} with ${values.interestRate}% annual return`;
+        if (result.success) {
+          const message = `Investment for ${
+            values.organisationName
+          } has been updated to ${formatAmount(
+            values.investmentAmount,
+            values.currency as SupportedCurrencyCode
+          )} with ${values.interestRate}% annual return`;
 
-      toast({
-        title: 'Investment Updated',
-        description: message,
-      });
+          toast({
+            title: 'Investment Updated',
+            description: message,
+          });
 
-      router.push('/investments');
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to update investment',
-        variant: 'destructive',
-      });
-    }
+          router.push('/investments');
+        } else {
+          throw new Error(result.error || 'Update failed');
+        }
+      } catch (error) {
+        toast({
+          title: 'Error',
+          description:
+            error instanceof Error
+              ? error.message
+              : 'Failed to update investment',
+          variant: 'destructive',
+        });
+      }
+    });
   };
 
   return (
     <div className='max-w-3xl mx-auto p-4'>
-      <BackButton text='Go Back' link='/investments'/>
+      <BackButton text='Go Back' link='/investments' />
       <h1 className='text-2xl font-bold mt-6 mb-6'>Edit Investment</h1>
 
       <Form {...form}>
@@ -141,7 +188,7 @@ const FinancialInstrumentEditPage = ({
               <FormItem>
                 <FormLabel>Organisation Name</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input {...field} disabled={isPending} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -159,6 +206,7 @@ const FinancialInstrumentEditPage = ({
                     <Input
                       type='number'
                       {...field}
+                      disabled={isPending}
                       onChange={(e) =>
                         field.onChange(parseFloat(e.target.value))
                       }
@@ -180,6 +228,7 @@ const FinancialInstrumentEditPage = ({
                       type='number'
                       step='0.01'
                       {...field}
+                      disabled={isPending}
                       onChange={(e) =>
                         field.onChange(parseFloat(e.target.value))
                       }
@@ -203,6 +252,7 @@ const FinancialInstrumentEditPage = ({
                       type='number'
                       step='0.01'
                       {...field}
+                      disabled={isPending}
                       onChange={(e) =>
                         field.onChange(parseFloat(e.target.value))
                       }
@@ -224,6 +274,7 @@ const FinancialInstrumentEditPage = ({
                       <FormControl>
                         <Button
                           variant='outline'
+                          disabled={isPending}
                           className={cn(
                             'w-full pl-3 text-left font-normal',
                             !field.value && 'text-muted-foreground'
@@ -243,7 +294,7 @@ const FinancialInstrumentEditPage = ({
                         mode='single'
                         selected={field.value}
                         onSelect={field.onChange}
-                        disabled={(date) => date < new Date()}
+                        disabled={(date) => date < new Date() || isPending}
                         initialFocus
                       />
                     </PopoverContent>
@@ -259,12 +310,13 @@ const FinancialInstrumentEditPage = ({
               type='button'
               variant='outline'
               onClick={() => router.back()}
+              disabled={isPending}
               className='w-full'
             >
               Cancel
             </Button>
-            <Button type='submit' className='w-full'>
-              Update Investment
+            <Button type='submit' disabled={isPending} className='w-full'>
+              {isPending ? 'Updating...' : 'Update Investment'}
             </Button>
           </div>
         </form>

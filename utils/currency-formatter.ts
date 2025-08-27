@@ -8,8 +8,8 @@ export const currencyFormatter = (locale: string, currency: string) => {
   }
 
   if (
-    !Object.values(SUPPORTED_CURRENCIES).includes(
-      currency.toUpperCase() as SupportedCurrency
+    !Object.values(SUPPORTED_CURRENCY_LABELS).includes(
+      currency.toUpperCase() as SupportedCurrencyCode
     )
   ) {
     throw new Error(`Unsupported currency: ${currency}`);
@@ -27,29 +27,35 @@ export const currencyFormatter = (locale: string, currency: string) => {
  * Supported currencies in the application
  * @remarks These are the only currencies that can be used throughout the app
  */
-export const SUPPORTED_CURRENCIES = {
+export const SUPPORTED_CURRENCY_LABELS = {
   MDL: 'MDL',
   EUR: 'EUR',
   GBP: 'GBP',
+  USD: 'USD',
 } as const;
 
-export type SupportedCurrency = keyof typeof SUPPORTED_CURRENCIES;
+export type SupportedCurrencyCode = keyof typeof SUPPORTED_CURRENCY_LABELS;
 
 export const CURRENCY_OPTIONS = [
   {
-    value: SUPPORTED_CURRENCIES.MDL.toLowerCase(),
-    label: SUPPORTED_CURRENCIES.MDL,
+    value: SUPPORTED_CURRENCY_LABELS.MDL.toLowerCase(),
+    label: SUPPORTED_CURRENCY_LABELS.MDL,
     locale: 'ro-MD',
   },
   {
-    value: SUPPORTED_CURRENCIES.EUR.toLowerCase(),
-    label: SUPPORTED_CURRENCIES.EUR,
+    value: SUPPORTED_CURRENCY_LABELS.EUR.toLowerCase(),
+    label: SUPPORTED_CURRENCY_LABELS.EUR,
     locale: 'en-US',
   },
   {
-    value: SUPPORTED_CURRENCIES.GBP.toLowerCase(),
-    label: SUPPORTED_CURRENCIES.GBP,
+    value: SUPPORTED_CURRENCY_LABELS.GBP.toLowerCase(),
+    label: SUPPORTED_CURRENCY_LABELS.GBP,
     locale: 'en-GB',
+  },
+  {
+    value: SUPPORTED_CURRENCY_LABELS.USD.toLowerCase(),
+    label: SUPPORTED_CURRENCY_LABELS.USD,
+    locale: 'en-US',
   },
 ] as const;
 
@@ -58,7 +64,7 @@ export const formatAmount = (amount: number, currency: string) => {
     throw new Error('Valid currency code is required');
   }
 
-  const uppercaseCurrency = currency.toUpperCase() as SupportedCurrency;
+  const uppercaseCurrency = currency.toUpperCase() as SupportedCurrencyCode;
   const option = CURRENCY_OPTIONS.find(
     (opt) => opt.value === currency.toLowerCase()
   );
@@ -75,23 +81,28 @@ export const formatAmount = (amount: number, currency: string) => {
 
 // Exchange rates as of 17th December 2024
 // 1 MDL = X foreign currency
-export const EXCHANGE_RATES = {
-  MDL: 1,
-  EUR: 19.11, // 1 EUR = 19.49 MDL
-  GBP: 23.12, // 1 GBP = 22.52 MDL
-} as const;
+// export const EXCHANGE_RATES = {
+//   MDL: 1,
+//   EUR: 19.11, // 1 EUR = 19.49 MDL
+//   GBP: 23.12, // 1 GBP = 22.52 MDL
+//   USD: 17.45, // 1 USD = 17.45 MDL
+// } as const;
+export type ExchangeRates = Record<SupportedCurrencyCode, number>;
 
 /**
  * Convert amount from one currency to another
  * @param amount Amount to convert
  * @param fromCurrency Currency to convert from
  * @param toCurrency Currency to convert to
+
  * @returns Converted amount
  */
 export function convertCurrency(
   amount: number,
-  fromCurrency: SupportedCurrency,
-  toCurrency: SupportedCurrency
+  fromCurrency: SupportedCurrencyCode,
+  // toCurrency: SupportedCurrencyCode
+  toCurrency: SupportedCurrencyCode,
+  exchangeRates: ExchangeRates
 ): number {
   // If same currency, return original amount
   if (fromCurrency === toCurrency) {
@@ -100,10 +111,12 @@ export function convertCurrency(
 
   // Convert to MDL first (if not already in MDL)
   const amountInMDL =
-    fromCurrency === 'MDL' ? amount : amount * EXCHANGE_RATES[fromCurrency];
+    // fromCurrency === 'MDL' ? amount : amount * EXCHANGE_RATES[fromCurrency];
+    fromCurrency === 'MDL' ? amount : amount * exchangeRates[fromCurrency];
 
   // Convert from MDL to target currency
   return toCurrency === 'MDL'
     ? amountInMDL
-    : amountInMDL / EXCHANGE_RATES[toCurrency];
+    : // : amountInMDL / EXCHANGE_RATES[toCurrency];
+      amountInMDL / exchangeRates[toCurrency];
 }

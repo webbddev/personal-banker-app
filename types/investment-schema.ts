@@ -1,70 +1,60 @@
 import * as z from 'zod';
 import {
-  InvestmentType,
   INVESTMENT_TYPES,
-  INVESTMENT_VALIDATION,
+  investmentValidationRules,
 } from '@/utils/investment-constants';
-import {
-  SupportedCurrency,
-  SUPPORTED_CURRENCIES,
-} from '@/utils/currency-formatter';
+import { SUPPORTED_CURRENCY_LABELS } from '@/utils/currency-formatter';
+import { Investment } from '@/lib/generated/prisma';
 
-// Financial Instrument data type
-export type FinancialInstrument = {
-  id: string;
-  organisationName: string;
-  relatedData: string;
-  investmentType: InvestmentType;
-  currency: SupportedCurrency;
-  investmentAmount: number;
-  interestRate: number;
-  incomeTax: number;
-  expirationDate: Date;
-  // monthlyReturn: number;
-  expirationStatus: 'expiring < 3 months' | 'expiring in a month' | 'expired';
-};
+// Use Prisma's generated Investment type as the main type
+export type FinancialInstrument = Investment;
 
 // Form validation schema
 export const formSchema = z.object({
-  organisationName: z.string().refine((val) => {
-    return val.trim().length >= INVESTMENT_VALIDATION.MIN_ORGANISATION_LENGTH;
-  }, 'Organisation name must be at least 2 characters'),
-  investmentType: z.enum(
-    Object.values(INVESTMENT_TYPES) as [string, ...string[]],
-    {
-      required_error: 'Please select an investment type',
-    }
-  ),
+  organisationName: z
+    .string()
+    .trim()
+    .min(
+      investmentValidationRules.MIN_ORGANIZATION_LENGTH,
+      `Organisation name must be at least ${investmentValidationRules.MIN_ORGANIZATION_LENGTH} characters`
+    ),
+
+  investmentType: z.enum(Object.values(INVESTMENT_TYPES), {
+    error: 'Please select an investment type',
+  }),
+
   relatedData: z.string().optional(),
-  currency: z.enum(
-    Object.values(SUPPORTED_CURRENCIES) as [string, ...string[]],
-    {
-      required_error: 'Please select a currency',
-    }
-  ),
+
+  currency: z.enum(Object.values(SUPPORTED_CURRENCY_LABELS), {
+    error: 'Please select a currency',
+  }),
+
   investmentAmount: z.string().refine((val) => {
     const parsed = parseFloat(val);
     return !isNaN(parsed) && parsed > 0;
   }, 'Amount must be a valid number greater than 0'),
+
   incomeTax: z.string().refine((val) => {
     const parsed = parseFloat(val);
     return !isNaN(parsed) && parsed >= 0 && parsed <= 50;
   }, 'Income tax must be a valid percentage between 0 and 50'),
+
   interestRate: z.string().refine((val) => {
     const parsed = parseFloat(val);
     return (
       !isNaN(parsed) &&
-      parsed >= INVESTMENT_VALIDATION.MIN_INTEREST_RATE &&
-      parsed <= INVESTMENT_VALIDATION.MAX_INTEREST_RATE
+      parsed >= investmentValidationRules.MIN_INTEREST_RATE &&
+      parsed <= investmentValidationRules.MAX_INTEREST_RATE
     );
   }, 'Interest rate must be between 0 and 30%'),
-  expirationDate: z.coerce
-    .date()
-    .refine(
-      (date) => date > new Date(),
-      'Expiration date must be in the future'
-    ),
+
+  expirationDate: z.date().refine((date) => date > new Date(), {
+    message: 'Expiration date must be in the future',
+  }),
 });
 
 // Form type derived from the schema
 export type CreateInvestmentFormValues = z.infer<typeof formSchema>;
+
+// Export Prisma types for convenience
+export { ExpirationStatus, type Investment } from '@/lib/generated/prisma';
