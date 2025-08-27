@@ -51,6 +51,8 @@ export function transformPrismaInvestmentToFinancialInstrument(
     incomeTax: prismaInvestment.incomeTax,
     expirationDate: prismaInvestment.expirationDate,
     expirationStatus: prismaInvestment.expirationStatus,
+    createdAt: prismaInvestment.createdAt,
+    updatedAt: prismaInvestment.updatedAt,
   };
 }
 

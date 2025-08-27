@@ -3,12 +3,11 @@ import { getInvestmentById } from '@/app/actions/investmentActions';
 export default async function SingleInvestment({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  //   const investment = await prisma.investment.findUnique({
-  //     where: { id: params.id },
-  //   });
-  const investment = await getInvestmentById(params.id);
+  
+  const { id } = await params;
+  const investment = await getInvestmentById(id);
 
   return <main>{investment?.organisationName}</main>;
 }
