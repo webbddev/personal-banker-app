@@ -1,0 +1,194 @@
+'use server';
+
+import { PrismaClient } from '@/lib/generated/prisma';
+import { revalidatePath } from 'next/cache';
+
+const prisma = new PrismaClient();
+
+export async function createInvestment(data: any) {
+  try {
+    const investment = await prisma.investment.create({
+      data: {
+        organisationName: data.organisationName ,
+        relatedData: data.relatedData,
+        investmentType: data.investmentType,
+        currency: data.currency,
+        investmentAmount: data.investmentAmount ,
+        interestRate: data.interestRate,
+        incomeTax: data.incomeTax,
+        expirationDate: data.expirationDate,
+        expirationStatus: data.expirationStatus,
+      },
+    });
+    revalidatePath('/investments');
+    return { success: true, investment };
+  } catch (error) {
+    console.error('Create investment error:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : String(error),
+    };
+  }
+}
+
+export async function getAllInvestments() {
+  try {
+    return await prisma.investment.findMany({
+      orderBy: { createdAt: 'desc' },
+    });
+  } catch (error) {
+    console.error('Get all investments error:', error);
+    return [];
+  }
+}
+
+export async function getInvestmentById(id: string) {
+  try {
+    return await prisma.investment.findUnique({ where: { id } });
+  } catch (error) {
+    console.error('Get investment by ID error:', error);
+    return null;
+  }
+}
+
+export async function updateInvestment(id: string, data: any) {
+  try {
+    const investment = await prisma.investment.update({
+      where: { id },
+      data: {
+        organisationName: data.organisationName,
+        relatedData: data.relatedData,
+        investmentType: data.investmentType,
+        currency: data.currency,
+        investmentAmount: data.investmentAmount,
+        interestRate: data.interestRate,
+        incomeTax: data.incomeTax,
+        expirationDate: data.expirationDate,
+        expirationStatus: data.expirationStatus,
+        updatedAt: new Date(),
+      },
+    });
+    revalidatePath('/investments');
+    return { success: true, investment };
+  } catch (error) {
+    console.error('Update investment error:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : String(error),
+    };
+  }
+}
+
+// Primary function for form submissions with validation
+export async function updateInvestmentAction(formData: FormData) {
+  try {
+    const id = formData.get('id') as string;
+    const organisationName = formData.get('organisationName') as string;
+    const investmentAmount = parseFloat(
+      formData.get('investmentAmount') as string
+    );
+    const interestRate = parseFloat(formData.get('interestRate') as string);
+    const incomeTax = parseFloat(formData.get('incomeTax') as string);
+    const expirationDate = new Date(formData.get('expirationDate') as string);
+    const currency = formData.get('currency') as string;
+    const investmentType = formData.get('investmentType') as string;
+
+    // Server-side validation
+    if (!organisationName || organisationName.trim().length < 2) {
+      return {
+        success: false,
+        error: 'Organisation name must be at least 2 characters',
+      };
+    }
+
+    if (isNaN(investmentAmount) || investmentAmount <= 0) {
+      return {
+        success: false,
+        error: 'Investment amount must be greater than 0',
+      };
+    }
+
+    if (isNaN(interestRate) || interestRate < 0 || interestRate > 30) {
+      return {
+        success: false,
+        error: 'Interest rate must be between 0 and 30%',
+      };
+    }
+
+    if (isNaN(incomeTax) || incomeTax < 0 || incomeTax > 100) {
+      return { success: false, error: 'Income tax must be between 0 and 100%' };
+    }
+
+    if (expirationDate <= new Date()) {
+      return { success: false, error: 'Expiration date must be in the future' };
+    }
+
+    const investment = await prisma.investment.update({
+      where: { id },
+      data: {
+        organisationName: organisationName.trim(),
+        investmentAmount,
+        interestRate,
+        incomeTax,
+        expirationDate,
+        currency,
+        investmentType,
+        updatedAt: new Date(),
+      },
+    });
+
+    revalidatePath('/investments');
+    revalidatePath(`/investments/edit/${id}`);
+
+    return { success: true, investment };
+  } catch (error) {
+    console.error('Update investment error:', error);
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : 'Failed to update investment',
+    };
+  }
+}
+
+export async function deleteInvestment(id: string) {
+  try {
+    await prisma.investment.delete({ where: { id } });
+    revalidatePath('/investments');
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to delete investment:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+}
+
+export async function getInvestmentsExpiringSoon() {
+  try {
+    const threeMonthsFromNow = new Date();
+    threeMonthsFromNow.setMonth(threeMonthsFromNow.getMonth() + 3);
+
+    return await prisma.investment.findMany({
+      where: {
+        expirationDate: {
+          lt: threeMonthsFromNow,
+        },
+      },
+      orderBy: { expirationDate: 'asc' },
+    });
+  } catch (error) {
+    console.error('Get investments expiring soon error:', error);
+    return [];
+  }
+}
+
+export async function countAllInvestments() {
+  try {
+    return await prisma.investment.count();
+  } catch (error) {
+    console.error('Count investments error:', error);
+    return 0;
+  }
+}

@@ -1,0 +1,62 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../lib/generated/prisma"
+}
+
+// neondb - should be run 
+// datasource db {
+//   provider  = "postgresql"
+//   url  	    = env("DATABASE_URL")
+// }
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String       @id @default(cuid())
+  clerkUserId String       @unique
+  email       String       @unique
+  name        String?
+  imageUrl    String?
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+  investments Investment[]
+}
+
+model Investment {
+  id               String           @id @default(cuid())
+  organisationName String
+  relatedData      String?
+  investmentType   String
+  currency         String
+  investmentAmount Float
+  interestRate     Float
+  incomeTax        Float
+  expirationDate   DateTime
+  expirationStatus ExpirationStatus
+  userId           String
+  user             User             @relation(fields: [userId], references: [clerkUserId], onDelete: Cascade)
+  createdAt        DateTime         @default(now()) @map("created_at")
+  updatedAt        DateTime         @updatedAt @map("updated_at")
+
+  @@index([userId])
+}
+
+enum ExpirationStatus {
+  EXPIRING_LESS_THAN_3_MONTHS
+  EXPIRING_IN_A_MONTH
+  EXPIRED
+}
+
+enum InvestmentType {
+  deposit
+  bankDeposit
+  governmentBond
+  corporateBond
+  eVMS
+}

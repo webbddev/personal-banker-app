@@ -1,0 +1,16 @@
+updated nextjs and react versions
+updated daypicker and the code within calendar.tsx for compatibility with tailwind v3.
+updated dev dependencies - types/node, types/react, types/react-dom, postcss, typescript
+updated everything apart from recharts, tailwind-merge and tailwindcss  
+
+CONSIDER FURTHER 
+Before migration to postgres -
+1. examine How to use Prisma ORM with Clerk Auth and Next.js. Before any modifications test if an app works just as fine and evaluate with AI if changes need to be introduced. 
+https://www.prisma.io/docs/guides/clerk-nextjs 
+
+CURRENTLY DOING
+following ByteGrad's prisma orm tutorial and introducing changes to my existing app
+stopped at 14:14. Check where my investments are rendered and proceed with the tutorial further
+
+FOR PROMPT 
+refactor my CreateInvestmentForm to use server actions with formData
