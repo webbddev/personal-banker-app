@@ -17,6 +17,7 @@ import {
   CurrencyTotals,
 } from '@/utils/investment-calculations';
 import { getLatestRates } from '@/utils/exchange-rate-service';
+import { ExchangeRatesDisplay } from '@/components/ExchangeRatesDisplay';
 
 export default async function InvestmentsPage() {
   // const investments = useInvestmentStore((state) => state.investments);
@@ -48,13 +49,18 @@ export default async function InvestmentsPage() {
       {/* Currency Totals Display */}
       <div className='mb-6'>
         <h2 className='text-xl font-semibold mb-2'>
-          Investment Totals - You have {instrumentsCount} investment instruments in your
-          portfolio
+          Investment Totals - You have {instrumentsCount} investment instruments
+          in your portfolio
         </h2>
+
         <CurrencyEquivalentTotal
           totals={currencyTotals}
           exchangeRates={exchangeRates}
         />
+      </div>
+      {/* Exchange Rates Display */}
+      <div className='md:col-span-1'>
+        <ExchangeRatesDisplay />
       </div>
 
       {/* Delete Dialog */}

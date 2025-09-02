@@ -29,25 +29,27 @@ export const formSchema = z.object({
     error: 'Please select a currency',
   }),
 
-  investmentAmount: z.string().refine((val) => {
-    const parsed = parseFloat(val);
-    return !isNaN(parsed) && parsed > 0;
-  }, 'Amount must be a valid number greater than 0'),
+  investmentAmount: z.number().positive('Amount must be greater than 0'),
 
-  incomeTax: z.string().refine((val) => {
-    const parsed = parseFloat(val);
-    return !isNaN(parsed) && parsed >= 0 && parsed <= 50;
-  }, 'Income tax must be a valid percentage between 0 and 50'),
+  // Use z.number() directly without error options
+  incomeTax: z
+    .number()
+    .min(0, 'Income tax cannot be negative')
+    .max(
+      investmentValidationRules.MAX_INCOME_TAX,
+      `Income tax must be between ${investmentValidationRules.MIN_INCOME_TAX} and ${investmentValidationRules.MAX_INCOME_TAX}`
+    ),
 
-  interestRate: z.string().refine((val) => {
-    const parsed = parseFloat(val);
-    return (
-      !isNaN(parsed) &&
-      parsed >= investmentValidationRules.MIN_INTEREST_RATE &&
-      parsed <= investmentValidationRules.MAX_INTEREST_RATE
-    );
-  }, 'Interest rate must be between 0 and 30%'),
+  // Use z.number() directly without error options
+  interestRate: z
+    .number()
+    .min(investmentValidationRules.MIN_INTEREST_RATE)
+    .max(
+      investmentValidationRules.MAX_INTEREST_RATE,
+      `Interest rate must be between ${investmentValidationRules.MIN_INTEREST_RATE} and ${investmentValidationRules.MAX_INTEREST_RATE}%`
+    ),
 
+  // Use z.date() directly without error options
   expirationDate: z.date().refine((date) => date > new Date(), {
     message: 'Expiration date must be in the future',
   }),

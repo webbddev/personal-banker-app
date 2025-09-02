@@ -2,22 +2,88 @@
 
 import { PrismaClient } from '@/lib/generated/prisma';
 import { revalidatePath } from 'next/cache';
+import { currentUser } from '@clerk/nextjs/server';
 
 const prisma = new PrismaClient();
 
+// Ensure there is a corresponding User row for the authenticated Clerk user
+async function ensureDbUser() {
+  const authUser = await currentUser();
+  if (!authUser) {
+    return null;
+  }
+
+  // An email is required to create a user in your database.
+  // We prioritize the primary email from Clerk, falling back to the first available one.
+  const email =
+    authUser.primaryEmailAddress?.emailAddress ??
+    authUser.emailAddresses?.[0]?.emailAddress;
+
+  if (!email) {
+    console.error(
+      'User does not have an email address, cannot create database entry.'
+    );
+    return null;
+  }
+
+  const name = `${authUser.firstName ?? ''} ${authUser.lastName ?? ''}`.trim();
+
+  try {
+    // Upsert the user: create if they don't exist, update if they do.
+    // This keeps your user data in sync with Clerk.
+    await prisma.user.upsert({
+      where: { clerkUserId: authUser.id },
+      update: {
+        email,
+        name: name || undefined,
+        imageUrl: authUser.imageUrl,
+      },
+      create: {
+        clerkUserId: authUser.id,
+        email,
+        name: name || undefined,
+        imageUrl: authUser.imageUrl,
+      },
+    });
+
+    return authUser;
+  } catch (e) {
+    console.error('Failed to ensure DB user exists:', e);
+    return null;
+  }
+}
+
 export async function createInvestment(data: any) {
+  const authUser = await currentUser();
+  if (!authUser) {
+    return {
+      success: false,
+      error: 'User not authenticated. Please log in.',
+    };
+  }
+
+  // Make sure the corresponding DB user exists to satisfy FK
+  const ensured = await ensureDbUser();
+  if (!ensured) {
+    return {
+      success: false,
+      error: 'Could not ensure user exists in database.',
+    };
+  }
+
   try {
     const investment = await prisma.investment.create({
       data: {
-        organisationName: data.organisationName ,
+        organisationName: data.organisationName,
         relatedData: data.relatedData,
         investmentType: data.investmentType,
         currency: data.currency,
-        investmentAmount: data.investmentAmount ,
+        investmentAmount: data.investmentAmount,
         interestRate: data.interestRate,
         incomeTax: data.incomeTax,
         expirationDate: data.expirationDate,
         expirationStatus: data.expirationStatus,
+        userId: authUser.id,
       },
     });
     revalidatePath('/investments');
@@ -32,8 +98,14 @@ export async function createInvestment(data: any) {
 }
 
 export async function getAllInvestments() {
+  const user = await currentUser();
+  if (!user) {
+    console.error('Get all investments error: User not authenticated');
+    return [];
+  }
   try {
     return await prisma.investment.findMany({
+      where: { userId: user.id },
       orderBy: { createdAt: 'desc' },
     });
   } catch (error) {
@@ -43,8 +115,17 @@ export async function getAllInvestments() {
 }
 
 export async function getInvestmentById(id: string) {
+  const user = await currentUser();
+  if (!user) {
+    console.error('Get investment by ID error: User not authenticated');
+    return null;
+  }
   try {
-    return await prisma.investment.findUnique({ where: { id } });
+    const investment = await prisma.investment.findUnique({ where: { id } });
+    if (!investment || investment.userId !== user.id) {
+      return null;
+    }
+    return investment;
   } catch (error) {
     console.error('Get investment by ID error:', error);
     return null;
@@ -52,7 +133,23 @@ export async function getInvestmentById(id: string) {
 }
 
 export async function updateInvestment(id: string, data: any) {
+  const user = await currentUser();
+
+  if (!user) {
+    return { success: false, error: 'User not authenticated.' };
+  }
+
   try {
+    const investmentToUpdate = await prisma.investment.findUnique({
+      where: { id },
+    });
+
+    if (!investmentToUpdate || investmentToUpdate.userId !== user.id) {
+      return {
+        success: false,
+        error: 'Investment not found or permission denied.',
+      };
+    }
     const investment = await prisma.investment.update({
       where: { id },
       data: {
@@ -81,8 +178,22 @@ export async function updateInvestment(id: string, data: any) {
 
 // Primary function for form submissions with validation
 export async function updateInvestmentAction(formData: FormData) {
+  const user = await currentUser();
+  if (!user) {
+    return { success: false, error: 'User not authenticated.' };
+  }
   try {
     const id = formData.get('id') as string;
+    const investmentToUpdate = await prisma.investment.findUnique({
+      where: { id },
+    });
+
+    if (!investmentToUpdate || investmentToUpdate.userId !== user.id) {
+      return {
+        success: false,
+        error: 'Investment not found or permission denied.',
+      };
+    }
     const organisationName = formData.get('organisationName') as string;
     const investmentAmount = parseFloat(
       formData.get('investmentAmount') as string
@@ -152,7 +263,23 @@ export async function updateInvestmentAction(formData: FormData) {
 }
 
 export async function deleteInvestment(id: string) {
+  const user = await currentUser();
+
+  if (!user) {
+    return { success: false, error: 'User not authenticated.' };
+  }
+
   try {
+    const investmentToDelete = await prisma.investment.findUnique({
+      where: { id },
+    });
+
+    if (!investmentToDelete || investmentToDelete.userId !== user.id) {
+      return {
+        success: false,
+        error: 'Investment not found or permission denied.',
+      };
+    }
     await prisma.investment.delete({ where: { id } });
     revalidatePath('/investments');
     return { success: true };
@@ -166,12 +293,20 @@ export async function deleteInvestment(id: string) {
 }
 
 export async function getInvestmentsExpiringSoon() {
+  
+  const user = await currentUser();
+
+  if (!user) {
+    return [];
+  }
+
   try {
     const threeMonthsFromNow = new Date();
     threeMonthsFromNow.setMonth(threeMonthsFromNow.getMonth() + 3);
 
     return await prisma.investment.findMany({
       where: {
+        userId: user.id,
         expirationDate: {
           lt: threeMonthsFromNow,
         },
@@ -185,8 +320,14 @@ export async function getInvestmentsExpiringSoon() {
 }
 
 export async function countAllInvestments() {
+  const user = await currentUser();
+
+  if (!user) {
+    return 0;
+  }
+
   try {
-    return await prisma.investment.count();
+    return await prisma.investment.count({ where: { userId: user.id } });
   } catch (error) {
     console.error('Count investments error:', error);
     return 0;
