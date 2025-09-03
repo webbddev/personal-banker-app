@@ -3,7 +3,8 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/toaster';
-import { ClerkProvider } from '@clerk/nextjs';
+import { ClerkProvider, SignedIn } from '@clerk/nextjs';
+import { dark, neobrutalism } from '@clerk/themes';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -26,7 +27,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider afterSignOutUrl='/'>
+    <ClerkProvider
+      appearance={{
+        baseTheme: 'simple',
+        variables: {
+          colorPrimary: '#40C1AB', // Tailwind teal-500
+        },
+        signIn: {
+          baseTheme: 'simple',
+        },
+        signUp: {
+          baseTheme: 'simple',
+        },
+      }}
+    >
       <html lang='en' suppressHydrationWarning>
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
