@@ -1,4 +1,3 @@
-export const dynamic = 'force-dynamic'; // silence informational error in vercel build logs
 
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
@@ -21,7 +20,7 @@ export default function Home() {
             where financial empowerment meets simplicity
           </p>
           <Button asChild className='mt-4'>
-            <Link href='/sign-up'>Get Started</Link>
+            <Link href='/investments'>Get Started</Link>
           </Button>
         </div>
         <Image
