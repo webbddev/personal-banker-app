@@ -39,9 +39,9 @@ import { CURRENCY_OPTIONS, formatAmount } from '@/utils/currency-formatter';
 import { investmentTypeOptions } from '@/utils/investment-constants';
 import { useRouter } from 'next/navigation';
 import BackButton from './BackButton';
-import { ExpirationStatus } from '@/lib/generated/prisma';
 import { createInvestment } from '@/app/actions/investmentActions';
 import { useState } from 'react';
+import { ExpirationStatus } from '@prisma/client';
 
 export default function CreateInvestmentForm() {
   const { toast } = useToast();
