@@ -1,73 +1,15 @@
 'use server';
 
-import { PrismaClient } from '@/lib/generated/prisma';
+import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
-import { currentUser } from '@clerk/nextjs/server';
-
-const prisma = new PrismaClient();
-
-// Ensure there is a corresponding User row for the authenticated Clerk user
-async function ensureDbUser() {
-  const authUser = await currentUser();
-  if (!authUser) {
-    return null;
-  }
-
-  // An email is required to create a user in your database.
-  // We prioritize the primary email from Clerk, falling back to the first available one.
-  const email =
-    authUser.primaryEmailAddress?.emailAddress ??
-    authUser.emailAddresses?.[0]?.emailAddress;
-
-  if (!email) {
-    console.error(
-      'User does not have an email address, cannot create database entry.'
-    );
-    return null;
-  }
-
-  const name = `${authUser.firstName ?? ''} ${authUser.lastName ?? ''}`.trim();
-
-  try {
-    // Upsert the user: create if they don't exist, update if they do.
-    // This keeps your user data in sync with Clerk.
-    await prisma.user.upsert({
-      where: { clerkUserId: authUser.id },
-      update: {
-        email,
-        name: name || undefined,
-        imageUrl: authUser.imageUrl,
-      },
-      create: {
-        clerkUserId: authUser.id,
-        email,
-        name: name || undefined,
-        imageUrl: authUser.imageUrl,
-      },
-    });
-
-    return authUser;
-  } catch (e) {
-    console.error('Failed to ensure DB user exists:', e);
-    return null;
-  }
-}
+import { checkUser } from '@/lib/checkUser';
 
 export async function createInvestment(data: any) {
-  const authUser = await currentUser();
-  if (!authUser) {
+  const user = await checkUser();
+  if (!user) {
     return {
       success: false,
       error: 'User not authenticated. Please log in.',
-    };
-  }
-
-  // Make sure the corresponding DB user exists to satisfy FK
-  const ensured = await ensureDbUser();
-  if (!ensured) {
-    return {
-      success: false,
-      error: 'Could not ensure user exists in database.',
     };
   }
 
@@ -83,7 +25,7 @@ export async function createInvestment(data: any) {
         incomeTax: data.incomeTax,
         expirationDate: data.expirationDate,
         expirationStatus: data.expirationStatus,
-        userId: authUser.id,
+        userId: user.clerkUserId,
       },
     });
     revalidatePath('/investments');
@@ -98,14 +40,14 @@ export async function createInvestment(data: any) {
 }
 
 export async function getAllInvestments() {
-  const user = await currentUser();
+  const user = await checkUser();
   if (!user) {
     console.error('Get all investments error: User not authenticated');
     return [];
   }
   try {
     return await prisma.investment.findMany({
-      where: { userId: user.id },
+      where: { userId: user.clerkUserId },
       orderBy: { createdAt: 'desc' },
     });
   } catch (error) {
@@ -115,14 +57,14 @@ export async function getAllInvestments() {
 }
 
 export async function getInvestmentById(id: string) {
-  const user = await currentUser();
+  const user = await checkUser();
   if (!user) {
     console.error('Get investment by ID error: User not authenticated');
     return null;
   }
   try {
     const investment = await prisma.investment.findUnique({ where: { id } });
-    if (!investment || investment.userId !== user.id) {
+    if (!investment || investment.userId !== user.clerkUserId) {
       return null;
     }
     return investment;
@@ -133,7 +75,7 @@ export async function getInvestmentById(id: string) {
 }
 
 export async function updateInvestment(id: string, data: any) {
-  const user = await currentUser();
+  const user = await checkUser();
 
   if (!user) {
     return { success: false, error: 'User not authenticated.' };
@@ -144,7 +86,7 @@ export async function updateInvestment(id: string, data: any) {
       where: { id },
     });
 
-    if (!investmentToUpdate || investmentToUpdate.userId !== user.id) {
+    if (!investmentToUpdate || investmentToUpdate.userId !== user.clerkUserId) {
       return {
         success: false,
         error: 'Investment not found or permission denied.',
@@ -178,7 +120,7 @@ export async function updateInvestment(id: string, data: any) {
 
 // Primary function for form submissions with validation
 export async function updateInvestmentAction(formData: FormData) {
-  const user = await currentUser();
+  const user = await checkUser();
   if (!user) {
     return { success: false, error: 'User not authenticated.' };
   }
@@ -188,7 +130,7 @@ export async function updateInvestmentAction(formData: FormData) {
       where: { id },
     });
 
-    if (!investmentToUpdate || investmentToUpdate.userId !== user.id) {
+    if (!investmentToUpdate || investmentToUpdate.userId !== user.clerkUserId) {
       return {
         success: false,
         error: 'Investment not found or permission denied.',
@@ -263,7 +205,7 @@ export async function updateInvestmentAction(formData: FormData) {
 }
 
 export async function deleteInvestment(id: string) {
-  const user = await currentUser();
+  const user = await checkUser();
 
   if (!user) {
     return { success: false, error: 'User not authenticated.' };
@@ -274,7 +216,7 @@ export async function deleteInvestment(id: string) {
       where: { id },
     });
 
-    if (!investmentToDelete || investmentToDelete.userId !== user.id) {
+    if (!investmentToDelete || investmentToDelete.userId !== user.clerkUserId) {
       return {
         success: false,
         error: 'Investment not found or permission denied.',
@@ -293,8 +235,7 @@ export async function deleteInvestment(id: string) {
 }
 
 export async function getInvestmentsExpiringSoon() {
-  
-  const user = await currentUser();
+  const user = await checkUser();
 
   if (!user) {
     return [];
@@ -306,7 +247,7 @@ export async function getInvestmentsExpiringSoon() {
 
     return await prisma.investment.findMany({
       where: {
-        userId: user.id,
+        userId: user.clerkUserId,
         expirationDate: {
           lt: threeMonthsFromNow,
         },
@@ -320,17 +261,18 @@ export async function getInvestmentsExpiringSoon() {
 }
 
 export async function countAllInvestments() {
-  const user = await currentUser();
+  const user = await checkUser();
 
   if (!user) {
     return 0;
   }
 
   try {
-    return await prisma.investment.count({ where: { userId: user.id } });
+    return await prisma.investment.count({
+      where: { userId: user.clerkUserId },
+    });
   } catch (error) {
     console.error('Count investments error:', error);
     return 0;
   }
 }
-
