@@ -7,9 +7,6 @@ import Link from 'next/link';
 export default function Home() {
   return (
     <main>
-      {/* <header className='max-w-6xl mx-auto px-4 sm:px-8 py-6'>
-        <Image src={Logo} className='mt-5 w-20 h-20' alt='logo' />
-      </header> */}
       <section className='max-w-7xl mx-auto mt-48 sm:mt-24 px-4 h-screen grid lg:grid-cols-[1fr,640px] lg:items-center'>
         <div>
           <h1 className='capitalize text-4xl md:text-7xl xl:text-8xl font-bold -ml-2'>
