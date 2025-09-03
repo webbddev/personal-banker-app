@@ -333,3 +333,4 @@ export async function countAllInvestments() {
     return 0;
   }
 }
+

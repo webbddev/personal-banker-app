@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import logo from '@/assets/White-Logo_noBackground.svg';
-import { SignedIn, UserButton } from '@clerk/nextjs';
+import { SignedIn, SignOutButton, UserButton } from '@clerk/nextjs';
 import { ModeToggle } from './ModeToggle';
 import { currentUser } from '@clerk/nextjs/server';
 
@@ -25,6 +25,13 @@ const Navbar = async () => {
           <UserButton />
         </SignedIn>
         <ModeToggle />
+      </div>
+      {/* Mobile Navigation Menu */}
+      <div className='fixed bottom-0 left-0 w-full bg-primary dark:bg-slate-700 text-white block md:hidden z-50'>
+        <nav className='flex flex-col items-center py-4'>
+          {/* Add your mobile nav links here */}
+          <SignOutButton />
+        </nav>
       </div>
     </div>
   );

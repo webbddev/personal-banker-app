@@ -79,14 +79,6 @@ export const formatAmount = (amount: number, currency: string) => {
   return currencyFormatter(option.locale, uppercaseCurrency).format(amount);
 };
 
-// Exchange rates as of 17th December 2024
-// 1 MDL = X foreign currency
-// export const EXCHANGE_RATES = {
-//   MDL: 1,
-//   EUR: 19.11, // 1 EUR = 19.49 MDL
-//   GBP: 23.12, // 1 GBP = 22.52 MDL
-//   USD: 17.45, // 1 USD = 17.45 MDL
-// } as const;
 export type ExchangeRates = Record<SupportedCurrencyCode, number>;
 
 /**

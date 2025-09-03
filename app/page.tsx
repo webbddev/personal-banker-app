@@ -19,7 +19,7 @@ export default function Home() {
             where financial empowerment meets simplicity
           </p>
           <Button asChild className='mt-4'>
-            <Link href='/dashboard'>Get Started</Link>
+            <Link href='/investments'>Get Started</Link>
           </Button>
         </div>
         <Image
