@@ -1,8 +1,8 @@
 import { currentUser } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma';
-// Removed invalid import of User
+import { User } from '@prisma/client';
 
-export const checkUser = async (): Promise<ReturnType<typeof prisma.user.upsert> | null> => {
+export const checkUser = async (): Promise<User | null> => {
   try {
     const authUser = await currentUser();
     if (!authUser) {
