@@ -8,6 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -15,6 +16,13 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   Popover,
   PopoverContent,
@@ -28,7 +36,9 @@ import { useRouter } from 'next/navigation';
 import {
   formatAmount,
   SupportedCurrencyCode,
+  CURRENCY_OPTIONS,
 } from '@/utils/currency-formatter';
+import { investmentTypeOptions } from '@/utils/investment-constants';
 import React, { useTransition, useEffect, useState, use } from 'react';
 import { FinancialInstrument } from '@/types/investment-schema';
 import {
@@ -40,6 +50,13 @@ const formSchema = z.object({
   organisationName: z
     .string()
     .min(2, { message: 'Organisation Name is required' }),
+  investmentType: z.string().min(1, { message: 'Investment Type is required' }),
+  relatedData: z.string(),
+  currency: z.string().min(1, { message: 'Currency is required' }),
+  incomeTax: z
+    .number()
+    .min(0, { message: 'Income Tax must be 0 or greater' })
+    .max(100, { message: 'Income Tax cannot exceed 100%' }),
   investmentAmount: z
     .number()
     .min(0.01, { message: 'Amount must be greater than 0' }),
@@ -53,12 +70,6 @@ const formSchema = z.object({
       (date) => date > new Date(),
       'Expiration date must be in the future'
     ),
-  incomeTax: z
-    .number()
-    .min(0, { message: 'Income Tax must be 0 or greater' })
-    .max(100, { message: 'Income Tax cannot exceed 100%' }),
-  currency: z.string().min(1, { message: 'Currency is required' }),
-  investmentType: z.string().min(1, { message: 'Investment Type is required' }),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -79,6 +90,16 @@ const FinancialInstrumentEditPage = ({
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
+    defaultValues: {
+      organisationName: '',
+      investmentType: '',
+      relatedData: '',
+      currency: '',
+      incomeTax: 0,
+      investmentAmount: 0,
+      interestRate: 0,
+      expirationDate: new Date(),
+    },
   });
 
   useEffect(() => {
@@ -88,25 +109,32 @@ const FinancialInstrumentEditPage = ({
         const foundInvestment = await getInvestmentById(id);
         if (foundInvestment) {
           setInvestment(foundInvestment);
+          // Pre-populate form with existing data
           form.reset({
             organisationName: foundInvestment.organisationName,
+            investmentType: foundInvestment.investmentType,
+            relatedData: foundInvestment.relatedData || '',
+            currency: foundInvestment.currency,
+            incomeTax: foundInvestment.incomeTax,
             investmentAmount: foundInvestment.investmentAmount,
             interestRate: foundInvestment.interestRate,
             expirationDate: new Date(foundInvestment.expirationDate),
-            incomeTax: foundInvestment.incomeTax,
-            currency: foundInvestment.currency,
-            investmentType: foundInvestment.investmentType,
           });
         }
       } catch (error) {
         console.error('Failed to load investment:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to load investment details',
+          variant: 'destructive',
+        });
       } finally {
         setIsLoading(false);
       }
     };
 
     loadInvestment();
-  }, [id, form]);
+  }, [id, form, toast]);
 
   if (isLoading) {
     return (
@@ -134,13 +162,14 @@ const FinancialInstrumentEditPage = ({
       try {
         const formData = new FormData();
         formData.append('id', investment.id);
-        formData.append('organisationName', values.organisationName);
+        formData.append('organisationName', values.organisationName.trim());
+        formData.append('investmentType', values.investmentType);
+        formData.append('relatedData', values.relatedData);
+        formData.append('currency', values.currency);
+        formData.append('incomeTax', values.incomeTax.toString());
         formData.append('investmentAmount', values.investmentAmount.toString());
         formData.append('interestRate', values.interestRate.toString());
-        formData.append('incomeTax', values.incomeTax.toString());
         formData.append('expirationDate', values.expirationDate.toISOString());
-        formData.append('currency', values.currency);
-        formData.append('investmentType', values.investmentType);
 
         const result = await updateInvestmentAction(formData);
 
@@ -180,7 +209,11 @@ const FinancialInstrumentEditPage = ({
       <h1 className='text-2xl font-bold mt-6 mb-6'>Edit Investment</h1>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className='space-y-8 max-w-3xl mx-auto'
+        >
+          {/* Organisation Name */}
           <FormField
             control={form.control}
             name='organisationName'
@@ -188,59 +221,104 @@ const FinancialInstrumentEditPage = ({
               <FormItem>
                 <FormLabel>Organisation Name</FormLabel>
                 <FormControl>
-                  <Input {...field} disabled={isPending} />
+                  <Input
+                    placeholder='MAIB, HSBC, Ministry of Finance, etc'
+                    type='text'
+                    {...field}
+                    disabled={isPending}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
 
+          {/* Investment Type */}
+          <FormField
+            control={form.control}
+            name='investmentType'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Type of Investment Instrument</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value}
+                  disabled={isPending}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder='Select your instrument' />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {investmentTypeOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Related Data */}
+          <FormField
+            control={form.control}
+            name='relatedData'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Related Data</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder='ISIC Nr., Deposit ID'
+                    type='text'
+                    {...field}
+                    disabled={isPending}
+                  />
+                </FormControl>
+                <FormDescription>
+                  Enter specific details if you have any
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Currency and Income Tax */}
           <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+            {/* Investment Currency */}
             <FormField
               control={form.control}
-              name='investmentAmount'
+              name='currency'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Investment Amount</FormLabel>
-                  <FormControl>
-                    <Input
-                      type='number'
-                      {...field}
-                      disabled={isPending}
-                      onChange={(e) =>
-                        field.onChange(parseFloat(e.target.value))
-                      }
-                    />
-                  </FormControl>
+                  <FormLabel>Investment Currency</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value}
+                    disabled={isPending}
+                  >
+                    <FormControl>
+                      <SelectTrigger className='max-w-full'>
+                        <SelectValue placeholder='Select currency' />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {CURRENCY_OPTIONS.map((option) => (
+                        <SelectItem key={option.value} value={option.label}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            <FormField
-              control={form.control}
-              name='interestRate'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Rate of Return (%)</FormLabel>
-                  <FormControl>
-                    <Input
-                      type='number'
-                      step='0.01'
-                      {...field}
-                      disabled={isPending}
-                      onChange={(e) =>
-                        field.onChange(parseFloat(e.target.value))
-                      }
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+            {/* Income Tax */}
             <FormField
               control={form.control}
               name='incomeTax'
@@ -250,12 +328,40 @@ const FinancialInstrumentEditPage = ({
                   <FormControl>
                     <Input
                       type='number'
+                      placeholder='Enter income tax percentage'
+                      {...field}
+                      onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                      value={field.value ?? ''}
+                      min='0'
+                      max='50'
+                      step='0.01'
+                      disabled={isPending}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          {/* Investment Amount, Interest Rate, Maturity Date */}
+          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+            {/* Investment Amount */}
+            <FormField
+              control={form.control}
+              name='investmentAmount'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Investment Amount</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder='e.g. 100000'
+                      type='number'
                       step='0.01'
                       {...field}
+                      onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                      value={field.value ?? ''}
                       disabled={isPending}
-                      onChange={(e) =>
-                        field.onChange(parseFloat(e.target.value))
-                      }
                     />
                   </FormControl>
                   <FormMessage />
@@ -263,22 +369,46 @@ const FinancialInstrumentEditPage = ({
               )}
             />
 
+            {/* Interest Rate */}
+            <FormField
+              control={form.control}
+              name='interestRate'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Rate of Return (%)</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder='e.g. 5'
+                      type='number'
+                      step='0.01'
+                      {...field}
+                      onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                      value={field.value ?? ''}
+                      disabled={isPending}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Expiration Date */}
             <FormField
               control={form.control}
               name='expirationDate'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Expiration Date</FormLabel>
+                  <FormLabel>Instrument Maturity Date</FormLabel>
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
                         <Button
-                          variant='outline'
-                          disabled={isPending}
+                          variant={'outline'}
                           className={cn(
                             'w-full pl-3 text-left font-normal',
                             !field.value && 'text-muted-foreground'
                           )}
+                          disabled={isPending}
                         >
                           {field.value ? (
                             format(field.value, 'PPP')
