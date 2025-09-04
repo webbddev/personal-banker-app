@@ -28,6 +28,7 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider
+      afterSignOutUrl={'/'}
       appearance={{
         baseTheme: 'simple',
         variables: {

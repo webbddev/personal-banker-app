@@ -1,4 +1,4 @@
-import { SignInButton } from '@clerk/nextjs';
+import {  SignUpButton } from '@clerk/nextjs';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import Logo from '../assets/Colour-Logo_noBackground.svg';
@@ -20,10 +20,10 @@ export default function Home() {
             where financial empowerment meets simplicity
           </p>
           <Button asChild className='mt-4'>
-            <SignInButton>
+            <SignUpButton >
               Get Started
               {/* <Link href='/investments'>Get Started</Link> */}
-            </SignInButton>
+            </SignUpButton>
           </Button>
         </div>
         <Image
