@@ -1,0 +1,386 @@
+Ниже — полный, линейный план внедрения автоматических писем в вашем приложении на Next.js с Clerk и Prisma, деплоем на Vercel, отправкой через Resend и двумя сценариями уведомлений:
+
+* **1-го числа месяца**: дайджест всех инвестиций пользователя, у которых истечение **в текущем календарном месяце**.
+* **Каждый день**: напоминание **ровно за 30 дней до истечения** по каждой инвестиции.
+
+> Везде предполагается структура из вашего кода: `Investment` ссылается на `User` через `userId -> clerkUserId`, а `checkUser` синхронизирует email/имя из Clerk в БД.
+
+---
+
+# 0) Предусловия
+
+* Next.js 15, Prisma, Clerk уже подключены (есть в вашем `package.json`).
+* В проекте есть `@/lib/prisma` (инициализированный PrismaClient).
+* В БД поле `expirationDate` у инвестиций заполнено корректно (UTC).
+
+---
+
+# 1) Установка зависимостей
+
+```bash
+npm install resend
+# (по желанию для часовых поясов)
+npm install date-fns date-fns-tz
+```
+
+> У вас `date-fns` уже установлен. `date-fns-tz` нужен только если захотите вычислять границы месяца в конкретном часовом поясе (например, Europe/Chisinau).
+
+---
+
+# 2) Переменные окружения (`.env` / Vercel Project → Settings → Environment Variables)
+
+Добавьте:
+
+```bash
+RESEND_API_KEY=YOUR_RESEND_API_KEY
+EMAIL_FROM=alerts@yourdomain.com
+APP_BASE_URL=https://your-app.vercel.app
+```
+
+**Важно:**
+
+* `EMAIL_FROM` — адрес с доменом, **верифицированным** в Resend (см. п.3). Например: `alerts@investmate.io`.
+* На Vercel добавьте те же переменные в **Production** (и при необходимости в Preview/Development).
+
+---
+
+# 3) Настройка домена в Resend (один раз)
+
+1. Зарегистрируйтесь/зайдите в Resend → **Domains** → **Add Domain**.
+2. Добавьте DNS-записи (DKIM/SPF и т.д.) у вашего DNS-провайдера.
+3. После верификации домена используйте `from: "alerts@yourdomain.com"`.
+
+*(Без верификации письма могут не доставляться.)*
+
+---
+
+# 4) Prisma: лёгкая оптимизация (опционально)
+
+Добавьте индекс по дате истечения — ускорит выборки:
+
+```prisma
+model Investment {
+  id               String   @id @default(cuid())
+  organisationName String
+  relatedData      String?
+  investmentType   String
+  currency         String
+  investmentAmount Float
+  interestRate     Float
+  incomeTax        Float
+  expirationDate   DateTime
+  expirationStatus ExpirationStatus
+  userId           String
+  user             User     @relation(fields: [userId], references: [clerkUserId], onDelete: Cascade)
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@index([expirationDate]) // <— добавили
+}
+```
+
+Выполните миграцию:
+
+```bash
+npx prisma generate
+npx prisma migrate dev -n add_expirationDate_index
+```
+
+> Структура `User`/`Investment` в целом уже ок для нашей задачи.
+
+---
+
+# 5) Хелперы: выборки инвестиций (`/lib/expirations.ts`)
+
+Создайте файл `lib/expirations.ts`:
+
+```ts
+// lib/expirations.ts
+import { prisma } from "@/lib/prisma";
+import { addDays, startOfDay, startOfMonth, endOfMonth } from "date-fns";
+import type { Investment } from "@prisma/client";
+
+/** Инвестиции, истекающие ровно через 30 дней (UTC) */
+export async function findInvestmentsExpiringIn30Days() {
+  const targetDate = startOfDay(addDays(new Date(), 30));
+  return prisma.investment.findMany({
+    where: { expirationDate: targetDate },
+    include: { user: true },
+  });
+}
+
+/** Инвестиции, истекающие в текущем месяце (UTC) */
+export async function findInvestmentsExpiringThisMonth() {
+  const now = new Date();
+  const start = startOfMonth(now);
+  const end = endOfMonth(now);
+
+  return prisma.investment.findMany({
+    where: {
+      expirationDate: {
+        gte: start,
+        lte: end,
+      },
+    },
+    include: { user: true },
+    orderBy: { expirationDate: "asc" },
+  });
+}
+```
+
+> Если хотите учитывать именно месяц в зоне `Europe/Chisinau`, используйте `date-fns-tz` (`utcToZonedTime`, `zonedTimeToUtc`) и сначала вычисляйте границы месяца в этой зоне, затем конвертируйте их в UTC для запроса.
+
+---
+
+# 6) Хелперы: отправка писем (`/lib/mailer.ts`)
+
+Создайте файл `lib/mailer.ts`:
+
+```ts
+// lib/mailer.ts
+import { Resend } from "resend";
+import type { Investment, User } from "@prisma/client";
+
+const resend = new Resend(process.env.RESEND_API_KEY!);
+const FROM = process.env.EMAIL_FROM!; // например, alerts@yourdomain.com
+
+export async function sendReminderEmail(to: string, investment: Investment & { user?: User | null }) {
+  const date = new Date(investment.expirationDate).toLocaleDateString("ru-RU");
+
+  await resend.emails.send({
+    from: FROM,
+    to,
+    subject: "Напоминание: инвестиция истекает через 30 дней",
+    html: `
+      <div style="font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;">
+        <h2>Напоминание по инвестиции</h2>
+        <p>Ваша инвестиция <b>${investment.organisationName}</b> на сумму
+        <b>${investment.investmentAmount} ${investment.currency}</b>
+        истекает <b>${date}</b>.</p>
+        <p><a href="${process.env.APP_BASE_URL}/investments/${investment.id}">Открыть в приложении</a></p>
+      </div>
+    `,
+  });
+}
+
+export async function sendMonthlyDigestEmail(to: string, userName: string | null | undefined, investments: (Investment & { user?: User | null })[]) {
+  if (!investments.length) return;
+
+  const list = investments
+    .map(inv => {
+      const d = new Date(inv.expirationDate).toLocaleDateString("ru-RU");
+      return `<li><b>${inv.organisationName}</b> — ${inv.investmentAmount} ${inv.currency}, истекает ${d}</li>`;
+    })
+    .join("");
+
+  await resend.emails.send({
+    from: FROM,
+    to,
+    subject: "Дайджест: инвестиции, истекающие в этом месяце",
+    html: `
+      <div style="font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;">
+        <h2>Здравствуйте${userName ? ", " + userName : ""}!</h2>
+        <p>В этом месяце у вас истекают следующие инвестиции:</p>
+        <ul>${list}</ul>
+        <p><a href="${process.env.APP_BASE_URL}/investments">Открыть список в приложении</a></p>
+      </div>
+    `,
+  });
+}
+```
+
+---
+
+# 7) Server Actions-обёртки (`/app/actions/send-reminders.ts`)
+
+Создайте файл `app/actions/send-reminders.ts`:
+
+```ts
+// app/actions/send-reminders.ts
+"use server";
+
+import { findInvestmentsExpiringIn30Days, findInvestmentsExpiringThisMonth } from "@/lib/expirations";
+import { sendMonthlyDigestEmail, sendReminderEmail } from "@/lib/mailer";
+
+/** Ежедневный прогон: письма за 30 дней до истечения */
+export async function runDailyReminders() {
+  const list = await findInvestmentsExpiringIn30Days();
+
+  // Пишем по каждому инструменту отдельное письмо
+  for (const inv of list) {
+    const email = inv.user?.email;
+    if (!email) continue;
+    await sendReminderEmail(email, inv);
+  }
+
+  return { count: list.length };
+}
+
+/** Месячный дайджест: 1-го числа — собрать и разослать по пользователям */
+export async function runMonthlyDigest() {
+  const monthly = await findInvestmentsExpiringThisMonth();
+
+  // Группировка по email пользователя
+  const byEmail: Record<string, typeof monthly> = {} as any;
+  for (const inv of monthly) {
+    const email = inv.user?.email;
+    if (!email) continue;
+    if (!byEmail[email]) byEmail[email] = [] as any;
+    byEmail[email].push(inv);
+  }
+
+  let usersNotified = 0;
+  for (const [email, investments] of Object.entries(byEmail)) {
+    const userName = investments[0]?.user?.name;
+    await sendMonthlyDigestEmail(email, userName, investments);
+    usersNotified++;
+  }
+
+  return { usersNotified, investmentsTotal: monthly.length };
+}
+```
+
+> Хотите избежать дублей при ручных перезапусках — добавьте таблицу логов уведомлений или флаги в `Investment` (см. §11).
+
+---
+
+# 8) API-роуты под Cron
+
+Создайте **два** маршрута, чтобы исключить двойной запуск дайджеста в один день.
+
+**`app/api/notifications/daily/route.ts`** — за 30 дней:
+
+```ts
+import { NextResponse } from "next/server";
+import { runDailyReminders } from "@/app/actions/send-reminders";
+
+export async function GET() {
+  const result = await runDailyReminders();
+  return NextResponse.json({ ok: true, ...result });
+}
+```
+
+**`app/api/notifications/monthly/route.ts`** — дайджест 1-го числа:
+
+```ts
+import { NextResponse } from "next/server";
+import { runMonthlyDigest } from "@/app/actions/send-reminders";
+
+export async function GET() {
+  const result = await runMonthlyDigest();
+  return NextResponse.json({ ok: true, ...result });
+}
+```
+
+---
+
+# 9) Планировщик Vercel (`vercel.json`)
+
+В корне проекта создайте `vercel.json`:
+
+```json
+{
+  "crons": [
+    { "path": "/api/notifications/daily",   "schedule": "0 5 * * *" },
+    { "path": "/api/notifications/monthly", "schedule": "0 5 1 * *" }
+  ]
+}
+```
+
+Пояснения:
+
+* Время — **UTC**. `05:00 UTC` ≈ `08:00` по Кишинёву летом (EEST). Зимой будет `07:00` (EET). Если нужен всегда «08:00 локального времени», используйте сторонний планировщик с TZ или запускайте чуть позже/раньше по вкусу.
+* Можно менять расписание под себя.
+
+Коммит/деплой на Vercel — Cron подтянется автоматически.
+
+---
+
+# 10) Локальная проверка
+
+1. Запустите dev-сервер:
+
+```bash
+npm run dev
+```
+
+2. В браузере/`curl` дерните маршруты вручную:
+
+```bash
+# имитация ежедневной задачи (за 30 дней)
+curl http://localhost:3000/api/notifications/daily
+
+# имитация месячного дайджеста
+curl http://localhost:3000/api/notifications/monthly
+```
+
+3. Проверьте логи в консоли Vercel/локально и доставку в ящике получателя.
+
+> Для надёжности добавьте в письма BCC на ваш тех. адрес, или логируйте события в таблицу (см. §11).
+
+---
+
+# 11) (Опционально, рекомендовано) Защита от дублей
+
+Чтобы избежать повторной отправки (при ручном запуске, повторном деплое и т.п.), можно:
+
+**Вариант A: флаги в Investment**
+
+```prisma
+model Investment {
+  // ...
+  reminder30dSentAt DateTime?
+}
+```
+
+В `runDailyReminders()` добавляйте в where-условие `reminder30dSentAt: null`, а после успешной отправки обновляйте поле текущим временем.
+
+Для дайджеста можно завести таблицу логов:
+
+```prisma
+model MonthlyDigestLog {
+  id        String   @id @default(cuid())
+  userEmail String
+  year      Int
+  month     Int
+  sentAt    DateTime @default(now())
+
+  @@unique([userEmail, year, month])
+}
+```
+
+И перед отправкой проверять, что записи за (year, month) нет.
+
+---
+
+# 12) Где что лежит — карта файлов
+
+```
+.env                          # RESEND_API_KEY, EMAIL_FROM, APP_BASE_URL
+vercel.json                   # Cron расписание
+lib/expirations.ts            # выборки из БД
+lib/mailer.ts                 # функции отправки писем через Resend
+app/actions/send-reminders.ts # server actions для задач
+app/api/notifications/daily/route.ts    # ежедневный cron
+app/api/notifications/monthly/route.ts  # месячный cron
+```
+
+---
+
+# 13) Частые вопросы / тонкости
+
+* **Почему два роута, а не один?** Чтобы 1-го числа задача «ежедневная» не запустила дайджест второй раз. Разделение даёт предсказуемость.
+* **Часовые пояса:** Vercel Cron — в UTC. Если ваши пользователи в одном TZ (MD), это ок. Если глобально — используйте user-специфичные расписания (отдельные очереди/воркеры), либо группируйте по TZ.
+* **Откуда брать email?** Вы его уже синхронизируете в `checkUser` при логине. Главное — не забыть создать `User` до того, как пользователь сохранит инвестиции.
+* **Можно ли вместо API-роутов использовать только Server Actions?** Нет — Cron Vercel вызывает **URL**, поэтому нужен API-роут. Мы, однако, вынесли бизнес-логику в Server Actions, чтобы код был переиспользуемым и тестируемым.
+* **Можно Gmail+Nodemailer?** Для продакшена лучше Resend/Postmark/SES — стабильнее доставляемость и проще доменные настройки.
+
+---
+
+Готово! Следуя этому плану, вы получите стабильную автоматическую рассылку:
+
+* дайджест 1-го числа каждого месяца,
+* точечные уведомления ровно за 30 дней до истечения.
+
+Если хотите, могу добавить «idempotency»-логику (таблицы/флаги) кода прямо сюда — с миграцией и обновлёнными функциями.

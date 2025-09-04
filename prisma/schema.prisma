@@ -38,6 +38,7 @@ model Investment {
   updatedAt        DateTime         @updatedAt @map("updated_at")
 
   @@index([userId])
+  @@index([expirationDate])
 }
 
 enum ExpirationStatus {
