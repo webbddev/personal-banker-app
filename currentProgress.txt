@@ -14,3 +14,5 @@ stopped at 14:14. Check where my investments are rendered and proceed with the t
 
 FOR PROMPT 
 refactor my CreateInvestmentForm to use server actions with formData
+
+    "postinstall": "prisma generate && prisma migrate deploy"
