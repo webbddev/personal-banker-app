@@ -18,12 +18,23 @@ export async function sendDailyReminders() {
     console.log(`Found ${investments.length} investments expiring in 30 days.`);
 
     // We use Promise.all to send emails in parallel, which is more efficient.
-    await Promise.all(
+    const results = await Promise.all(
       investments.map((investment) => sendDailyReminder(investment))
     );
 
-    console.log('Daily reminder job completed successfully.');
-    return { success: true, message: `Sent ${investments.length} reminders.` };
+    const successfulSends = results.filter(Boolean).length;
+    const failedSends = investments.length - successfulSends;
+
+    console.log(
+      `Daily reminder job completed. Successful: ${successfulSends}, Failed: ${failedSends}.`
+    );
+    return {
+      success: true,
+      message: `Processed ${investments.length} reminders. Successful: ${successfulSends}, Failed: ${failedSends}.`,
+      found: investments.length,
+      successfulSends,
+      failedSends,
+    };
   } catch (error) {
     console.error('Error in daily reminder job:', error);
     return { success: false, message: 'An error occurred.' };
@@ -49,7 +60,7 @@ export async function sendMonthlyDigests() {
     );
 
     // We use Promise.all to send emails in parallel.
-    await Promise.all(
+    const results = await Promise.all(
       users.map((userId) => {
         const userInvestments = investmentsByUser[userId];
         // The user object is attached to each investment, so we can grab it from the first one.
@@ -58,8 +69,19 @@ export async function sendMonthlyDigests() {
       })
     );
 
-    console.log('Monthly digest job completed successfully.');
-    return { success: true, message: `Sent digests to ${users.length} users.` };
+    const successfulSends = results.filter(Boolean).length;
+    const failedSends = users.length - successfulSends;
+
+    console.log(
+      `Monthly digest job completed. Successful: ${successfulSends}, Failed: ${failedSends}.`
+    );
+    return {
+      success: true,
+      message: `Processed ${users.length} digests. Successful: ${successfulSends}, Failed: ${failedSends}.`,
+      found: users.length,
+      successfulSends,
+      failedSends,
+    };
   } catch (error) {
     console.error('Error in monthly digest job:', error);
     return { success: false, message: 'An error occurred.' };
