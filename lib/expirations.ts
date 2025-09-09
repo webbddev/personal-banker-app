@@ -1,8 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { addDays, startOfDay, startOfMonth, endOfMonth } from 'date-fns';
-import type { Investment } from '@prisma/client';
 
-/** Инвестиции, истекающие ровно через 30 дней (UTC) */
+/** Investments expiring in exactly 30 days (UTC) */
 export async function findInvestmentsExpiringIn30Days() {
   const targetDate = startOfDay(addDays(new Date(), 30));
   return prisma.investment.findMany({
@@ -11,7 +10,7 @@ export async function findInvestmentsExpiringIn30Days() {
   });
 }
 
-/** Инвестиции, истекающие в текущем месяце (UTC) */
+/** Investments expiring in the current month (UTC) */
 export async function findInvestmentsExpiringThisMonth() {
   const now = new Date();
   const start = startOfMonth(now);
