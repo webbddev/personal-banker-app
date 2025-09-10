@@ -18,6 +18,7 @@ import {
   Settings,
   User,
   Coins,
+  LoaderPinwheel
 } from 'lucide-react';
 
 const Sidebar = () => {
@@ -34,6 +35,11 @@ const Sidebar = () => {
           <CommandItem>
             <LayoutDashboard className='mr-2 h-4 w-4' />
             <Link href={'/dashboard'}>Dashboard</Link>
+          </CommandItem>
+          <CommandItem>
+            <LoaderPinwheel
+             className='mr-2 h-4 w-4' />
+            <Link href={'/ai-assistant'}>Ask AI</Link>
           </CommandItem>
           <CommandItem>
             <Newspaper className='mr-2 h-4 w-4' />
