@@ -5,7 +5,7 @@ import {
   ConversationContent,
   ConversationScrollButton,
 } from '@/components/ai-elements/conversation';
-import { Message, MessageAvatar, MessageContent } from '@/components/ai-elements/message';
+import { Message, MessageContent } from '@/components/ai-elements/message';
 import {
   PromptInput,
   PromptInputActionAddAttachments,
@@ -15,13 +15,7 @@ import {
   PromptInputAttachment,
   PromptInputAttachments,
   PromptInputBody,
-  PromptInputButton,
   type PromptInputMessage,
-  PromptInputModelSelect,
-  PromptInputModelSelectContent,
-  PromptInputModelSelectItem,
-  PromptInputModelSelectTrigger,
-  PromptInputModelSelectValue,
   PromptInputSubmit,
   PromptInputTextarea,
   PromptInputToolbar,
@@ -31,7 +25,7 @@ import { Actions, Action } from '@/components/ai-elements/actions';
 import { Fragment, useState } from 'react';
 import { useChat } from '@ai-sdk/react';
 import { Response } from '@/components/ai-elements/response';
-import { Bot, CopyIcon, GlobeIcon, RefreshCcwIcon, User } from 'lucide-react';
+import { Bot, CopyIcon, RefreshCcwIcon, User } from 'lucide-react';
 import {
   Source,
   Sources,
@@ -65,6 +59,7 @@ const AIChat = () => {
   const [model, setModel] = useState<string>(models[0].value);
   const [webSearch, setWebSearch] = useState(false);
   const { messages, sendMessage, status, regenerate } = useChat();
+  const [isCopied, setIsCopied] = useState<Record<string, boolean>>({});
 
   const handleSubmit = (message: PromptInputMessage) => {
     const hasText = Boolean(message.text);
@@ -121,10 +116,11 @@ const AIChat = () => {
                     </Sources>
                   )}
                 {message.parts.map((part, i) => {
+                  const partId = `${message.id}-${i}`;
                   switch (part.type) {
                     case 'text':
                       return (
-                        <Fragment key={`${message.id}-${i}`}>
+                        <Fragment key={partId}>
                           <Message
                             from={message.role}
                             displayName={
@@ -133,19 +129,13 @@ const AIChat = () => {
                                 : firstName || 'You'
                             }
                           >
-                            <MessageAvatar>
-                              {message.role === 'assistant' ? (
-                                <Bot className='size-5' />
-                              ) : (
-                                <User className='size-5' />
-                              )}
-                            </MessageAvatar>
                             <MessageContent>
                               <Response>{part.text}</Response>
                             </MessageContent>
                           </Message>
                           {message.role === 'assistant' &&
-                            i === messages.length - 1 && (
+                            i === message.parts.length - 1 &&
+                            message.id === messages.at(-1)?.id && (
                               <Actions>
                                 <Action
                                   onClick={() => regenerate()}
@@ -154,12 +144,28 @@ const AIChat = () => {
                                   <RefreshCcwIcon className='size-3' />
                                 </Action>
                                 <Action
-                                  onClick={() =>
-                                    navigator.clipboard.writeText(part.text)
-                                  }
-                                  label='Copy'
+                                  onClick={() => {
+                                    navigator.clipboard.writeText(part.text);
+                                    setIsCopied((prev) => ({
+                                      ...prev,
+                                      [partId]: true,
+                                    }));
+                                    setTimeout(
+                                      () =>
+                                        setIsCopied((prev) => ({
+                                          ...prev,
+                                          [partId]: false,
+                                        })),
+                                      1000
+                                    );
+                                  }}
+                                  label={isCopied[partId] ? 'Copied' : 'Copy'}
                                 >
-                                  <CopyIcon className='size-3' />
+                                  {isCopied[partId] ? (
+                                    <span className='text-xs'>Copied</span>
+                                  ) : (
+                                    <CopyIcon className='size-3' />
+                                  )}
                                 </Action>
                               </Actions>
                             )}
@@ -214,33 +220,6 @@ const AIChat = () => {
                   <PromptInputActionAddAttachments />
                 </PromptInputActionMenuContent>
               </PromptInputActionMenu>
-              {/* <PromptInputButton
-                variant={webSearch ? 'default' : 'ghost'}
-                onClick={() => setWebSearch(!webSearch)}
-              >
-                <GlobeIcon size={16} />
-                <span>Search</span>
-              </PromptInputButton> */}
-              {/* <PromptInputModelSelect
-                onValueChange={(value) => {
-                  setModel(value);
-                }}
-                value={model}
-              >
-                <PromptInputModelSelectTrigger>
-                  <PromptInputModelSelectValue />
-                </PromptInputModelSelectTrigger>
-                <PromptInputModelSelectContent>
-                  {models.map((model) => (
-                    <PromptInputModelSelectItem
-                      key={model.value}
-                      value={model.value}
-                    >
-                      {model.name}
-                    </PromptInputModelSelectItem>
-                  ))}
-                </PromptInputModelSelectContent>
-              </PromptInputModelSelect> */}
             </PromptInputTools>
             <PromptInputSubmit disabled={!input && !status} status={status} />
           </PromptInputToolbar>
