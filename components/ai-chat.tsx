@@ -5,7 +5,7 @@ import {
   ConversationContent,
   ConversationScrollButton,
 } from '@/components/ai-elements/conversation';
-import { Message, MessageContent } from '@/components/ai-elements/message';
+import { Message, MessageAvatar, MessageContent } from '@/components/ai-elements/message';
 import {
   PromptInput,
   PromptInputActionAddAttachments,
@@ -31,7 +31,7 @@ import { Actions, Action } from '@/components/ai-elements/actions';
 import { Fragment, useState } from 'react';
 import { useChat } from '@ai-sdk/react';
 import { Response } from '@/components/ai-elements/response';
-import { CopyIcon, GlobeIcon, RefreshCcwIcon } from 'lucide-react';
+import { Bot, CopyIcon, GlobeIcon, RefreshCcwIcon, User } from 'lucide-react';
 import {
   Source,
   Sources,
@@ -44,6 +44,7 @@ import {
   ReasoningTrigger,
 } from '@/components/ai-elements/reasoning';
 import { Loader } from '@/components/ai-elements/loader';
+import { useUser } from '@clerk/nextjs';
 
 const models = [
   {
@@ -57,6 +58,9 @@ const models = [
 ];
 
 const AIChat = () => {
+  const { user } = useUser();
+  const firstName = user?.firstName;
+
   const [input, setInput] = useState('');
   const [model, setModel] = useState<string>(models[0].value);
   const [webSearch, setWebSearch] = useState(false);
@@ -121,7 +125,21 @@ const AIChat = () => {
                     case 'text':
                       return (
                         <Fragment key={`${message.id}-${i}`}>
-                          <Message from={message.role}>
+                          <Message
+                            from={message.role}
+                            displayName={
+                              message.role === 'assistant'
+                                ? 'Personal Banker'
+                                : firstName || 'You'
+                            }
+                          >
+                            <MessageAvatar>
+                              {message.role === 'assistant' ? (
+                                <Bot className='size-5' />
+                              ) : (
+                                <User className='size-5' />
+                              )}
+                            </MessageAvatar>
                             <MessageContent>
                               <Response>{part.text}</Response>
                             </MessageContent>

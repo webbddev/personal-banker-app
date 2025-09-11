@@ -9,18 +9,37 @@ import { cva, type VariantProps } from "class-variance-authority";
 import type { ComponentProps, HTMLAttributes } from "react";
 
 export type MessageProps = HTMLAttributes<HTMLDivElement> & {
-  from: UIMessage["role"];
+  from: UIMessage['role'];
+  displayName?: string;
 };
 
-export const Message = ({ className, from, ...props }: MessageProps) => (
+export const Message = ({
+  className,
+  from,
+  displayName,
+  children,
+  ...props
+}: MessageProps) => (
   <div
     className={cn(
-      "group flex w-full items-end justify-end gap-2 py-4",
-      from === "user" ? "is-user" : "is-assistant flex-row-reverse justify-end",
-      className
+      'flex flex-col gap-2 py-2',
+      from === 'user' ? 'items-end' : 'items-start'
     )}
-    {...props}
-  />
+  >
+    {displayName && <div className='text-xs font-medium'>{displayName}</div>}
+    <div
+      className={cn(
+        'group flex w-full items-end justify-end gap-2',
+        from === 'user'
+          ? 'is-user'
+          : 'is-assistant flex-row-reverse justify-end',
+        className
+      )}
+      {...props}
+    >
+      {children}
+    </div>
+  </div>
 );
 
 const messageContentVariants = cva(
@@ -63,7 +82,7 @@ export const MessageContent = ({
 );
 
 export type MessageAvatarProps = ComponentProps<typeof Avatar> & {
-  src: string;
+  src?: string;
   name?: string;
 };
 
@@ -71,10 +90,11 @@ export const MessageAvatar = ({
   src,
   name,
   className,
+  children,
   ...props
 }: MessageAvatarProps) => (
-  <Avatar className={cn("size-8 ring-1 ring-border", className)} {...props}>
-    <AvatarImage alt="" className="mt-0 mb-0" src={src} />
-    <AvatarFallback>{name?.slice(0, 2) || "ME"}</AvatarFallback>
+  <Avatar className={cn('size-8', className)} {...props}>
+    {src && <AvatarImage alt='' className='mt-0 mb-0' src={src} />}
+    <AvatarFallback>{children || name?.slice(0, 2) || 'ME'}</AvatarFallback>
   </Avatar>
 );
