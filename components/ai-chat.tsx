@@ -15,7 +15,13 @@ import {
   PromptInputAttachment,
   PromptInputAttachments,
   PromptInputBody,
+  PromptInputButton,
   type PromptInputMessage,
+  PromptInputModelSelect,
+  PromptInputModelSelectContent,
+  PromptInputModelSelectItem,
+  PromptInputModelSelectTrigger,
+  PromptInputModelSelectValue,
   PromptInputSubmit,
   PromptInputTextarea,
   PromptInputToolbar,
@@ -25,7 +31,13 @@ import { Actions, Action } from '@/components/ai-elements/actions';
 import { Fragment, useState } from 'react';
 import { useChat } from '@ai-sdk/react';
 import { Response } from '@/components/ai-elements/response';
-import { Bot, CopyIcon, RefreshCcwIcon, User } from 'lucide-react';
+import {
+  Bot,
+  CopyIcon,
+  GlobeIcon,
+  RefreshCcwIcon,
+  SquareIcon,
+} from 'lucide-react';
 import {
   Source,
   Sources,
@@ -39,11 +51,34 @@ import {
 } from '@/components/ai-elements/reasoning';
 import { Loader } from '@/components/ai-elements/loader';
 import { useUser } from '@clerk/nextjs';
+import { Button } from './ui/button';
+import Image from 'next/image';
 
+// Define available llm models
 const models = [
+  {
+    name: 'Grok 4 Fast Reasoning',
+    value: 'xai/grok-4-fast-reasoning',
+  },
+  {
+    name: 'Gemini Flash',
+    value: 'google/gemini-2.5-flash',
+  },
+  {
+    name: 'Perplexity Sonar',
+    value: 'perplexity/sonar',
+  },
+  {
+    name: 'GPT 4o mini',
+    value: 'openai/gpt-4o-mini',
+  },
   {
     name: 'GPT 4o',
     value: 'openai/gpt-4o',
+  },
+  {
+    name: 'GPT 4.1 Nano',
+    value: 'openai/gpt-4.1-nano',
   },
   {
     name: 'Deepseek R1',
@@ -55,11 +90,13 @@ const AIChat = () => {
   const { user } = useUser();
   const firstName = user?.firstName;
 
-  const [input, setInput] = useState('');
+  const [prompt, setPrompt] = useState('');
+  // const [model, setModel] = useState<string>('');
   const [model, setModel] = useState<string>(models[0].value);
   const [webSearch, setWebSearch] = useState(false);
-  const { messages, sendMessage, status, regenerate } = useChat();
   const [isCopied, setIsCopied] = useState<Record<string, boolean>>({});
+
+  const { messages, sendMessage, status, regenerate, error, stop } = useChat();
 
   const handleSubmit = (message: PromptInputMessage) => {
     const hasText = Boolean(message.text);
@@ -81,7 +118,7 @@ const AIChat = () => {
         },
       }
     );
-    setInput('');
+    setPrompt('');
   };
 
   return (
@@ -186,16 +223,58 @@ const AIChat = () => {
                           <ReasoningContent>{part.text}</ReasoningContent>
                         </Reasoning>
                       );
+                    case 'file':
+                      if (part.mediaType?.startsWith('image/')) {
+                        return (
+                          <Image
+                            key={`${message.id}-${i}`}
+                            src={part.url}
+                            alt={part.filename ?? `Attachment ${i}`}
+                            width={500}
+                            height={500}
+                          />
+                        );
+                      }
+                      if (part.mediaType?.startsWith('application/pdf')) {
+                        return (
+                          <iframe
+                            key={`${message.id}-${i}`}
+                            src={part.url}
+                            width={500}
+                            height={600}
+                            title={part.filename ?? `attachment-${i}`}
+                          />
+                        );
+                      }
                     default:
                       return null;
                   }
                 })}
               </div>
             ))}
-            {status === 'submitted' && <Loader />}
+            {status === 'submitted' || (status === 'streaming' && <Loader />)}
+            {error && (
+              <Message from='assistant' displayName='Personal Banker'>
+                <MessageContent>
+                  <div className='p-4 rounded-lg bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400'>
+                    <h4 className='font-bold mb-1'>An error occurred</h4>
+                    <p className='text-sm'>{error.message}</p>
+                  </div>
+                </MessageContent>
+              </Message>
+            )}
           </ConversationContent>
           <ConversationScrollButton />
         </Conversation>
+
+        {(status === 'submitted' || status === 'streaming') && (
+          <div className='flex justify-center items-center p-4 border-t bg-background'>
+            <Button variant='secondary' onClick={stop}>
+              <SquareIcon className='mr-2 size-4' />
+              Stop generating
+            </Button>
+          </div>
+        )}
 
         <PromptInput
           onSubmit={handleSubmit}
@@ -208,8 +287,8 @@ const AIChat = () => {
               {(attachment) => <PromptInputAttachment data={attachment} />}
             </PromptInputAttachments>
             <PromptInputTextarea
-              onChange={(e) => setInput(e.target.value)}
-              value={input}
+              onChange={(e) => setPrompt(e.target.value)}
+              value={prompt}
             />
           </PromptInputBody>
           <PromptInputToolbar>
@@ -220,8 +299,40 @@ const AIChat = () => {
                   <PromptInputActionAddAttachments />
                 </PromptInputActionMenuContent>
               </PromptInputActionMenu>
+              <PromptInputButton
+                variant={webSearch ? 'default' : 'ghost'}
+                onClick={() => setWebSearch(!webSearch)}
+              >
+                <GlobeIcon size={16} />
+                <span>Search</span>
+              </PromptInputButton>
+              <PromptInputModelSelect
+                onValueChange={(value) => {
+                  setModel(value);
+                }}
+                value={model}
+              >
+                <PromptInputModelSelectTrigger>
+                  <PromptInputModelSelectValue />
+                </PromptInputModelSelectTrigger>
+                <PromptInputModelSelectContent>
+                  {models.map((model) => (
+                    <PromptInputModelSelectItem
+                      key={model.value}
+                      value={model.value}
+                    >
+                      {model.name}
+                    </PromptInputModelSelectItem>
+                  ))}
+                </PromptInputModelSelectContent>
+              </PromptInputModelSelect>
             </PromptInputTools>
-            <PromptInputSubmit disabled={!input && !status} status={status} />
+            <PromptInputSubmit
+              disabled={
+                !prompt || status === 'submitted' || status === 'streaming'
+              }
+              status={status}
+            />
           </PromptInputToolbar>
         </PromptInput>
       </div>

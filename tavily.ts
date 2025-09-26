@@ -272,8 +272,8 @@ Current date: ${currentDate}
     });
 
     const result = await streamText({
-      model: model,
-      // model: webSearch ? 'perplexity/sonar' : model,
+      // model: model,
+      model: webSearch ? 'perplexity/sonar' : model,
       system: systemPrompt,
       messages: convertToModelMessages(messages),
       providerOptions: {

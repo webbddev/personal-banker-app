@@ -15,16 +15,16 @@ export const maxDuration = 30;
 // List of trusted Moldovan financial sources
 const TRUSTED_MOLDOVAN_SOURCES = {
   banks: [
-    'https://www.victoriabank.md',
-    'https://mobiasbanca.md',
-    'https://micb.md',
-    'https://ecb.md',
-    'https://eximbank.md',
-    'https://fincombank.com',
-    'https://www.energbank.com',
-    'https://comertbank.md',
-    'https://www.procreditbank.md',
-    'https://www.maib.md',
+    'https://www.victoriabank.md/ru/economii-si-investitii/depozite-la-termen/depozit-online',
+    'https://mobiasbanca.md/ru/promo-deposit',
+    'https://micb.md/ru/depozite-persoane-fizice/',
+    'https://ecb.md/ru/depozity-fiziceskih-lit/',
+    'https://eximbank.md/ru/deposit-types',
+    'https://fincombank.com/ru/tipurile-de-depozite#filter=.online',
+    'https://www.energbank.com/ru/page/%D1%83%D1%81%D0%BB%D0%BE%D0%B2%D0%B8%D1%8F-%D0%B4%D0%B5%D0%BF%D0%BE%D0%B7%D0%B8%D1%82%D0%BE%D0%B2',
+    'https://comertbank.md/ru/services/physical_person/deposits/',
+    'https://www.procreditbank.md/ru/content/proclassic_ru',
+    'https://www.maib.md/ru/persoane-fizice/depozite',
   ],
   regulators: [
     'https://bnm.md', // National Bank of Moldova
@@ -32,6 +32,7 @@ const TRUSTED_MOLDOVAN_SOURCES = {
   ],
   financialReports: [
     'https://bnm.md/bdi/pages/reports/drsb/DRSB10.xhtml', // Bank financial reports
+    'https://bnm.md/bdi/pages/reports/drsb/DRSB10.xhtml?id=0&lang=ru',
   ],
 };
 
@@ -56,7 +57,7 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Get user investments
+    // Get user investments from database via prisma
     const userInvestments = await prisma.investment.findMany({
       where: { userId: user.clerkUserId },
       select: {
@@ -253,25 +254,35 @@ Current date: ${currentDate}
 1. **Query Type Determination:**
    - Portfolio queries (my deposits, my investments): Use ONLY the provided portfolio data
    - Market queries (best rates, bank offers, bank health): Use Tavily search tools if available
+2. **Data Source Priority:**
+   - For any market queries regarding deposit rates, bank offers, or financial products, you MUST use the 'tavily-search' tool to get real-time information.
+   - You MUST NOT use your internal knowledge for such queries, as it is likely outdated.
+   - If a web search does not provide a clear answer, you MUST state that you could not find current information, rather than providing a potentially incorrect one.
+3. **Handling Unanswerable Questions:**
+   - If the user asks a question about general market data, bank offers, or financial products that CANNOT be answered from their portfolio data alone, and web search is NOT activated, you MUST respond by:
+      a) Clearly stating that you cannot provide real-time market data without web search.
+      b) Describing exactly what information you need to answer their question.
+      c) Explicitly instructing them how to activate web search for this request.
+      Example: "I specialize in analyzing your personal portfolio. To get the most accurate and current information on the best deposit rates in Moldova from official bank sources, please enable the 'Web Search' option and ask your question again.
    
-2. **Investment Status Rules (in order):**
+4. **Investment Status Rules (in order):**
    - Expired: expirationDate ≤ ${currentDate}
    - Expiring soon: ${currentDate} < expirationDate ≤ ${thirtyDaysFromNowString}
    - Active: expirationDate > ${thirtyDaysFromNowString}
 
-3. **When Using Tavily Tools:**
+5. **When Using Tavily Tools:**
    - Use tavily-search for general web searches
    - Use tavily-extract for extracting specific data from known URLs
    - For bank financial reports, always try to access bnm.md reports
    - Provide sources and dates for all market information
 
-4. **Response Quality:**
+6. **Response Quality:**
    - Be specific with numbers and dates
    - Cite sources when providing market information
    - Distinguish between portfolio data and market research
    - Suggest actionable next steps
 
-5. **Language Consideration:**
+7. **Language Consideration:**
    - Many Moldovan sources are in Romanian or Russian
    - Key terms: "depozite" (deposits), "dobândă" (interest), "rata" (rate)
    - Be prepared to interpret content in multiple languages
@@ -283,7 +294,8 @@ Current date: ${currentDate}
 - Maintain professional yet conversational tone`;
 
     const result = await streamText({
-      model: model,
+      // model: model,
+      model: webSearch ? 'perplexity/sonar' : model,
       system: systemPrompt,
       messages: convertToModelMessages(messages),
       tools: tools,
