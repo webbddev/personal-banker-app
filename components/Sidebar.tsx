@@ -20,6 +20,7 @@ import {
   Coins,
   LoaderPinwheel
 } from 'lucide-react';
+import { SidebarTrigger } from './ui/sidebar';
 
 const Sidebar = () => {
   return (
@@ -37,11 +38,6 @@ const Sidebar = () => {
             <Link href={'/dashboard'}>Dashboard</Link>
           </CommandItem>
           <CommandItem>
-            <LoaderPinwheel
-             className='mr-2 h-4 w-4' />
-            <Link href={'/ai-assistant'}>Ask AI</Link>
-          </CommandItem>
-          <CommandItem>
             <Newspaper className='mr-2 h-4 w-4' />
             <Link href={'/posts'}>Posts</Link>
           </CommandItem>
@@ -49,10 +45,10 @@ const Sidebar = () => {
             <Coins className='mr-2 h-4 w-4' />
             <Link href={'/investments'}>Investments</Link>
           </CommandItem>
-          <CommandItem>
+          {/* <CommandItem>
             <Folders className='mr-2 h-4 w-4' />
             <Link href={'#'}>Categories</Link>
-          </CommandItem>
+          </CommandItem> */}
         </CommandGroup>
         {/* Settings section */}
         <CommandSeparator />
