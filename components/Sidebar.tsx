@@ -18,7 +18,7 @@ import {
   Settings,
   User,
   Coins,
-  LoaderPinwheel
+  Sparkle,
 } from 'lucide-react';
 import { SidebarTrigger } from './ui/sidebar';
 
@@ -38,8 +38,8 @@ const Sidebar = () => {
             <Link href={'/dashboard'}>Dashboard</Link>
           </CommandItem>
           <CommandItem>
-            <Newspaper className='mr-2 h-4 w-4' />
-            <Link href={'/posts'}>Posts</Link>
+            <Sparkle className='mr-2 h-4 w-4' />
+            <Link href={'/ai-assistant'}>Ask AI</Link>
           </CommandItem>
           <CommandItem>
             <Coins className='mr-2 h-4 w-4' />
