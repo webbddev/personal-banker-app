@@ -19,6 +19,7 @@ import {
   User,
   Coins,
 } from 'lucide-react';
+import { SidebarTrigger } from './ui/sidebar';
 
 const Sidebar = () => {
   return (
@@ -35,18 +36,18 @@ const Sidebar = () => {
             <LayoutDashboard className='mr-2 h-4 w-4' />
             <Link href={'/dashboard'}>Dashboard</Link>
           </CommandItem>
-          <CommandItem>
+          {/* <CommandItem>
             <Newspaper className='mr-2 h-4 w-4' />
             <Link href={'/posts'}>Posts</Link>
-          </CommandItem>
+          </CommandItem> */}
           <CommandItem>
             <Coins className='mr-2 h-4 w-4' />
             <Link href={'/investments'}>Investments</Link>
           </CommandItem>
-          <CommandItem>
+          {/* <CommandItem>
             <Folders className='mr-2 h-4 w-4' />
             <Link href={'#'}>Categories</Link>
-          </CommandItem>
+          </CommandItem> */}
         </CommandGroup>
         {/* Settings section */}
         <CommandSeparator />

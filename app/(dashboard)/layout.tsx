@@ -2,6 +2,7 @@ import Navbar from '@/components/Navbar';
 import Sidebar from '@/components/Sidebar';
 
 import { PropsWithChildren } from 'react';
+import Page from './dashboard/page';
 
 export default function DashboardLayout({ children }: PropsWithChildren) {
   return (

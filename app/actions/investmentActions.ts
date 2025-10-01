@@ -38,6 +38,22 @@ export async function createInvestment(data: any) {
     };
   }
 }
+export async function getAllInvestmentsSortedByExpiration() {
+  const user = await checkUser();
+  if (!user) {
+    console.error('Get all investments error: User not authenticated');
+    return [];
+  }
+  try {
+    return await prisma.investment.findMany({
+      where: { userId: user.clerkUserId },
+      orderBy: { expirationDate: 'asc' },
+    });
+  } catch (error) {
+    console.error('Get all investments error:', error);
+    return [];
+  }
+}
 
 export async function getAllInvestments() {
   const user = await checkUser();

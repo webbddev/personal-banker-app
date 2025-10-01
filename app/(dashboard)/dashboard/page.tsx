@@ -1,53 +1,34 @@
-import DashboardCard from '@/components/dashboard/DashboardCard';
-// import InvestmentsTable from '@/app/investments/InvestmentsTable';
-import PostsTable from '@/components/posts/PostsTable';
-import { Folder, Folders, MessageCircle, Newspaper, User } from 'lucide-react';
-import AnalyticsChart from '@/components/dashboard/AnalyticsChart';
-import InvestmentsPage from '../investments/page';
+import { AppSidebar } from '@/components/app-sidebar';
+import { ChartAreaInteractive } from '@/components/chart-area-interactive';
+import { DataTable } from '@/components/data-table';
+import { SectionCards } from '@/components/section-cards';
+import { SiteHeader } from '@/components/site-header';
+import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 
-export default function Home() {
+import data from './data.json';
+import { ChartBarInteractive } from '@/components/ui/chart-bar-interactive';
+import { getAllInvestmentsSortedByExpiration } from '@/app/actions/investmentActions';
+import Sidebar from '@/components/Sidebar';
+
+export default async function Page() {
+  const investments = await getAllInvestmentsSortedByExpiration();
+
   return (
-    <>
-      <div className='flex flex-col md:flex-row justify-between gap-5 mb-5'>
-        <DashboardCard
-          title='Posts'
-          count={10}
-          icon={
-            <Newspaper
-              className='text-slate-500 dark:text-slate-200'
-              size={72}
-            />
-          }
-        />
-        <DashboardCard
-          title='Categories'
-          count={12}
-          icon={
-            <Folders className='text-slate-500 dark:text-slate-200' size={72} />
-          }
-        />
-        <DashboardCard
-          title='Users'
-          count={750}
-          icon={
-            <User className='text-slate-500 dark:text-slate-200' size={72} />
-          }
-        />
-        <DashboardCard
-          title='Comments'
-          count={1200}
-          icon={
-            <MessageCircle
-              className='text-slate-500 dark:text-slate-200'
-              size={72}
-            />
-          }
-        />
-      </div>
-      <AnalyticsChart />
-      <PostsTable title='Latest Posts' limit={5} />
-      {/* <InvestmentsTable /> */}
-      <InvestmentsPage/>
-    </>
+    <SidebarProvider>
+      {/* <AppSidebar variant="inset" /> */}
+      <SidebarInset>
+        <SiteHeader />
+        <div className='flex flex-1 flex-col'>
+          <div className='@container/main flex flex-1 flex-col gap-2'>
+            <div className='flex flex-col gap-4 py-4 md:gap-6 md:py-6'>
+              <SectionCards />
+              <div className='px-4 lg:px-6'>
+                <ChartBarInteractive data={investments} />
+              </div>
+            </div>
+          </div>
+        </div>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }
