@@ -1,12 +1,10 @@
-// 'use client';
-
-import BackButton from '@/components/BackButton';
 import { columns } from './columns';
 import { InvestmentsTable } from './data-table';
 import { CurrencyEquivalentTotal } from '@/components/CurrencyEquivalentTotal';
 import { MonthlyReturnsDisplay } from '@/components/MonthlyReturnsDisplay';
 import { DeleteDialog } from '@/components/DeleteDialog';
-// import { useInvestmentStore } from '@/store/financialInvestmentsStore';
+import { SiteHeader } from '@/components/site-header';
+import { SidebarInset } from '@/components/ui/sidebar';
 import {
   countAllInvestments,
   getAllInvestments,
@@ -20,8 +18,6 @@ import { getLatestRates } from '@/utils/exchange-rate-service';
 import { ExchangeRatesDisplay } from '@/components/ExchangeRatesDisplay';
 
 export default async function InvestmentsPage() {
-  // const investments = useInvestmentStore((state) => state.investments);
-
   const investments = await getAllInvestments();
   const exchangeRates = await getLatestRates();
   const instrumentsCount = await countAllInvestments();
@@ -31,97 +27,44 @@ export default async function InvestmentsPage() {
   const monthlyReturns: CurrencyTotals = calculateMonthlyReturns(investments);
 
   return (
-    <>
-      <BackButton text='Go Back' link='/dashboard' />
-      <div className='container mx-auto w-full py-10'>
-        <h1 className='text-2xl font-semibold mb-4'>Investments</h1>
+    <SidebarInset className='w-full'>
+      <SiteHeader title='Investments' />
+      <div className='flex flex-1 flex-col w-full'>
+        <div className='flex flex-1 flex-col gap-2 w-full'>
+          <div className='flex flex-col gap-4 py-4 md:gap-6 md:py-6 w-full px-4 lg:px-6'>
+            {/* Monthly Returns Display */}
+            <div className='mb-6'>
+              <h2 className='text-xl font-semibold mb-2'>Monthly Returns</h2>
+              <MonthlyReturnsDisplay totals={monthlyReturns} />
+            </div>
 
-        {/* Monthly Returns Display */}
-        <div className='mb-6'>
-          <h2 className='text-xl font-semibold mb-2'>Monthly Returns</h2>
-          <MonthlyReturnsDisplay totals={monthlyReturns} />
+            {/* Data table displaying investment details */}
+            <div className='w-full'>
+              <InvestmentsTable columns={columns} data={investments} />
+            </div>
+
+            {/* Currency Totals Display */}
+            <div className='mb-6'>
+              <h2 className='text-xl font-semibold mb-2'>
+                Investment Totals - You have {instrumentsCount} investment
+                instruments in your portfolio
+              </h2>
+              <CurrencyEquivalentTotal
+                totals={currencyTotals}
+                exchangeRates={exchangeRates}
+              />
+            </div>
+
+            {/* Exchange Rates Display */}
+            <div className='md:col-span-1'>
+              <ExchangeRatesDisplay />
+            </div>
+          </div>
         </div>
-
-        {/* Data table displaying investment details */}
-        <InvestmentsTable columns={columns} data={investments} />
-      </div>
-
-      {/* Currency Totals Display */}
-      <div className='mb-6'>
-        <h2 className='text-xl font-semibold mb-2'>
-          Investment Totals - You have {instrumentsCount} investment instruments
-          in your portfolio
-        </h2>
-
-        <CurrencyEquivalentTotal
-          totals={currencyTotals}
-          exchangeRates={exchangeRates}
-        />
-      </div>
-      {/* Exchange Rates Display */}
-      <div className='md:col-span-1'>
-        <ExchangeRatesDisplay />
       </div>
 
       {/* Delete Dialog */}
       <DeleteDialog />
-    </>
+    </SidebarInset>
   );
 }
-
-// 'use client';
-
-// import { useEffect } from 'react';
-// import BackButton from '@/components/BackButton';
-// import { columns } from './columns';
-// import { InvestmentsTable } from './data-table';
-// import { CurrencyEquivalentTotal } from '@/components/CurrencyEquivalentTotal';
-// import { MonthlyReturnsDisplay } from '@/components/MonthlyReturnsDisplay';
-// import { DeleteDialog } from '@/components/DeleteDialog';
-// import { useInvestmentStore } from '@/store/financialInvestmentsStore';
-
-// export default function InvestmentsPage() {
-//   const { investments, isLoading, fetchInvestments } = useInvestmentStore();
-
-//   // Fetch investments when component mounts
-//   useEffect(() => {
-//     fetchInvestments();
-//   }, [fetchInvestments]);
-
-//   if (isLoading) {
-//     return (
-//       <div className='container mx-auto w-full py-10'>
-//         <div className='flex justify-center items-center h-64'>
-//           <div className='text-lg'>Loading investments...</div>
-//         </div>
-//       </div>
-//     );
-//   }
-
-//   return (
-//     <>
-//       <BackButton text='Go Back' link='/dashboard' />
-//       <div className='container mx-auto w-full py-10'>
-//         <h1 className='text-2xl font-semibold mb-4'>Investments</h1>
-
-//         {/* Monthly Returns Display */}
-//         <div className='mb-6'>
-//           <h2 className='text-xl font-semibold mb-2'>Monthly Returns</h2>
-//           <MonthlyReturnsDisplay />
-//         </div>
-
-//         {/* Data table displaying investment details */}
-//         <InvestmentsTable columns={columns} data={investments} />
-//       </div>
-
-//       {/* Currency Totals Display */}
-//       <div className='mb-6'>
-//         <h2 className='text-xl font-semibold mb-2'>Investment Totals</h2>
-//         <CurrencyEquivalentTotal />
-//       </div>
-
-//       {/* Delete Dialog */}
-//       <DeleteDialog />
-//     </>
-//   );
-// }

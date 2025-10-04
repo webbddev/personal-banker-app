@@ -32,7 +32,7 @@ export default function RootLayout({
       appearance={{
         baseTheme: 'simple',
         variables: {
-          colorPrimary: '#40C1AB', // Tailwind teal-500
+          colorPrimary: '#40C1AB', // Tailwinszd teal-500
         },
         signIn: {
           baseTheme: 'simple',
