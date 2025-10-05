@@ -1,5 +1,4 @@
 import {
-  Home,
   LayoutDashboard,
   Sparkle,
   Coins,
@@ -9,8 +8,6 @@ import {
   ChevronUp,
   Plus,
   Projector,
-  ChevronDown,
-  LogOut,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -22,35 +19,15 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
-  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
   SidebarSeparator,
 } from './ui/sidebar';
 import Link from 'next/link';
 import Image from 'next/image';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from './ui/dropdown-menu';
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from './ui/collapsible';
-import {
-  SignedIn,
-  SignOutButton,
-  UserButton,
-  RedirectToUserProfile,
-} from '@clerk/nextjs';
+import { SignedIn, UserButton } from '@clerk/nextjs';
 import { currentUser } from '@clerk/nextjs/server';
+import { Collapsible } from './ui/collapsible';
 
 // Suggestions section items
 const suggestionItems = [
@@ -102,7 +79,6 @@ const settingsItems = [
 const AppSidebar = async () => {
   const user = await currentUser();
   const userName = user?.firstName;
-  const userImage = user?.imageUrl;
 
   return (
     <Sidebar collapsible='icon'>
@@ -174,7 +150,7 @@ const AppSidebar = async () => {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Projects Section (Optional - keep if you need it) */}
+        {/* Projects Section */}
         <SidebarGroup>
           <SidebarGroupLabel>Projects</SidebarGroupLabel>
           <SidebarGroupAction>
@@ -205,26 +181,26 @@ const AppSidebar = async () => {
 
       <SidebarSeparator />
 
-      {/* Clean User Dropdown */}
+      {/* User Section */}
       <SidebarFooter>
         <SidebarMenu>
-          <SidebarMenuItem>
-            <SignedIn>
-              <div className='flex w-full items-center gap-2 p-2 rounded-md hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors'>
-                <UserButton />
+            <SidebarMenuItem>
+              <SignedIn>
+                <div className='flex w-full items-center gap-2 p-2 rounded-md hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors'>
+                  <UserButton />
 
-                {/* Show name and chevron only when sidebar is expanded */}
-                <div className='flex-1 min-w-0 group-data-[collapsible=icon]:hidden'>
-                  <div className='flex items-center justify-between'>
-                    <span className='truncate text-sm'>
-                      Welcome, {userName || 'User'}
-                    </span>
-                    <ChevronUp className='w-4 h-4 flex-shrink-0 opacity-60' />
+                  {/* Show name and chevron only when sidebar is expanded */}
+                  <div className='flex-1 min-w-0 group-data-[collapsible=icon]:hidden'>
+                    <div className='flex items-center justify-between'>
+                      <span className='truncate text-sm'>
+                        Welcome, {userName || 'User'}
+                      </span>
+                      <ChevronUp className='w-4 h-4 flex-shrink-0 opacity-60' />
+                    </div>
                   </div>
                 </div>
-              </div>
-            </SignedIn>
-          </SidebarMenuItem>
+              </SignedIn>
+            </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
     </Sidebar>

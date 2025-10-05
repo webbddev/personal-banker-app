@@ -1,4 +1,4 @@
-import AIChat from '@/components/ai-chat';
+import AIChat from '@/components/AiChat';
 import { SiteHeader } from '@/components/site-header';
 import { SidebarInset } from '@/components/ui/sidebar';
 

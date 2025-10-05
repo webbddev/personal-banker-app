@@ -25,12 +25,12 @@ export function ChartBarInteractive({ data }: { data: Investment[] }) {
   const chartConfig = {
     investmentAmount: {
       label: 'Investment Amount',
-      //   color: 'hsl(var(--chart-1))',
+        // color: 'hsl(var(--chart-6))',
       color: '#40C1AC',
     },
     expiringSoon: {
       label: 'Expiring Soon',
-      color: 'hsl(var(--chart-2))',
+      color: 'hsl(var(--chart-3))',
     },
     expiringIn7Days: {
       label: 'Expiring in 7 Days',
@@ -82,7 +82,7 @@ export function ChartBarInteractive({ data }: { data: Investment[] }) {
               top: 20,
               right: 40,
               bottom: 20,
-              left: 40,
+              left: 10,
             }}
           >
             <CartesianGrid vertical={false} />

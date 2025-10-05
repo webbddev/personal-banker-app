@@ -55,6 +55,44 @@ export async function getAllInvestmentsSortedByExpiration() {
   }
 }
 
+// Add this function to your investments actions file
+export async function getInvestmentsByType() {
+  const user = await checkUser();
+  if (!user) {
+    console.error('User not authenticated');
+    return [];
+  }
+
+  try {
+    const allInvestments = await prisma.investment.findMany({
+      where: { userId: user.clerkUserId },
+    });
+
+    // Use Record<string, number> to type the accumulator
+    const investmentsByType = allInvestments.reduce(
+      (acc: Record<string, number>, investment) => {
+        const type = investment.investmentType;
+        acc[type] = (acc[type] || 0) + investment.investmentAmount;
+        return acc;
+      },
+      {}
+    );
+
+    // Transform data for the chart
+    const chartData = Object.entries(investmentsByType).map(
+      ([investmentType, totalAmount]) => ({
+        type: investmentType,
+        value: totalAmount,
+      })
+    );
+
+    return chartData;
+  } catch (error) {
+    console.error('Error getting investments by type:', error);
+    return [];
+  }
+}
+
 export async function getAllInvestments() {
   const user = await checkUser();
   if (!user) {
