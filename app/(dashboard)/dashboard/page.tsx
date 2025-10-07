@@ -7,12 +7,15 @@ import { ChartBarInteractive } from '@/components/ChartBarInteractive';
 import {
   getAllInvestmentsSortedByExpiration,
   getInvestmentsByType,
+  getInvestmentsByCurrency,
 } from '@/app/actions/investmentActions';
 import { ChartPieLabel } from '@/components/ChartPieLabel';
+import { ChartPieInteractive } from '@/components/ChartPieInteractive';
 
 export default async function DashboardPage() {
   const investments = await getAllInvestmentsSortedByExpiration();
-  const investmentsByType = await getInvestmentsByType(); // Add this line
+  const investmentsByType = await getInvestmentsByType();
+  const investmentsByCurrency = await getInvestmentsByCurrency();
 
   return (
     <SidebarInset className='w-full'>
@@ -27,21 +30,19 @@ export default async function DashboardPage() {
 
             {/* Charts Grid Layout */}
             <div className='w-full grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4'>
-              {/* Investment Portfolio Overview Chart - Takes half width on large screens */}
+              {/* Bar Chart - Investment Portfolio Overview - Takes half width on large screens */}
               <div className='lg:col-span-1 xl:col-span-2'>
                 <ChartBarInteractive data={investments} />
               </div>
 
-              {/* Pie Chart */}
-              <div className='lg:col-span-1 xl:col-span-1'>
+              {/* Pie Chart Label - Investments by Type */}
+              <div className='lg:col-span-1 xl:col-span-2'>
                 <ChartPieLabel data={investmentsByType} />
               </div>
 
-              {/* Placeholder for Donut Chart */}
-              <div className='bg-primary-foreground p-4 rounded-lg lg:col-span-1 xl:col-span-1'>
-                <div className='h-full flex items-center justify-center'>
-                  <p className='text-muted-foreground'>Donut Chart</p>
-                </div>
+              {/* Pie Chart - Investments by Currency */}
+              <div className='lg:col-span-1 xl:col-span-2'>
+                <ChartPieInteractive data={investmentsByCurrency} />
               </div>
 
               {/* Additional Chart Area - Full width on large screens */}

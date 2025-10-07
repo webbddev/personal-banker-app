@@ -31,12 +31,12 @@ const formatInvestmentType = (type: string) => {
     .join(' ');
 };
 
-interface ChartData {
+type ChartData = {
   type: string;
   value: number;
   investments?: Investment[];
   count?: number;
-}
+};
 
 const CustomTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
@@ -53,6 +53,20 @@ const CustomTooltip = ({ active, payload }: any) => {
 };
 
 export function ChartPieLabel({ data }: { data: ChartData[] }) {
+  const [isMobile, setIsMobile] = React.useState(false);
+
+  React.useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
   const total = data.reduce((sum, item) => sum + item.value, 0);
 
   const chartData = data.map((item, index) => ({
@@ -77,7 +91,7 @@ export function ChartPieLabel({ data }: { data: ChartData[] }) {
 
   return (
     <Card className='flex flex-col h-full'>
-      <CardHeader className='items-center pb-0'>
+      <CardHeader className='items-start pb-0'>
         <CardTitle>Investments by Type</CardTitle>
         <CardDescription>
           Your investment portfolio distribution
@@ -86,7 +100,8 @@ export function ChartPieLabel({ data }: { data: ChartData[] }) {
       <CardContent className='flex-1 pb-0 flex items-center justify-center'>
         <ChartContainer
           config={chartConfig}
-          className='[&_.recharts-pie-label-text]:fill-foreground w-full h-full'
+          // className='[&_.recharts-pie-label-text]:fill-foreground mx-auto aspect-auto h-[250px] w-full'
+          className='[&_.recharts-pie-label-text]:fill-foreground mx-auto aspect-square h-[250px] md:h-[300px] lg:h-[350px] 2xl:h-[600px] w-full max-w-[650px] pb-0'
         >
           <PieChart>
             <ChartTooltip content={<CustomTooltip />} />
@@ -97,11 +112,13 @@ export function ChartPieLabel({ data }: { data: ChartData[] }) {
               nameKey='name'
             />
             <Legend
-              verticalAlign='middle'
-              align='right'
-              layout='vertical'
+              verticalAlign={isMobile ? 'bottom' : 'middle'}
+              align={isMobile ? 'center' : 'right'}
+              layout={isMobile ? 'horizontal' : 'vertical'}
               iconType='circle'
-              wrapperStyle={{ paddingLeft: '20px' }}
+              wrapperStyle={
+                isMobile ? { paddingTop: '20px' } : { paddingLeft: '40px' }
+              }
               formatter={(value) => value}
             />
           </PieChart>

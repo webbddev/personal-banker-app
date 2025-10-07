@@ -55,7 +55,6 @@ export async function getAllInvestmentsSortedByExpiration() {
   }
 }
 
-// Add this function to your investments actions file
 export async function getInvestmentsByType() {
   const user = await checkUser();
   if (!user) {
@@ -90,6 +89,54 @@ export async function getInvestmentsByType() {
   } catch (error) {
     console.error('Error getting investments by type:', error);
     return [];
+  }
+}
+
+// export async function getInvestmentTotalsByCurrency() {
+//   const user = await checkUser();
+//   if (!user) return {};
+
+//   const investments = await prisma.investment.findMany({
+//     where: { userId: user.clerkUserId },
+//     select: { investmentAmount: true, currency: true },
+//   });
+
+//   const totalsByCurrency: Record<string, number> = {};
+//   investments.forEach((i) => {
+//     if (!totalsByCurrency[i.currency]) {
+//       totalsByCurrency[i.currency] = 0;
+//     }
+//     totalsByCurrency[i.currency] += i.investmentAmount;
+//   });
+
+//   return totalsByCurrency;
+// }
+
+export async function getInvestmentsByCurrency() {
+  const user = await checkUser();
+  if (!user) {
+    console.error('User not authenticated');
+    return {};
+  }
+
+  try {
+    const allInvestments = await prisma.investment.findMany({
+      where: { userId: user.clerkUserId },
+    });
+
+    const investmentsByCurrency = allInvestments.reduce(
+      (acc: Record<string, number>, investment) => {
+        const currency = investment.currency;
+        acc[currency] = (acc[currency] || 0) + investment.investmentAmount;
+        return acc;
+      },
+      {}
+    );
+
+    return investmentsByCurrency;
+  } catch (error) {
+    console.error('Error getting investments by currency:', error);
+    return {};
   }
 }
 

@@ -25,7 +25,7 @@ export function ChartBarInteractive({ data }: { data: Investment[] }) {
   const chartConfig = {
     investmentAmount: {
       label: 'Investment Amount',
-        // color: 'hsl(var(--chart-6))',
+      // color: 'hsl(var(--chart-6))',
       color: '#40C1AC',
     },
     expiringSoon: {
@@ -66,7 +66,7 @@ export function ChartBarInteractive({ data }: { data: Investment[] }) {
   });
 
   return (
-    <Card>
+    <Card className='h-full'>
       <CardHeader>
         <CardTitle>Investment Portfolio Overview</CardTitle>
         <CardDescription>
@@ -74,7 +74,10 @@ export function ChartBarInteractive({ data }: { data: Investment[] }) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartConfig} className='max-h-[500px] w-full'>
+        <ChartContainer
+          config={chartConfig}
+          className='aspect-auto h-[250px] md:h-[300px] lg:h-[350px] 2xl:h-[600px] w-full'
+        >
           <BarChart
             accessibilityLayer
             data={chartData}
