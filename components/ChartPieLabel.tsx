@@ -100,7 +100,7 @@ export function ChartPieLabel({ data }: { data: ChartData[] }) {
       <CardContent className='flex-1 pb-0 flex items-center justify-center'>
         <ChartContainer
           config={chartConfig}
-          // className='[&_.recharts-pie-label-text]:fill-foreground mx-auto aspect-auto h-[250px] w-full'
+         
           className='[&_.recharts-pie-label-text]:fill-foreground mx-auto aspect-square h-[250px] md:h-[300px] lg:h-[350px] 2xl:h-[600px] w-full max-w-[650px] pb-0'
         >
           <PieChart>

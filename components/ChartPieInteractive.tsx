@@ -100,7 +100,6 @@ export function ChartPieInteractive({ data }: ChartPieInteractiveProps) {
           id={id}
           config={dynamicChartConfig}
           className='mx-auto aspect-square h-[200px] md:h-[200px] lg:h-[250px] 2xl:h-[600px] w-full max-w-[650px]'
-          // className='mx-auto aspect-square w-full max-w-[250px]'
         >
           <PieChart>
             <ChartTooltip

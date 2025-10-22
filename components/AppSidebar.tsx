@@ -28,6 +28,8 @@ import Image from 'next/image';
 import { SignedIn, UserButton } from '@clerk/nextjs';
 import { currentUser } from '@clerk/nextjs/server';
 import { Collapsible } from './ui/collapsible';
+import { ModeToggle } from './ModeToggle';
+import { AppearanceMenuItem } from './AppearanceMenuItem';
 
 // Suggestions section items
 const suggestionItems = [
@@ -184,23 +186,30 @@ const AppSidebar = async () => {
       {/* User Section */}
       <SidebarFooter>
         <SidebarMenu>
-            <SidebarMenuItem>
-              <SignedIn>
-                <div className='flex w-full items-center gap-2 p-2 rounded-md hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors'>
-                  <UserButton />
-
-                  {/* Show name and chevron only when sidebar is expanded */}
-                  <div className='flex-1 min-w-0 group-data-[collapsible=icon]:hidden'>
-                    <div className='flex items-center justify-between'>
-                      <span className='truncate text-sm'>
-                        Welcome, {userName || 'User'}
-                      </span>
-                      <ChevronUp className='w-4 h-4 flex-shrink-0 opacity-60' />
-                    </div>
+          {/* Theme Toggle */}
+          <SidebarMenuItem>
+            <div className='flex items-center justify-start w-full py-2 rounded-md hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors group-data-[collapsible=icon]:justify-center'>
+              <ModeToggle />
+              <span className='group-data-[collapsible=icon]:hidden ml-2 text-sm'>
+                Switch Theme
+              </span>
+            </div>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SignedIn>
+              <div className='flex items-center justify-center w-full gap-2 p-0 rounded-md hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors group-data-[collapsible=icon]:justify-center'>
+                <UserButton />
+                <div className='flex-1 min-w-0 group-data-[collapsible=icon]:hidden'>
+                  <div className='flex items-center justify-between'>
+                    <span className='truncate text-sm'>
+                      Welcome, {userName || 'User'}
+                    </span>
+                    <ChevronUp className='w-4 h-4 flex-shrink-0 opacity-60' />
                   </div>
                 </div>
-              </SignedIn>
-            </SidebarMenuItem>
+              </div>
+            </SignedIn>
+          </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
     </Sidebar>
