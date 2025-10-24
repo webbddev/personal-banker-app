@@ -41,7 +41,7 @@ export function SectionCards({
   return (
     <div className='grid gap-6 sm:grid-cols-2 lg:grid-cols-4'>
       {/* Card 1 - Monthly Revenue */}
-      <Card className={cardClassName}>
+      <Card className={`${cardClassName} lg:col-span-2`}>
         <div className={hoverEffect}></div>
         <CardHeader>
           <CardTitle className='flex items-center justify-between'>
@@ -52,7 +52,7 @@ export function SectionCards({
         </CardHeader>
         <CardContent className='space-y-4'>
           <div>
-            <p className='text-xs text-gray-500 uppercase'>
+            <p className='text-xs text-gray-500 uppercase mb-1 lg:mb-3'>
               Total (MDL Equivalent)
             </p>
             <p className='text-2xl font-bold'>
@@ -78,7 +78,7 @@ export function SectionCards({
       </Card>
 
       {/* Card 2 - Investment Overview */}
-      <Card className={cardClassName}>
+      <Card className={`${cardClassName} lg:col-span-2`}>
         <div className={hoverEffect}></div>
         <CardHeader>
           <CardTitle className='flex items-center justify-between'>
@@ -89,7 +89,9 @@ export function SectionCards({
         </CardHeader>
         <CardContent className='space-y-4'>
           <div>
-            <p className='text-xs text-gray-500 uppercase'>Total Investments</p>
+            <p className='text-xs text-gray-500 uppercase mb-1 lg:mb-3'>
+              Total Investments
+            </p>
             <p className='text-2xl font-bold'>{totalInvestments}</p>
           </div>
           <div className='space-y-4'>
@@ -129,7 +131,7 @@ export function SectionCards({
                         <TableCell className='text-xs text-muted-foreground py-2'>
                           {new Date(
                             investment.expirationDate
-                          ).toLocaleDateString()}
+                          ).toLocaleDateString('en-GB')}
                         </TableCell>
                       </TableRow>
                     ))}
@@ -173,7 +175,7 @@ export function SectionCards({
                         <TableCell className='text-xs text-muted-foreground py-2'>
                           {new Date(
                             investment.expirationDate
-                          ).toLocaleDateString()}
+                          ).toLocaleDateString('en-GB')}
                         </TableCell>
                       </TableRow>
                     ))}
