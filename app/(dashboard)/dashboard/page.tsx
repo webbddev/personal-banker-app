@@ -8,14 +8,45 @@ import {
   getAllInvestmentsSortedByExpiration,
   getInvestmentsByType,
   getInvestmentsByCurrency,
+  getAllInvestments,
 } from '@/app/actions/investmentActions';
+import {
+  calculateMonthlyReturns,
+  getInvestmentsExpiringIn30Days,
+  getInvestmentsExpiringIn7Days,
+  convertCurrency,
+} from '@/utils/investment-calculations';
+import { getLatestRates } from '@/utils/exchange-rate-service';
 import { ChartPieLabel } from '@/components/ChartPieLabel';
 import { ChartPieInteractive } from '@/components/ChartPieInteractive';
+import { SupportedCurrencyCode } from '@/utils/currency-formatter';
 
 export default async function DashboardPage() {
   const investments = await getAllInvestmentsSortedByExpiration();
+  const allInvestments = await getAllInvestments();
   const investmentsByType = await getInvestmentsByType();
   const investmentsByCurrency = await getInvestmentsByCurrency();
+  const monthlyReturns = calculateMonthlyReturns(allInvestments);
+  const exchangeRates = await getLatestRates();
+
+  const totalMonthlyRevenue = Object.entries(monthlyReturns).reduce(
+    (total, [currency, amount]) => {
+      return (
+        total +
+        convertCurrency(
+          amount,
+          currency as SupportedCurrencyCode,
+          'MDL',
+          exchangeRates
+        )
+      );
+    },
+    0
+  );
+
+  const totalInvestments = allInvestments.length;
+  const expiringIn7Days = getInvestmentsExpiringIn7Days(allInvestments);
+  const expiringIn30Days = getInvestmentsExpiringIn30Days(allInvestments);
 
   return (
     <SidebarInset className='w-full'>
@@ -25,7 +56,13 @@ export default async function DashboardPage() {
           <div className='flex flex-col gap-4 py-4 px-4 md:gap-6 md:py-6 w-full'>
             {/* Section Cards - Full width */}
             <div className='w-full'>
-              <SectionCards />
+              <SectionCards
+                monthlyReturns={monthlyReturns}
+                totalMonthlyRevenue={totalMonthlyRevenue}
+                totalInvestments={totalInvestments}
+                expiringIn7Days={expiringIn7Days}
+                expiringIn30Days={expiringIn30Days}
+              />
             </div>
 
             {/* Charts Grid Layout */}

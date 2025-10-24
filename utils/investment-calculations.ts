@@ -6,6 +6,8 @@ import {
   SupportedCurrencyCode,
 } from './currency-formatter';
 
+export { convertCurrency };
+
 export type CurrencyTotals = {
   MDL: number;
   EUR: number;
@@ -109,18 +111,18 @@ export function calculateMonthlyReturn(
   return Math.round(netReturn * 100) / 100;
 }
 
-/**
+/** COULD BE DELETED LATER IF NOT NEEDED
  * Format a monetary amount with currency symbol
  * @param amount - The amount to format
  * @param currency - The currency code (e.g., 'USD', 'EUR')
  * @returns Formatted string with currency symbol
  */
-export function formatAmount(amount: number, currency: string): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: currency.toUpperCase(),
-  }).format(amount);
-}
+// export function formatAmount(amount: number, currency: string): string {
+//   return new Intl.NumberFormat('en-US', {
+//     style: 'currency',
+//     currency: currency.toUpperCase(),
+//   }).format(amount);
+// }
 
 /**
  * Calculate the number of days until expiration
@@ -136,6 +138,34 @@ export function calculateDaysUntilExpiration(expirationDate: Date): number {
 
   const diffTime = expDate.getTime() - today.getTime();
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+}
+
+/**
+ * Filters investments that are expiring within the next 7 days.
+ * @param investments - An array of financial instruments.
+ * @returns An array of investments expiring within 7 days.
+ */
+export function getInvestmentsExpiringIn7Days(
+  investments: FinancialInstrument[]
+): FinancialInstrument[] {
+  return investments.filter((inv) => {
+    const days = calculateDaysUntilExpiration(inv.expirationDate);
+    return days > 0 && days <= 7;
+  });
+}
+
+/**
+ * Filters investments that are expiring within the next 30 days.
+ * @param investments - An array of financial instruments.
+ * @returns An array of investments expiring within 30 days.
+ */
+export function getInvestmentsExpiringIn30Days(
+  investments: FinancialInstrument[]
+): FinancialInstrument[] {
+  return investments.filter((inv) => {
+    const days = calculateDaysUntilExpiration(inv.expirationDate);
+    return days > 0 && days <= 30;
+  });
 }
 
 export function calculateMonthlyReturns(
