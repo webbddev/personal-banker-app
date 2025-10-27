@@ -43,7 +43,7 @@ const CustomTooltip = ({ active, payload }: any) => {
     const data = payload[0].payload;
 
     return (
-      <div className='flex flex-col gap-1 rounded-lg bg-background p-2 shadow-sm border'>
+      <div className='flex flex-col gap-1 rounded-lg bg-background p-2 shadow-sm border text-sm lg:text-base'>
         <span className='font-bold'>{formatInvestmentType(data.type)}</span>
         <span>Amount: {data.value.toLocaleString()}</span>
       </div>
@@ -92,16 +92,17 @@ export function ChartPieLabel({ data }: { data: ChartData[] }) {
   return (
     <Card className='flex flex-col h-full'>
       <CardHeader className='items-start pb-0'>
-        <CardTitle>Investments by Type</CardTitle>
-        <CardDescription>
+        <CardTitle className='text-xl lg:text-2xl'>
+          Investments by Type
+        </CardTitle>
+        <CardDescription className='lg:text-base'>
           Your investment portfolio distribution
         </CardDescription>
       </CardHeader>
       <CardContent className='flex-1 pb-0 flex items-center justify-center'>
         <ChartContainer
           config={chartConfig}
-         
-          className='[&_.recharts-pie-label-text]:fill-foreground mx-auto aspect-square h-[250px] md:h-[300px] lg:h-[350px] 2xl:h-[600px] w-full max-w-[650px] pb-0'
+          className='[&_.recharts-pie-label-text]:fill-foreground [&_.recharts-pie-label-text]:text-sm [&_.recharts-pie-label-text]:lg:text-lg [&_.recharts-pie-label-text]:font-bold mx-auto aspect-square h-[250px] md:h-[300px] lg:h-[350px] 2xl:h-[600px] w-full max-w-[650px] pb-0'
         >
           <PieChart>
             <ChartTooltip content={<CustomTooltip />} />
@@ -110,6 +111,7 @@ export function ChartPieLabel({ data }: { data: ChartData[] }) {
               dataKey='value'
               label={({ percentage }) => `${percentage}%`}
               nameKey='name'
+              labelLine={true}
             />
             <Legend
               verticalAlign={isMobile ? 'bottom' : 'middle'}
@@ -119,12 +121,14 @@ export function ChartPieLabel({ data }: { data: ChartData[] }) {
               wrapperStyle={
                 isMobile ? { paddingTop: '20px' } : { paddingLeft: '40px' }
               }
-              formatter={(value) => value}
+              formatter={(value) => (
+                <span className='text-sm lg:text-base'>{value}</span>
+              )}
             />
           </PieChart>
         </ChartContainer>
       </CardContent>
-      <CardFooter className='flex-col gap-2 text-sm'>
+      <CardFooter className='flex-col gap-2 text-sm lg:text-base'>
         <div className='text-muted-foreground leading-none'>
           Percentage distribution across investment categories.
         </div>

@@ -109,7 +109,9 @@ const AppSidebar = async () => {
       <SidebarContent>
         {/* Suggestions Section */}
         <SidebarGroup>
-          <SidebarGroupLabel>Suggestions</SidebarGroupLabel>
+          <SidebarGroupLabel className='lg:text-base'>
+            Suggestions
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {suggestionItems.map((item) => (
@@ -117,7 +119,7 @@ const AppSidebar = async () => {
                   <SidebarMenuButton asChild>
                     <Link href={item.url}>
                       <item.icon />
-                      <span>{item.title}</span>
+                      <span className='lg:text-base'>{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -130,7 +132,7 @@ const AppSidebar = async () => {
 
         {/* Settings Section */}
         <SidebarGroup>
-          <SidebarGroupLabel>Settings</SidebarGroupLabel>
+          <SidebarGroupLabel className='lg:text-base'>Settings</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {settingsItems.map((item) => (
@@ -138,9 +140,9 @@ const AppSidebar = async () => {
                   <SidebarMenuButton asChild>
                     <Link href={item.url}>
                       <item.icon />
-                      <span>{item.title}</span>
+                      <span className='lg:text-base'>{item.title}</span>
                       {item.shortcut && (
-                        <span className='ml-auto text-xs text-muted-foreground'>
+                        <span className='ml-auto text-xs text-muted-foreground lg:text-sm'>
                           {item.shortcut}
                         </span>
                       )}
@@ -154,7 +156,7 @@ const AppSidebar = async () => {
 
         {/* Projects Section */}
         <SidebarGroup>
-          <SidebarGroupLabel>Projects</SidebarGroupLabel>
+          <SidebarGroupLabel className='lg:text-base'>Projects</SidebarGroupLabel>
           <SidebarGroupAction>
             <Plus /> <span className='sr-only'>Add Project</span>
           </SidebarGroupAction>
@@ -164,7 +166,7 @@ const AppSidebar = async () => {
                 <SidebarMenuButton asChild>
                   <Link href='/#'>
                     <Projector />
-                    See All Projects
+                    <span className='lg:text-base'>See All Projects</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -172,7 +174,7 @@ const AppSidebar = async () => {
                 <SidebarMenuButton asChild>
                   <Link href='/#'>
                     <Plus />
-                    Add Project
+                    <span className='lg:text-base'>Add Project</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -190,7 +192,7 @@ const AppSidebar = async () => {
           <SidebarMenuItem>
             <div className='flex items-center justify-start w-full py-2 rounded-md hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors group-data-[collapsible=icon]:justify-center'>
               <ModeToggle />
-              <span className='group-data-[collapsible=icon]:hidden ml-2 text-sm'>
+              <span className='group-data-[collapsible=icon]:hidden ml-2 text-sm lg:text-base'>
                 Switch Theme
               </span>
             </div>
@@ -201,7 +203,7 @@ const AppSidebar = async () => {
                 <UserButton />
                 <div className='flex-1 min-w-0 group-data-[collapsible=icon]:hidden'>
                   <div className='flex items-center justify-between'>
-                    <span className='truncate text-sm'>
+                    <span className='truncate text-sm lg:text-base'>
                       Welcome, {userName || 'User'}
                     </span>
                     <ChevronUp className='w-4 h-4 flex-shrink-0 opacity-60' />

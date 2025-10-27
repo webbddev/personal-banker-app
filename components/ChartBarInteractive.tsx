@@ -68,8 +68,10 @@ export function ChartBarInteractive({ data }: { data: Investment[] }) {
   return (
     <Card className='h-full'>
       <CardHeader>
-        <CardTitle>Investment Portfolio Overview</CardTitle>
-        <CardDescription>
+        <CardTitle className='text-xl lg:text-2xl'>
+          Investment Portfolio Overview
+        </CardTitle>
+        <CardDescription className='lg:text-base'>
           Each bar represents an investment, ordered by expiration date.
         </CardDescription>
       </CardHeader>
@@ -107,7 +109,7 @@ export function ChartBarInteractive({ data }: { data: Investment[] }) {
               content={
                 <ChartTooltipContent
                   formatter={(value, name, props) => (
-                    <div className='flex flex-col gap-1 rounded-lg bg-background p-2 shadow-sm'>
+                    <div className='flex flex-col gap-1 rounded-lg bg-background p-2 shadow-sm text-sm lg:text-base'>
                       <span className='font-bold'>
                         {props.payload.organisationName}
                       </span>

@@ -90,8 +90,8 @@ export function ChartPieInteractive({ data }: ChartPieInteractiveProps) {
     <Card data-chart={id} className='flex flex-col h-full'>
       <ChartStyle id={id} config={dynamicChartConfig} />
       <CardHeader className='items-start pb-0'>
-        <CardTitle>Currency Exposure</CardTitle>
-        <CardDescription>
+        <CardTitle className='text-xl lg:text-2xl'>Currency Exposure</CardTitle>
+        <CardDescription className='lg:text-base'>
           Distribution of investments by currency
         </CardDescription>
       </CardHeader>
@@ -142,14 +142,14 @@ export function ChartPieInteractive({ data }: ChartPieInteractiveProps) {
                         <tspan
                           x={viewBox.cx}
                           y={viewBox.cy}
-                          className='fill-foreground text-3xl font-bold'
+                          className='fill-foreground text-3xl lg:text-4xl font-bold'
                         >
                           {activeData.amount.toLocaleString()}
                         </tspan>
                         <tspan
                           x={viewBox.cx}
                           y={(viewBox.cy || 0) + 24}
-                          className='fill-muted-foreground'
+                          className='fill-muted-foreground text-sm lg:text-base'
                         >
                           {activeData.currency}
                         </tspan>
@@ -163,7 +163,7 @@ export function ChartPieInteractive({ data }: ChartPieInteractiveProps) {
         </ChartContainer>
 
         {/* Currencies list */}
-        <div className='flex flex-row md:flex-col gap-2'>
+        <div className='flex flex-row md:flex-col gap-2 text-sm lg:text-base'>
           {currencies.map((key) => {
             const config =
               dynamicChartConfig[key as keyof typeof dynamicChartConfig];

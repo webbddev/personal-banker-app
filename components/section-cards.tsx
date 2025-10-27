@@ -55,13 +55,6 @@ export function SectionCards({
   const hoverEffect =
     'absolute inset-0 bg-gradient-to-r from-blue-100 to-blue-200 dark:from-purple-600 dark:to-indigo-600 opacity-0 hover:opacity-10 transition-opacity duration-300';
 
-  const sortedMonthlyReturnsByType = Object.entries(monthlyReturnsByType).sort(
-    ([typeA], [typeB]) => {
-      if (typeA === 'bankDeposit') return -1;
-      if (typeB === 'bankDeposit') return 1;
-      return typeA.localeCompare(typeB);
-    }
-  );
   return (
     <div className='grid gap-6 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-4'>
       {/* Card 1 - Monthly Revenue */}
@@ -70,18 +63,20 @@ export function SectionCards({
       >
         <div className={hoverEffect} />
         <CardHeader>
-          <CardTitle className='flex items-center justify-between'>
+          <CardTitle className='flex items-center justify-between text-xl lg:text-2xl'>
             <span>Monthly Revenue</span>
             <TrendingUp className='h-6 w-6 text-green-500' />
           </CardTitle>
-          <CardDescription>Total earnings this month</CardDescription>
+          <CardDescription className='lg:text-base'>
+            Total earnings this month
+          </CardDescription>
         </CardHeader>
         <CardContent className='space-y-4'>
           <div>
-            <p className='text-xs text-gray-500 uppercase mb-1 lg:mb-3'>
+            <p className='text-xs lg:text-sm text-gray-500 uppercase mb-1 lg:mb-3'>
               Total (MDL Equivalent)
             </p>
-            <p className='text-2xl font-bold'>
+            <p className='text-2xl lg:text-3xl font-bold'>
               {formatAmount(totalMonthlyRevenue, 'MDL')}
             </p>
           </div>
@@ -93,8 +88,8 @@ export function SectionCards({
                   key={currency}
                   className='flex justify-between items-center'
                 >
-                  <span className='text-sm text-gray-400'>{`Returns in ${currency}`}</span>
-                  <span className='text-sm font-medium text-green-400'>
+                  <span className='text-sm lg:text-base text-gray-400'>{`Returns in ${currency}`}</span>
+                  <span className='text-sm lg:text-base font-medium text-green-400'>
                     + {formatAmount(amount, currency)}
                   </span>
                 </div>
@@ -109,36 +104,42 @@ export function SectionCards({
       >
         <div className={hoverEffect} />
         <CardHeader>
-          <CardTitle className='flex items-center justify-between'>
+          <CardTitle className='flex items-center justify-between text-xl lg:text-2xl'>
             <span>Investment Overview</span>
             <Briefcase className='h-6 w-6 text-blue-500' />
           </CardTitle>
-          <CardDescription>Current portfolio status</CardDescription>
+          <CardDescription className='lg:text-base'>
+            Current portfolio status
+          </CardDescription>
         </CardHeader>
         <CardContent className='space-y-4'>
           <div>
-            <p className='text-xs text-gray-500 uppercase mb-1 lg:mb-3'>
+            <p className='text-xs lg:text-sm text-gray-500 uppercase mb-1 lg:mb-3'>
               Total Investments
             </p>
-            <p className='text-2xl font-bold'>{totalInvestments}</p>
+            <p className='text-2xl lg:text-3xl font-bold'>{totalInvestments}</p>
           </div>
           <div className='space-y-4'>
             {expiringIn7Days.length > 0 && (
               <div>
-                <h3 className='text-sm font-semibold text-yellow-400 mb-2 flex justify-between items-center'>
+                <h3 className='text-sm lg:text-base font-semibold text-yellow-400 mb-2 flex justify-between items-center'>
                   <span>Investments Expiring in 7 Days</span>
-                  <span className='text-sm font-medium'>
+                  <span className='text-sm lg:text-base font-medium'>
                     {expiringIn7Days.length}
                   </span>
                 </h3>
                 <Table>
                   <TableHeader>
                     <TableRow className='border-b border-gray-800'>
-                      <TableHead className='text-xs h-8 py-2'>
+                      <TableHead className='text-xs lg:text-sm h-8 py-2'>
                         Organization
                       </TableHead>
-                      <TableHead className='text-xs h-8 py-2'>Amount</TableHead>
-                      <TableHead className='text-xs h-8 py-2'>Date</TableHead>
+                      <TableHead className='text-xs lg:text-sm h-8 py-2'>
+                        Amount
+                      </TableHead>
+                      <TableHead className='text-xs lg:text-sm h-8 py-2'>
+                        Date
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -147,16 +148,16 @@ export function SectionCards({
                         key={investment.id}
                         className='border-b border-gray-800/50'
                       >
-                        <TableCell className='text-xs font-medium py-2'>
+                        <TableCell className='text-xs lg:text-sm font-medium py-2'>
                           {investment.organisationName}
                         </TableCell>
-                        <TableCell className='text-xs py-2'>
+                        <TableCell className='text-xs lg:text-sm py-2'>
                           {formatAmount(
                             investment.investmentAmount,
                             investment.currency
                           )}
                         </TableCell>
-                        <TableCell className='text-xs text-muted-foreground py-2'>
+                        <TableCell className='text-xs lg:text-sm text-muted-foreground py-2'>
                           {new Date(
                             investment.expirationDate
                           ).toLocaleDateString('en-GB')}
@@ -169,20 +170,24 @@ export function SectionCards({
             )}
             {expiringIn30Days.length > 0 && (
               <div>
-                <h3 className='text-sm font-semibold text-red-400 mb-2 flex justify-between items-center'>
+                <h3 className='text-sm lg:text-base font-semibold text-red-400 mb-2 flex justify-between items-center'>
                   <span>Investments Expiring in 30 Days</span>
-                  <span className='text-sm font-medium'>
+                  <span className='text-sm lg:text-base font-medium'>
                     {expiringIn30Days.length}
                   </span>
                 </h3>
                 <Table>
                   <TableHeader>
                     <TableRow className='border-b border-gray-800'>
-                      <TableHead className='text-xs h-8 py-2'>
+                      <TableHead className='text-xs lg:text-sm h-8 py-2'>
                         Organization
                       </TableHead>
-                      <TableHead className='text-xs h-8 py-2'>Amount</TableHead>
-                      <TableHead className='text-xs h-8 py-2'>Date</TableHead>
+                      <TableHead className='text-xs lg:text-sm h-8 py-2'>
+                        Amount
+                      </TableHead>
+                      <TableHead className='text-xs lg:text-sm h-8 py-2'>
+                        Date
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -191,16 +196,16 @@ export function SectionCards({
                         key={investment.id}
                         className='border-b border-gray-800/50'
                       >
-                        <TableCell className='text-xs font-medium py-2'>
+                        <TableCell className='text-xs lg:text-sm font-medium py-2'>
                           {investment.organisationName}
                         </TableCell>
-                        <TableCell className='text-xs py-2'>
+                        <TableCell className='text-xs lg:text-sm py-2'>
                           {formatAmount(
                             investment.investmentAmount,
                             investment.currency
                           )}
                         </TableCell>
-                        <TableCell className='text-xs text-muted-foreground py-2'>
+                        <TableCell className='text-xs lg:text-sm text-muted-foreground py-2'>
                           {new Date(
                             investment.expirationDate
                           ).toLocaleDateString('en-GB')}
@@ -220,11 +225,11 @@ export function SectionCards({
       >
         <div className={hoverEffect} />
         <CardHeader>
-          <CardTitle className='flex items-center justify-between'>
+          <CardTitle className='flex items-center justify-between text-xl lg:text-2xl'>
             <span>Revenue by Type</span>
             <PieChart className='h-6 w-6 text-yellow-500' />
           </CardTitle>
-          <CardDescription>
+          <CardDescription className='lg:text-base'>
             Monthly income from different investment types
           </CardDescription>
         </CardHeader>
@@ -233,7 +238,7 @@ export function SectionCards({
             <div className='flex flex-col divide-y divide-gray-200 dark:divide-gray-800'>
               {Object.entries(monthlyReturnsByType).map(([type, returns]) => (
                 <div key={type} className='py-3 first:pt-0 last:pb-0'>
-                  <h3 className='text-sm font-semibold text-gray-400 mb-2'>
+                  <h3 className='text-sm lg:text-base font-semibold text-gray-400 mb-2'>
                     {getInvestmentTypeLabel(type)}
                   </h3>
                   <Table>
@@ -242,10 +247,10 @@ export function SectionCards({
                         .filter(([, amount]) => amount > 0)
                         .map(([currency, amount]) => (
                           <TableRow key={currency} className='border-b-0'>
-                            <TableCell className='text-xs text-gray-500 py-1 px-0'>
+                            <TableCell className='text-xs lg:text-sm text-gray-500 py-1 px-0'>
                               {`Returns in ${currency}`}
                             </TableCell>
-                            <TableCell className='text-xs font-medium text-green-400 py-1 px-0 text-right'>
+                            <TableCell className='text-xs lg:text-sm font-medium text-green-400 py-1 px-0 text-right'>
                               + {formatAmount(amount, currency)}
                             </TableCell>
                           </TableRow>
@@ -256,7 +261,9 @@ export function SectionCards({
               ))}
             </div>
           ) : (
-            <p className='text-center text-gray-500'>No revenue data by type</p>
+            <p className='text-center text-gray-500 lg:text-base'>
+              No revenue data by type
+            </p>
           )}
         </CardContent>
       </Card>
@@ -266,14 +273,16 @@ export function SectionCards({
       >
         <div className={hoverEffect} />
         <CardHeader>
-          <CardTitle className='flex items-center justify-between'>
+          <CardTitle className='flex items-center justify-between text-xl lg:text-2xl'>
             <span>Quick Actions</span>
             <Zap className='h-6 w-6 text-purple-500' />
           </CardTitle>
-          <CardDescription>Shortcuts</CardDescription>
+          <CardDescription className='lg:text-base'>Shortcuts</CardDescription>
         </CardHeader>
         <CardContent>
-          <p className='text-center text-gray-500'>No actions available</p>
+          <p className='text-center text-gray-500 lg:text-base'>
+            No actions available
+          </p>
         </CardContent>
       </Card>
     </div>
