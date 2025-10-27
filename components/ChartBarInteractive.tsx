@@ -22,6 +22,8 @@ import { calculateDaysUntilExpiration } from '@/utils/investment-calculations';
 export const description = 'An interactive bar chart of investments';
 
 export function ChartBarInteractive({ data }: { data: Investment[] }) {
+  const [activeIndex, setActiveIndex] = React.useState<number | null>(null);
+
   const chartConfig = {
     investmentAmount: {
       label: 'Investment Amount',
@@ -89,6 +91,14 @@ export function ChartBarInteractive({ data }: { data: Investment[] }) {
               bottom: 20,
               left: 10,
             }}
+            onMouseMove={(state) => {
+              if (state.isTooltipActive) {
+                setActiveIndex(state.activeTooltipIndex ?? null);
+              } else {
+                setActiveIndex(null);
+              }
+            }}
+            onMouseLeave={() => setActiveIndex(null)}
           >
             <CartesianGrid vertical={false} />
             <XAxis
@@ -124,7 +134,16 @@ export function ChartBarInteractive({ data }: { data: Investment[] }) {
             />
             <Bar dataKey='investmentAmount' radius={4}>
               {chartData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.fill} />
+                <Cell
+                  key={`cell-${index}`}
+                  fill={entry.fill}
+                  opacity={
+                    activeIndex === null || activeIndex === index ? 1 : 0.6
+                  }
+                  stroke={activeIndex === index ? 'hsl(var(--foreground))' : 'none'}
+                  strokeWidth={activeIndex === index ? 2 : 0}
+                
+                />
               ))}
             </Bar>
           </BarChart>

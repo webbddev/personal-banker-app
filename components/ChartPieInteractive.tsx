@@ -95,11 +95,11 @@ export function ChartPieInteractive({ data }: ChartPieInteractiveProps) {
           Distribution of investments by currency
         </CardDescription>
       </CardHeader>
-      <CardContent className='flex-1 flex flex-col md:flex-row items-center justify-center p-4 gap-8'>
+      <CardContent className='flex-1 flex flex-col items-center justify-center p-4 pb-6 gap-6'>
         <ChartContainer
           id={id}
           config={dynamicChartConfig}
-          className='mx-auto aspect-square h-[200px] md:h-[200px] lg:h-[250px] 2xl:h-[600px] w-full max-w-[650px]'
+          className='mx-auto aspect-square h-[250px] md:h-[270px] lg:h-[350px] 2xl:h-[600px] w-full max-w-[600px]'
         >
           <PieChart>
             <ChartTooltip
@@ -142,14 +142,14 @@ export function ChartPieInteractive({ data }: ChartPieInteractiveProps) {
                         <tspan
                           x={viewBox.cx}
                           y={viewBox.cy}
-                          className='fill-foreground text-3xl lg:text-4xl font-bold'
+                          className='fill-foreground text-2xl md:text-3xl lg:text-4xl font-bold'
                         >
                           {activeData.amount.toLocaleString()}
                         </tspan>
                         <tspan
                           x={viewBox.cx}
-                          y={(viewBox.cy || 0) + 24}
-                          className='fill-muted-foreground text-sm lg:text-base'
+                          y={(viewBox.cy || 0) + 20}
+                          className='fill-muted-foreground text-xs md:text-sm'
                         >
                           {activeData.currency}
                         </tspan>
@@ -163,7 +163,7 @@ export function ChartPieInteractive({ data }: ChartPieInteractiveProps) {
         </ChartContainer>
 
         {/* Currencies list */}
-        <div className='flex flex-row md:flex-col gap-2 text-sm lg:text-base'>
+        <div className='flex flex-row flex-wrap gap-2 justify-center w-full max-w-md'>
           {currencies.map((key) => {
             const config =
               dynamicChartConfig[key as keyof typeof dynamicChartConfig];
@@ -174,7 +174,7 @@ export function ChartPieInteractive({ data }: ChartPieInteractiveProps) {
             return (
               <div
                 key={key}
-                className={`flex items-center gap-2 cursor-pointer p-2 rounded-lg ${
+                className={`flex items-center gap-2 cursor-pointer px-3 py-1.5 rounded-lg transition-colors ${
                   isActive ? 'bg-muted' : 'hover:bg-muted/50'
                 }`}
                 onClick={() => setActiveCurrency(key)}
@@ -186,7 +186,9 @@ export function ChartPieInteractive({ data }: ChartPieInteractiveProps) {
                   }}
                 />
                 <div className='flex-1'>
-                  <div className='font-medium leading-none'>{config.label}</div>
+                  <div className='font-medium leading-none text-sm'>
+                    {config.label}
+                  </div>
                 </div>
               </div>
             );

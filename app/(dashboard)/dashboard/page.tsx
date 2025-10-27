@@ -70,7 +70,7 @@ export default async function DashboardPage() {
                 <ChartPieLabel data={investmentsByType} />
               </div>
 
-              {/* Pie Chart - Investments by Currency */}
+              {/* Pie Chart - Currency Exposure */}
               <div className='lg:col-span-1 xl:col-span-2'>
                 <ChartPieInteractive data={investmentsByCurrency} />
               </div>
