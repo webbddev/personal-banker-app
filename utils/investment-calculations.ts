@@ -168,6 +168,7 @@ export function getInvestmentsExpiringIn30Days(
   });
 }
 
+// Calculate monthly returns by currency
 export function calculateMonthlyReturns(
   investments: FinancialInstrument[]
 ): CurrencyTotals {
@@ -199,6 +200,7 @@ export function calculateMonthlyReturns(
   );
 }
 
+// Calculate monthly returns by investment type
 export type MonthlyReturnsByInvestmentType = Record<string, CurrencyTotals>;
 
 export function calculateMonthlyReturnsByInvestmentType(
@@ -222,3 +224,19 @@ export function calculateMonthlyReturnsByInvestmentType(
   }, {} as MonthlyReturnsByInvestmentType);
 }
 
+export function calculateTotalMonthlyRevenueInMDL(
+  monthlyReturns: CurrencyTotals,
+  exchangeRates: ExchangeRates
+): number {
+  return Object.entries(monthlyReturns).reduce((total, [currency, amount]) => {
+    return (
+      total +
+      convertCurrency(
+        amount,
+        currency as SupportedCurrencyCode,
+        'MDL',
+        exchangeRates
+      )
+    );
+  }, 0);
+}

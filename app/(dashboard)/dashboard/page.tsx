@@ -16,6 +16,7 @@ import {
   getInvestmentsExpiringIn7Days,
   convertCurrency,
   calculateMonthlyReturnsByInvestmentType,
+  calculateTotalMonthlyRevenueInMDL,
 } from '@/utils/investment-calculations';
 import { getLatestRates } from '@/utils/exchange-rate-service';
 import { ChartPieLabel } from '@/components/ChartPieLabel';
@@ -31,23 +32,10 @@ export default async function DashboardPage() {
   const monthlyReturnsByType =
     calculateMonthlyReturnsByInvestmentType(allInvestments);
   const exchangeRates = await getLatestRates();
-
-  const totalMonthlyRevenue = Object.entries(monthlyReturns).reduce(
-    (total, [currency, amount]) => {
-      return (
-        total +
-        convertCurrency(
-          amount,
-          currency as SupportedCurrencyCode,
-          'MDL',
-          exchangeRates
-        )
-      );
-    },
-    0
+  const totalMonthlyRevenue = calculateTotalMonthlyRevenueInMDL(
+    monthlyReturns,
+    exchangeRates
   );
-
-
   const totalInvestments = allInvestments.length;
   const expiringIn7Days = getInvestmentsExpiringIn7Days(allInvestments);
   const expiringIn30Days = getInvestmentsExpiringIn30Days(allInvestments);
