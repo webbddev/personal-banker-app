@@ -15,6 +15,7 @@ import {
   getInvestmentsExpiringIn30Days,
   getInvestmentsExpiringIn7Days,
   convertCurrency,
+  calculateMonthlyReturnsByInvestmentType,
 } from '@/utils/investment-calculations';
 import { getLatestRates } from '@/utils/exchange-rate-service';
 import { ChartPieLabel } from '@/components/ChartPieLabel';
@@ -27,6 +28,8 @@ export default async function DashboardPage() {
   const investmentsByType = await getInvestmentsByType();
   const investmentsByCurrency = await getInvestmentsByCurrency();
   const monthlyReturns = calculateMonthlyReturns(allInvestments);
+  const monthlyReturnsByType =
+    calculateMonthlyReturnsByInvestmentType(allInvestments);
   const exchangeRates = await getLatestRates();
 
   const totalMonthlyRevenue = Object.entries(monthlyReturns).reduce(
@@ -43,6 +46,7 @@ export default async function DashboardPage() {
     },
     0
   );
+
 
   const totalInvestments = allInvestments.length;
   const expiringIn7Days = getInvestmentsExpiringIn7Days(allInvestments);
@@ -62,6 +66,7 @@ export default async function DashboardPage() {
                 totalInvestments={totalInvestments}
                 expiringIn7Days={expiringIn7Days}
                 expiringIn30Days={expiringIn30Days}
+                monthlyReturnsByType={monthlyReturnsByType}
               />
             </div>
 

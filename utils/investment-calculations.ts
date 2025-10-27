@@ -199,31 +199,26 @@ export function calculateMonthlyReturns(
   );
 }
 
-// worked well
-// export function calculateMonthlyReturns(
-//   investments: FinancialInstrument[]
-// ): CurrencyTotals {
-//   return investments.reduce(
-//     (totals, investment) => {
-//       const monthlyReturn =
-//         (Number(investment.investmentAmount) *
-//           (Number(investment.interestRate) / 100)) /
-//         12;
-//       const afterTax = monthlyReturn * (1 - Number(investment.incomeTax) / 100);
+export type MonthlyReturnsByInvestmentType = Record<string, CurrencyTotals>;
 
-//       switch (investment.currency) {
-//         case 'MDL':
-//           totals.MDL += afterTax;
-//           break;
-//         case 'EUR':
-//           totals.EUR += afterTax;
-//           break;
-//         case 'GBP':
-//           totals.GBP += afterTax;
-//           break;
-//       }
-//       return totals;
-//     },
-//     { MDL: 0, EUR: 0, GBP: 0 }
-//   );
-// }
+export function calculateMonthlyReturnsByInvestmentType(
+  investments: FinancialInstrument[]
+): MonthlyReturnsByInvestmentType {
+  return investments.reduce((acc, investment) => {
+    const { investmentType, currency } = investment;
+    const monthlyReturn = calculateMonthlyReturn(
+      Number(investment.investmentAmount),
+      Number(investment.interestRate),
+      Number(investment.incomeTax)
+    );
+
+    if (!acc[investmentType]) {
+      acc[investmentType] = { MDL: 0, EUR: 0, GBP: 0, USD: 0 };
+    }
+
+    (acc[investmentType] as any)[currency as keyof CurrencyTotals] +=
+      monthlyReturn;
+    return acc;
+  }, {} as MonthlyReturnsByInvestmentType);
+}
+

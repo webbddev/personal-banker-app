@@ -13,10 +13,12 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { TrendingUp, Briefcase, AlertTriangle, Zap } from 'lucide-react';
-import { CurrencyTotals } from '@/utils/investment-calculations';
+import { TrendingUp, Briefcase, AlertTriangle, Zap, PieChart } from 'lucide-react';
+import { CurrencyTotals, MonthlyReturnsByInvestmentType } from '@/utils/investment-calculations';
 import { formatAmount } from '@/utils/currency-formatter';
 import { Investment } from '@prisma/client';
+import { investmentTypeOptions } from '@/utils/investment-constants';
+
 
 interface SectionCardsProps {
   monthlyReturns: CurrencyTotals;
@@ -24,7 +26,13 @@ interface SectionCardsProps {
   totalInvestments: number;
   expiringIn7Days: Investment[];
   expiringIn30Days: Investment[];
+  monthlyReturnsByType: MonthlyReturnsByInvestmentType;
 }
+
+const getInvestmentTypeLabel = (typeValue: string) => {
+  const option = investmentTypeOptions.find((opt) => opt.value === typeValue);
+  return option ? option.label : typeValue;
+};
 
 export function SectionCards({
   monthlyReturns,
@@ -32,6 +40,7 @@ export function SectionCards({
   totalInvestments,
   expiringIn7Days,
   expiringIn30Days,
+  monthlyReturnsByType,
 }: SectionCardsProps) {
   const cardClassName =
     'relative overflow-hidden hover:shadow-lg transition-shadow duration-300';
@@ -39,10 +48,12 @@ export function SectionCards({
     'absolute inset-0 bg-gradient-to-r from-blue-100 to-blue-200 dark:from-purple-600 dark:to-indigo-600 opacity-0 hover:opacity-10 transition-opacity duration-300';
 
   return (
-    <div className='grid gap-6 sm:grid-cols-2 lg:grid-cols-4'>
+    <div className='grid gap-6 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-4'>
       {/* Card 1 - Monthly Revenue */}
-      <Card className={`${cardClassName} lg:col-span-2`}>
-        <div className={hoverEffect}></div>
+      <Card
+        className={`${cardClassName} sm:col-span-2 lg:col-span-2 xl:col-span-1 2xl:col-span-1`}
+      >
+        <div className={hoverEffect} />
         <CardHeader>
           <CardTitle className='flex items-center justify-between'>
             <span>Monthly Revenue</span>
@@ -69,7 +80,7 @@ export function SectionCards({
                 >
                   <span className='text-sm text-gray-400'>{`Returns in ${currency}`}</span>
                   <span className='text-sm font-medium text-green-400'>
-                    +{formatAmount(amount, currency)}
+                    + {formatAmount(amount, currency)}
                   </span>
                 </div>
               ))}
@@ -78,8 +89,10 @@ export function SectionCards({
       </Card>
 
       {/* Card 2 - Investment Overview */}
-      <Card className={`${cardClassName} lg:col-span-2`}>
-        <div className={hoverEffect}></div>
+      <Card
+        className={`${cardClassName} sm:col-span-2 lg:col-span-2 xl:col-span-2 2xl:col-span-1`}
+      >
+        <div className={hoverEffect} />
         <CardHeader>
           <CardTitle className='flex items-center justify-between'>
             <span>Investment Overview</span>
@@ -187,8 +200,54 @@ export function SectionCards({
         </CardContent>
       </Card>
       {/* Card 3 */}
-      <Card className={cardClassName}>
-        <div className={hoverEffect}></div>
+      <Card
+        className={`${cardClassName} sm:col-span-1 lg:col-span-2 xl:col-span-1 2xl:col-span-1`}
+      >
+        <div className={hoverEffect} />
+        <CardHeader>
+          <CardTitle className='flex items-center justify-between'>
+            <span>Revenue by Type</span>
+            <PieChart className='h-6 w-6 text-yellow-500' />
+          </CardTitle>
+          <CardDescription>
+            Monthly income from different investment types
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {Object.keys(monthlyReturnsByType).length > 0 ? (
+            <div className='space-y-4'>
+              {Object.entries(monthlyReturnsByType).map(([type, returns]) => (
+                <div key={type}>
+                  <h3 className='text-sm font-semibold text-gray-400 mb-2'>
+                    {getInvestmentTypeLabel(type)}
+                  </h3>
+                  <div className='space-y-1'>
+                    {Object.entries(returns)
+                      .filter(([, amount]) => amount > 0)
+                      .map(([currency, amount]) => (
+                        <div
+                          key={currency}
+                          className='flex justify-between items-center'
+                        >
+                          <span className='text-xs text-gray-500'>{`Returns in ${currency}`}</span>
+                          <span className='text-xs font-medium text-green-400'>
+                            + {formatAmount(amount, currency)}
+                          </span>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className='text-center text-gray-500'>No revenue data by type</p>
+          )}
+        </CardContent>
+      </Card>
+      {/* <Card
+        className={`${cardClassName} sm:col-span-1 lg:col-span-2 xl:col-span-1 2xl:col-span-1`}
+      >
+        <div className={hoverEffect} />
         <CardHeader>
           <CardTitle className='flex items-center justify-between'>
             <span>Alerts & Notifications</span>
@@ -199,10 +258,12 @@ export function SectionCards({
         <CardContent>
           <p className='text-center text-gray-500'>No new alerts</p>
         </CardContent>
-      </Card>
+      </Card> */}
       {/* Card 4 */}
-      <Card className={cardClassName}>
-        <div className={hoverEffect}></div>
+      <Card
+        className={`${cardClassName} sm:col-span-1 lg:col-span-2 xl:col-span-4 2xl:col-span-1`}
+      >
+        <div className={hoverEffect} />
         <CardHeader>
           <CardTitle className='flex items-center justify-between'>
             <span>Quick Actions</span>
