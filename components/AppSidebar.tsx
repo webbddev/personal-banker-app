@@ -23,13 +23,13 @@ import {
   SidebarMenuItem,
   SidebarSeparator,
 } from './ui/sidebar';
-import Link from 'next/link';
 import Image from 'next/image';
 import { SignedIn, UserButton } from '@clerk/nextjs';
 import { currentUser } from '@clerk/nextjs/server';
 import { Collapsible } from './ui/collapsible';
 import { ModeToggle } from './ModeToggle';
 import { AppearanceMenuItem } from './AppearanceMenuItem';
+import { SidebarLink } from './SidebarLink';
 
 // Suggestions section items
 const suggestionItems = [
@@ -88,7 +88,7 @@ const AppSidebar = async () => {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild className='h-auto py-3 px-2'>
-              <Link
+              <SidebarLink
                 href='/dashboard'
                 className='flex items-center justify-center w-full'
               >
@@ -100,7 +100,7 @@ const AppSidebar = async () => {
                     className='object-contain'
                   />
                 </div>
-              </Link>
+              </SidebarLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
@@ -117,10 +117,10 @@ const AppSidebar = async () => {
               {suggestionItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <Link href={item.url}>
+                    <SidebarLink href={item.url}>
                       <item.icon />
                       <span className='lg:text-base'>{item.title}</span>
-                    </Link>
+                    </SidebarLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -138,7 +138,7 @@ const AppSidebar = async () => {
               {settingsItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <Link href={item.url}>
+                    <SidebarLink href={item.url}>
                       <item.icon />
                       <span className='lg:text-base'>{item.title}</span>
                       {item.shortcut && (
@@ -146,7 +146,7 @@ const AppSidebar = async () => {
                           {item.shortcut}
                         </span>
                       )}
-                    </Link>
+                    </SidebarLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -164,18 +164,18 @@ const AppSidebar = async () => {
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
-                  <Link href='/#'>
+                  <SidebarLink href='/#'>
                     <Projector />
                     <span className='lg:text-base'>See All Projects</span>
-                  </Link>
+                  </SidebarLink>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
-                  <Link href='/#'>
+                  <SidebarLink href='/#'>
                     <Plus />
                     <span className='lg:text-base'>Add Project</span>
-                  </Link>
+                  </SidebarLink>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
