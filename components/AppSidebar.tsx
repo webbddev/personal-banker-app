@@ -26,9 +26,7 @@ import {
 import Image from 'next/image';
 import { SignedIn, UserButton } from '@clerk/nextjs';
 import { currentUser } from '@clerk/nextjs/server';
-import { Collapsible } from './ui/collapsible';
 import { ModeToggle } from './ModeToggle';
-import { AppearanceMenuItem } from './AppearanceMenuItem';
 import { SidebarLink } from './SidebarLink';
 
 // Suggestions section items
@@ -38,11 +36,11 @@ const suggestionItems = [
     url: '/dashboard',
     icon: LayoutDashboard,
   },
-  {
-    title: 'Ask AI',
-    url: '/ai-assistant',
-    icon: Sparkle,
-  },
+  // {
+  //   title: 'Ask AI',
+  //   url: '/ai-assistant',
+  //   icon: Sparkle,
+  // },
   {
     title: 'Investments',
     url: '/investments',
@@ -132,7 +130,9 @@ const AppSidebar = async () => {
 
         {/* Settings Section */}
         <SidebarGroup>
-          <SidebarGroupLabel className='lg:text-base'>Settings</SidebarGroupLabel>
+          <SidebarGroupLabel className='lg:text-base'>
+            Settings
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {settingsItems.map((item) => (
@@ -156,7 +156,9 @@ const AppSidebar = async () => {
 
         {/* Projects Section */}
         <SidebarGroup>
-          <SidebarGroupLabel className='lg:text-base'>Projects</SidebarGroupLabel>
+          <SidebarGroupLabel className='lg:text-base'>
+            Projects
+          </SidebarGroupLabel>
           <SidebarGroupAction>
             <Plus /> <span className='sr-only'>Add Project</span>
           </SidebarGroupAction>

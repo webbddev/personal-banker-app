@@ -1,21 +1,10 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import {
-  Bot,
-  BrainCog,
-  Expand,
-  GlobeIcon,
-  Minimize,
-  SquareIcon,
-  Trash,
-  X,
-  CopyIcon,
-  RefreshCcwIcon,
-} from 'lucide-react';
-import { Button } from './ui/button';
+import { CopyIcon, RefreshCcwIcon, GlobeIcon, SquareIcon } from 'lucide-react';
+import { Button } from '../../../components/ui/button';
 import { Fragment, useState } from 'react';
-import { useChat, type UIMessage as AIMessage } from '@ai-sdk/react';
+import { useChat } from '@ai-sdk/react';
 import { useUser } from '@clerk/nextjs';
 import {
   PromptInput,
@@ -42,30 +31,27 @@ import {
   Conversation,
   ConversationContent,
   ConversationScrollButton,
-} from './ai-elements/conversation';
-import { Message, MessageContent } from './ai-elements/message';
-import { Response } from './ai-elements/response';
-import { Action, Actions } from './ai-elements/actions';
+} from '../../../components/ai-elements/conversation';
+import {
+  Message,
+  MessageContent,
+} from '../../../components/ai-elements/message';
+import { Response } from '../../../components/ai-elements/response';
+import { Action, Actions } from '../../../components/ai-elements/actions';
 import {
   Source,
   Sources,
   SourcesContent,
   SourcesTrigger,
-} from './ai-elements/sources';
+} from '../../../components/ai-elements/sources';
 import {
   Reasoning,
   ReasoningContent,
   ReasoningTrigger,
-} from './ai-elements/reasoning';
-import { Loader } from './ai-elements/loader';
+} from '../../../components/ai-elements/reasoning';
+import { Loader } from '../../../components/ai-elements/loader';
 import Image from 'next/image';
 
-interface AIChatBoxProps {
-  open: boolean;
-  onClose: () => void;
-}
-
-// Define available llm models
 const models = [
   {
     name: 'Grok 4 Fast Reasoning',
@@ -97,8 +83,7 @@ const models = [
   },
 ];
 
-export function AIChatBox({ open, onClose }: AIChatBoxProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
+export function AiChatPage() {
   const { user } = useUser();
   const firstName = user?.firstName;
 
@@ -107,15 +92,7 @@ export function AIChatBox({ open, onClose }: AIChatBoxProps) {
   const [webSearch, setWebSearch] = useState(false);
   const [isCopied, setIsCopied] = useState<Record<string, boolean>>({});
 
-  const {
-    messages,
-    sendMessage,
-    status,
-    regenerate,
-    error,
-    stop,
-    setMessages,
-  } = useChat();
+  const { messages, sendMessage, status, regenerate, error, stop } = useChat();
 
   const handleSubmit = (message: PromptInputMessage) => {
     const hasText = Boolean(message.text);
@@ -140,55 +117,8 @@ export function AIChatBox({ open, onClose }: AIChatBoxProps) {
     setPrompt('');
   };
 
-  const handleClearChat = () => {
-    setMessages([]);
-  };
-
-  if (!open) return null;
-
   return (
-    <div
-      className={cn(
-        'animate-in slide-in-from-bottom-10 bg-card fixed right-4 bottom-4 z-50 flex flex-col rounded-lg border shadow-lg duration-300 2xl:right-16',
-        isExpanded
-          ? 'h-[950px] max-h-[90vh] w-[550px] max-w-[90vw]'
-          : 'h-[500px] max-h-[80vh] w-80 sm:w-96'
-      )}
-    >
-      <div className='bg-[#40C1AC] text-primary-foreground flex items-center justify-between rounded-t-lg border-b p-3'>
-        <div className='flex items-center gap-2'>
-          <BrainCog size={18} />
-          <h3 className='font-medium'>Personal Banker</h3>
-        </div>
-        <div className='flex items-center gap-1'>
-          <Button
-            variant='ghost'
-            size='icon'
-            onClick={() => setIsExpanded(!isExpanded)}
-            className='text-primary-foreground hover:bg-transparent h-8 w-8'
-            title={isExpanded ? 'Minimize' : 'Expand'}
-          >
-            {isExpanded ? <Minimize /> : <Expand />}
-          </Button>
-          <Button
-            variant='ghost'
-            size='icon'
-            onClick={handleClearChat}
-            className='text-primary-foreground hover:bg-transparent h-8 w-8'
-            title='Clear chat'
-          >
-            <Trash />
-          </Button>
-          <Button
-            variant='ghost'
-            size='icon'
-            onClick={onClose}
-            className='text-primary-foreground hover:bg-transparent h-8 w-8'
-          >
-            <X className='size-4' />
-          </Button>
-        </div>
-      </div>
+    <div className='flex flex-col h-full'>
       <div className='flex-1 space-y-4 overflow-y-auto p-3'>
         <div className='max-w-4xl mx-auto relative size-full'>
           <Conversation className='h-full'>
