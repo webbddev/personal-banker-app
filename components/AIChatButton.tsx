@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Bot } from 'lucide-react';
+import { BrainCog } from 'lucide-react';
 import { useState } from 'react';
 import { AIChatBox } from './AIChatBox';
 
@@ -10,8 +10,11 @@ export function AIChatButton() {
 
   return (
     <>
-      <Button onClick={() => setChatOpen(true)} variant='outline'>
-        <Bot className='mr-2' />
+      <Button
+        onClick={() => setChatOpen(!chatOpen)}
+        className='bg-slate-600 text-primary-foreground hover:bg-primary/90 dark:bg-secondary dark:text-secondary-foreground dark:hover:bg-secondary/80 '
+      >
+        <BrainCog className='' />
         <span>Ask AI</span>
       </Button>
       <AIChatBox open={chatOpen} onClose={() => setChatOpen(false)} />

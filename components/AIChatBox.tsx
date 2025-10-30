@@ -3,6 +3,7 @@
 import { cn } from '@/lib/utils';
 import {
   Bot,
+  BrainCog,
   Expand,
   GlobeIcon,
   Minimize,
@@ -128,13 +129,13 @@ export function AIChatBox({ open, onClose }: AIChatBoxProps) {
       className={cn(
         'animate-in slide-in-from-bottom-10 bg-card fixed right-4 bottom-4 z-50 flex flex-col rounded-lg border shadow-lg duration-300 2xl:right-16',
         isExpanded
-          ? 'h-[950px] max-h-[90vh] w-[650px] max-w-[90vw]'
+          ? 'h-[950px] max-h-[90vh] w-[550px] max-w-[90vw]'
           : 'h-[500px] max-h-[80vh] w-80 sm:w-96'
       )}
     >
-      <div className='bg-primary text-primary-foreground flex items-center justify-between rounded-t-lg border-b p-3'>
+      <div className='bg-[#40C1AC] text-primary-foreground flex items-center justify-between rounded-t-lg border-b p-3'>
         <div className='flex items-center gap-2'>
-          <Bot size={18} />
+          <BrainCog size={18} />
           <h3 className='font-medium'>Personal Banker</h3>
         </div>
         <div className='flex items-center gap-1'>
@@ -142,7 +143,7 @@ export function AIChatBox({ open, onClose }: AIChatBoxProps) {
             variant='ghost'
             size='icon'
             onClick={() => setIsExpanded(!isExpanded)}
-            className='text-primary-foreground hover:bg-primary/90 h-8 w-8'
+            className='text-primary-foreground hover:bg-transparent h-8 w-8'
             title={isExpanded ? 'Minimize' : 'Expand'}
           >
             {isExpanded ? <Minimize /> : <Expand />}
@@ -151,7 +152,7 @@ export function AIChatBox({ open, onClose }: AIChatBoxProps) {
             variant='ghost'
             size='icon'
             onClick={handleClearChat}
-            className='text-primary-foreground hover:bg-primary/90 h-8 w-8'
+            className='text-primary-foreground hover:bg-transparent h-8 w-8'
             title='Clear chat'
           >
             <Trash />
@@ -160,7 +161,7 @@ export function AIChatBox({ open, onClose }: AIChatBoxProps) {
             variant='ghost'
             size='icon'
             onClick={onClose}
-            className='text-primary-foreground hover:bg-primary/90 h-8 w-8'
+            className='text-primary-foreground hover:bg-transparent h-8 w-8'
           >
             <X className='size-4' />
           </Button>
