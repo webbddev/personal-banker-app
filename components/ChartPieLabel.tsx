@@ -102,24 +102,6 @@ export function ChartPieLabel({ data }: { data: ChartData[] }) {
             />
           </PieChart>
         </ChartContainer>
-        {/* Custom Legend - matching ChartBarInteractive style */}
-        {/* <div className='mx-auto mt-2 flex justify-center flex-wrap mb-6'>
-          {chartData.map((item, index) => (
-            <Item key={`legend-${index}`} variant='default' size='xs'>
-              <ItemMedia>
-                <div
-                  className='h-3 w-3 rounded-sm'
-                  style={{ backgroundColor: item.fill }}
-                />
-              </ItemMedia>
-              <ItemContent>
-                <ItemTitle className='text-xs lg:text-sm'>
-                  {item.name}
-                </ItemTitle>
-              </ItemContent>
-            </Item>
-          ))}
-        </div> */}
       </CardContent>
       <CardFooter>
         {/* Custom Legend - matching ChartBarInteractive style */}
