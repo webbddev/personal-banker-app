@@ -19,6 +19,8 @@ import {
   AlertTriangle,
   Zap,
   PieChart,
+  Timer,
+  CalendarDays,
 } from 'lucide-react';
 import {
   CurrencyTotals,
@@ -35,6 +37,7 @@ interface SectionCardsProps {
   expiringIn7Days: Investment[];
   expiringIn30Days: Investment[];
   monthlyReturnsByType: MonthlyReturnsByInvestmentType;
+  expiredInvestments: Investment[];
 }
 
 const getInvestmentTypeLabel = (typeValue: string) => {
@@ -49,6 +52,7 @@ export function SectionCards({
   expiringIn7Days,
   expiringIn30Days,
   monthlyReturnsByType,
+  expiredInvestments,
 }: SectionCardsProps) {
   const cardClassName =
     'relative overflow-hidden hover:shadow-lg transition-shadow duration-300';
@@ -98,20 +102,21 @@ export function SectionCards({
         </CardContent>
       </Card>
 
-      {/* Card 2 - Investment Overview */}
+      {/* Card 2 - Upcoming Maturities */}
       <Card
         className={`${cardClassName} sm:col-span-2 lg:col-span-2 xl:col-span-2 2xl:col-span-1`}
       >
         <div className={hoverEffect} />
         <CardHeader>
           <CardTitle className='flex items-center justify-between text-xl lg:text-2xl'>
-            <span>Investment Overview</span>
+            <span>Upcoming Maturities</span>
             <Briefcase className='h-6 w-6 text-blue-500' />
           </CardTitle>
           <CardDescription className='lg:text-base'>
             Current portfolio status
           </CardDescription>
         </CardHeader>
+
         <CardContent className='space-y-4'>
           <div>
             <p className='text-xs lg:text-sm text-gray-500 uppercase mb-1 lg:mb-3'>
@@ -120,11 +125,67 @@ export function SectionCards({
             <p className='text-2xl lg:text-3xl font-bold'>{totalInvestments}</p>
           </div>
           <div className='space-y-4'>
+            {/* Investments that have already expired */}
+            {expiredInvestments.length > 0 && (
+              <div>
+                <h3 className='text-sm lg:text-base font-semibold text-red-500 mb-2 flex justify-between items-center'>
+                  <span className='flex items-center'>
+                    <AlertTriangle className='h-4 w-4 mr-2' />
+                    <span>Expired Investments</span>
+                  </span>
+                  <span className='text-sm lg:text-base font-semibold'>
+                    {expiredInvestments.length}
+                  </span>
+                </h3>
+                <Table>
+                  <TableHeader>
+                    <TableRow className='border-b border-gray-800'>
+                      <TableHead className='text-xs lg:text-sm h-8 py-2'>
+                        Organization
+                      </TableHead>
+                      <TableHead className='text-xs lg:text-sm h-8 py-2'>
+                        Amount
+                      </TableHead>
+                      <TableHead className='text-xs lg:text-sm h-8 py-2'>
+                        Date
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {expiredInvestments.map((investment) => (
+                      <TableRow
+                        key={investment.id}
+                        className='border-b border-gray-800/50'
+                      >
+                        <TableCell className='text-xs lg:text-sm font-medium py-2'>
+                          {investment.organisationName}
+                        </TableCell>
+                        <TableCell className='text-xs lg:text-sm py-2'>
+                          {formatAmount(
+                            investment.investmentAmount,
+                            investment.currency
+                          )}
+                        </TableCell>
+                        <TableCell className='text-xs lg:text-sm text-muted-foreground py-2'>
+                          {new Date(
+                            investment.expirationDate
+                          ).toLocaleDateString('en-GB')}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+            {/* Investments expiring in 7 days */}
             {expiringIn7Days.length > 0 && (
               <div>
-                <h3 className='text-sm lg:text-base font-semibold text-yellow-400 mb-2 flex justify-between items-center'>
-                  <span>Investments Expiring in 7 Days</span>
-                  <span className='text-sm lg:text-base font-medium'>
+                <h3 className='text-sm lg:text-base font-semibold text-yellow-500 dark:text-yellow-400 mb-2 flex justify-between items-center'>
+                  <span className='flex items-center'>
+                    <Timer className='h-4 w-4 mr-2' />
+                    <span>Investments Expiring in 7 Days</span>
+                  </span>
+                  <span className='text-sm lg:text-base font-semibold'>
                     {expiringIn7Days.length}
                   </span>
                 </h3>
@@ -168,11 +229,15 @@ export function SectionCards({
                 </Table>
               </div>
             )}
+            {/* Investments expiring in 30 days */}
             {expiringIn30Days.length > 0 && (
               <div>
-                <h3 className='text-sm lg:text-base font-semibold text-red-400 mb-2 flex justify-between items-center'>
-                  <span>Investments Expiring in 30 Days</span>
-                  <span className='text-sm lg:text-base font-medium'>
+                <h3 className='text-sm lg:text-base font-semibold text-green-600 dark:text-green-400 mb-2 flex justify-between items-center'>
+                  <span className='flex items-center'>
+                    <CalendarDays className='h-4 w-4 mr-2' />
+                    <span>Investments Expiring in 30 Days</span>
+                  </span>{' '}
+                  <span className='text-sm lg:text-base font-semibold'>
                     {expiringIn30Days.length}
                   </span>
                 </h3>

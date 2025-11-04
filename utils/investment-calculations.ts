@@ -168,6 +168,21 @@ export function getInvestmentsExpiringIn30Days(
   });
 }
 
+/**
+ * Filters investments that have already expired.
+ * @param investments - An array of financial instruments.
+ * @returns An array of expired investments.
+ */
+export function getExpiredInvestments(
+  investments: FinancialInstrument[]
+): FinancialInstrument[] {
+  return investments.filter((inv) => {
+    const days = calculateDaysUntilExpiration(inv.expirationDate);
+    return days <= 0;
+  });
+}
+
+
 // Calculate monthly returns by currency
 export function calculateMonthlyReturns(
   investments: FinancialInstrument[]

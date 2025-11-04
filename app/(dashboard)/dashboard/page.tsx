@@ -14,14 +14,13 @@ import {
   calculateMonthlyReturns,
   getInvestmentsExpiringIn30Days,
   getInvestmentsExpiringIn7Days,
-  convertCurrency,
   calculateMonthlyReturnsByInvestmentType,
   calculateTotalMonthlyRevenueInMDL,
+  getExpiredInvestments,
 } from '@/utils/investment-calculations';
 import { getLatestRates } from '@/utils/exchange-rate-service';
 import { ChartPieLabel } from '@/components/ChartPieLabel';
 import { ChartPieInteractive } from '@/components/ChartPieInteractive';
-import { SupportedCurrencyCode } from '@/utils/currency-formatter';
 
 export default async function DashboardPage() {
   const investments = await getAllInvestmentsSortedByExpiration();
@@ -39,6 +38,8 @@ export default async function DashboardPage() {
   const totalInvestments = allInvestments.length;
   const expiringIn7Days = getInvestmentsExpiringIn7Days(allInvestments);
   const expiringIn30Days = getInvestmentsExpiringIn30Days(allInvestments);
+    const expiredInvestments = getExpiredInvestments(allInvestments);
+
 
   return (
     <SidebarInset className='w-full'>
@@ -55,6 +56,7 @@ export default async function DashboardPage() {
                 expiringIn7Days={expiringIn7Days}
                 expiringIn30Days={expiringIn30Days}
                 monthlyReturnsByType={monthlyReturnsByType}
+                expiredInvestments={expiredInvestments}
               />
             </div>
 
