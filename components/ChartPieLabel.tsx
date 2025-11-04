@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Pie, PieChart, Legend } from 'recharts';
+import { Pie, PieChart } from 'recharts';
 import { Investment } from '@prisma/client';
 
 import {
@@ -18,6 +18,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart';
+import { Item, ItemContent, ItemMedia, ItemTitle } from '@/components/ui/item';
 
 export const description = 'A pie chart with a label for investments by type';
 
@@ -53,20 +54,6 @@ const CustomTooltip = ({ active, payload }: any) => {
 };
 
 export function ChartPieLabel({ data }: { data: ChartData[] }) {
-  const [isMobile, setIsMobile] = React.useState(false);
-
-  React.useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 1024);
-    };
-
-    handleResize();
-    window.addEventListener('resize', handleResize);
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
   const total = data.reduce((sum, item) => sum + item.value, 0);
 
   const chartData = data.map((item, index) => ({
@@ -96,13 +83,13 @@ export function ChartPieLabel({ data }: { data: ChartData[] }) {
           Investments by Type
         </CardTitle>
         <CardDescription className='lg:text-base'>
-          Your investment portfolio distribution
+          Investment portfolio distribution across investment categories
         </CardDescription>
       </CardHeader>
-      <CardContent className='flex-1 pb-0 flex items-center justify-center'>
+      <CardContent className='flex-1 pb-0 flex flex-col items-center justify-center'>
         <ChartContainer
           config={chartConfig}
-          className='[&_.recharts-pie-label-text]:fill-foreground [&_.recharts-pie-label-text]:text-sm [&_.recharts-pie-label-text]:lg:text-lg [&_.recharts-pie-label-text]:font-bold mx-auto aspect-square h-[250px] md:h-[300px] lg:h-[350px] 2xl:h-[600px] w-full max-w-[650px] pb-0'
+          className='[&_.recharts-pie-label-text]:fill-foreground [&_.recharts-pie-label-text]:text-xs [&_.recharts-pie-label-text]:lg:text-sm [&_.recharts-pie-label-text]:font-bold mx-auto aspect-square h-[250px] md:h-[250px] lg:h-[320px] 2xl:h-[500px] w-full max-w-[500px] '
         >
           <PieChart>
             <ChartTooltip content={<CustomTooltip />} />
@@ -113,24 +100,45 @@ export function ChartPieLabel({ data }: { data: ChartData[] }) {
               nameKey='name'
               labelLine={true}
             />
-            <Legend
-              verticalAlign={isMobile ? 'bottom' : 'middle'}
-              align={isMobile ? 'center' : 'right'}
-              layout={isMobile ? 'horizontal' : 'vertical'}
-              iconType='circle'
-              wrapperStyle={
-                isMobile ? { paddingTop: '20px' } : { paddingLeft: '40px' }
-              }
-              formatter={(value) => (
-                <span className='text-sm lg:text-base'>{value}</span>
-              )}
-            />
           </PieChart>
         </ChartContainer>
+        {/* Custom Legend - matching ChartBarInteractive style */}
+        {/* <div className='mx-auto mt-2 flex justify-center flex-wrap mb-6'>
+          {chartData.map((item, index) => (
+            <Item key={`legend-${index}`} variant='default' size='xs'>
+              <ItemMedia>
+                <div
+                  className='h-3 w-3 rounded-sm'
+                  style={{ backgroundColor: item.fill }}
+                />
+              </ItemMedia>
+              <ItemContent>
+                <ItemTitle className='text-xs lg:text-sm'>
+                  {item.name}
+                </ItemTitle>
+              </ItemContent>
+            </Item>
+          ))}
+        </div> */}
       </CardContent>
-      <CardFooter className='flex-col gap-2 text-sm lg:text-base'>
-        <div className='text-muted-foreground leading-none'>
-          Percentage distribution across investment categories.
+      <CardFooter>
+        {/* Custom Legend - matching ChartBarInteractive style */}
+        <div className='mx-auto mt-2 flex justify-center flex-wrap gap-y-0'>
+          {chartData.map((item, index) => (
+            <Item key={`legend-${index}`} variant='default' size='xs'>
+              <ItemMedia>
+                <div
+                  className='h-3 w-3 rounded-sm'
+                  style={{ backgroundColor: item.fill }}
+                />
+              </ItemMedia>
+              <ItemContent>
+                <ItemTitle className='text-xs lg:text-sm'>
+                  {item.name}
+                </ItemTitle>
+              </ItemContent>
+            </Item>
+          ))}
         </div>
       </CardFooter>
     </Card>

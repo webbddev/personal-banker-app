@@ -17,7 +17,9 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart';
+import { Item, ItemContent, ItemMedia, ItemTitle } from '@/components/ui/item';
 import { calculateDaysUntilExpiration } from '@/utils/investment-calculations';
+import { formatAmount } from '@/utils/currency-formatter';
 
 export const description = 'An interactive bar chart of investments';
 
@@ -26,29 +28,35 @@ export function ChartBarInteractive({ data }: { data: Investment[] }) {
 
   const chartConfig = {
     investmentAmount: {
-      label: 'Investment Amount',
-      // color: 'hsl(var(--chart-6))',
-      color: '#40C1AC',
+      label: 'Active Investment',
+      color: '#40C1AC', // Teal/Cyan - matches the primary investment color
     },
     expiringSoon: {
       label: 'Expiring Soon',
-      color: 'hsl(var(--chart-3))',
+      color: '#16a34a', // green-600 (light mode) / green-400 (dark mode) - Investments expiring in 30 days
     },
     expiringIn7Days: {
       label: 'Expiring in 7 Days',
-      color: 'hsl(var(--chart-3))',
+      color: '#eab308', // yellow-500 (light mode) / yellow-400 (dark mode) - Investments expiring in 7 days
+    },
+    expired: {
+      label: 'Expired',
+      color: '#ef4444', // red-500 - Expired investments
     },
   } satisfies ChartConfig;
 
   const chartData = data.map((investment) => {
     const expirationDate = new Date(investment.expirationDate);
     const daysUntilExpiration = calculateDaysUntilExpiration(expirationDate);
+    const isExpired = daysUntilExpiration <= 0;
     const isExpiringIn7Days =
       daysUntilExpiration > 0 && daysUntilExpiration <= 7;
     const isExpiringSoon = daysUntilExpiration > 0 && daysUntilExpiration <= 30;
 
     let fill;
-    if (isExpiringIn7Days) {
+    if (isExpired) {
+      fill = 'var(--color-expired)';
+    } else if (isExpiringIn7Days) {
       fill = 'var(--color-expiringIn7Days)';
     } else if (isExpiringSoon) {
       fill = 'var(--color-expiringSoon)';
@@ -67,6 +75,20 @@ export function ChartBarInteractive({ data }: { data: Investment[] }) {
     };
   });
 
+  // Determine which legend items to display based on data
+  const hasExpired = chartData.some(
+    (item) => item.fill === 'var(--color-expired)'
+  );
+  const isExpiringIn7Days = chartData.some(
+    (item) => item.fill === 'var(--color-expiringIn7Days)'
+  );
+  const isExpiringSoon = chartData.some(
+    (item) => item.fill === 'var(--color-expiringSoon)'
+  );
+  const isActiveInvestment = chartData.some(
+    (item) => item.fill === 'var(--color-investmentAmount)'
+  );
+
   return (
     <Card className='h-full'>
       <CardHeader>
@@ -74,7 +96,7 @@ export function ChartBarInteractive({ data }: { data: Investment[] }) {
           Investment Portfolio Overview
         </CardTitle>
         <CardDescription className='lg:text-base'>
-          Each bar represents an investment, ordered by expiration date.
+          Each bar represents an investment, ordered by expiration date
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -123,7 +145,13 @@ export function ChartBarInteractive({ data }: { data: Investment[] }) {
                       <span className='font-bold'>
                         {props.payload.organisationName}
                       </span>
-                      <span>Amount: {Number(value).toLocaleString()}</span>
+                      <span>
+                        Amount:{' '}
+                        {formatAmount(
+                          Number(value),
+                          props.payload.currency as string
+                        )}
+                      </span>
                       <span>
                         Expires: {props.payload.expirationDateFormatted}
                       </span>
@@ -140,14 +168,77 @@ export function ChartBarInteractive({ data }: { data: Investment[] }) {
                   opacity={
                     activeIndex === null || activeIndex === index ? 1 : 0.6
                   }
-                  stroke={activeIndex === index ? 'hsl(var(--foreground))' : 'none'}
+                  stroke={
+                    activeIndex === index ? 'hsl(var(--foreground))' : 'none'
+                  }
                   strokeWidth={activeIndex === index ? 2 : 0}
-                
                 />
               ))}
             </Bar>
           </BarChart>
         </ChartContainer>
+        {/* Legend */}
+        {/* <div className='mx-auto mt-6 grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 w-fit gap-4'> */}
+        <div className='mx-auto mt-2 flex justify-center flex-wrap gap-y-0'>
+          {hasExpired && (
+            <Item variant='default' size='xs'>
+              <ItemMedia>
+                <div
+                  className='h-3 w-3 rounded-sm'
+                  style={{ backgroundColor: '#ef4444' }}
+                />
+              </ItemMedia>
+              <ItemContent>
+                <ItemTitle className='text-xs lg:text-sm'>Expired</ItemTitle>
+              </ItemContent>
+            </Item>
+          )}
+          {isExpiringIn7Days && (
+            <Item variant='default' size='xs'>
+              <ItemMedia>
+                <div
+                  className='h-3 w-3 rounded-sm'
+                  style={{ backgroundColor: '#eab308' }}
+                />
+              </ItemMedia>
+              <ItemContent>
+                <ItemTitle className='text-xs lg:text-sm'>
+                  Expiring in 7 Days
+                </ItemTitle>
+              </ItemContent>
+            </Item>
+          )}
+          {isExpiringSoon && (
+            <Item variant='default' size='xs'>
+              <ItemMedia>
+                <div
+                  className='h-3 w-3 rounded-sm'
+                  style={{ backgroundColor: '#16a34a' }}
+                />
+              </ItemMedia>
+              <ItemContent>
+                <ItemTitle className='text-xs lg:text-sm'>
+                  Expiring in 30 Days
+                </ItemTitle>
+              </ItemContent>
+            </Item>
+          )}
+          {isActiveInvestment && (
+            <Item variant='default' size='xs'>
+              <ItemMedia>
+                <div
+                  className='h-3 w-3 rounded-sm'
+                  style={{ backgroundColor: '#40C1AC' }}
+                />
+              </ItemMedia>
+              <ItemContent>
+                <ItemTitle className='text-xs lg:text-sm'>
+                  Active Investments
+                </ItemTitle>
+              </ItemContent>
+            </Item>
+          )}
+        </div>
       </CardContent>
     </Card>
   );

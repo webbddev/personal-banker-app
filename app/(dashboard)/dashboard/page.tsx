@@ -62,7 +62,7 @@ export default async function DashboardPage() {
 
             {/* Charts Grid Layout */}
             <div className='w-full grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4'>
-              {/* Bar Chart - Investment Portfolio Overview - Takes half width on large screens */}
+              {/* Bar Chart - Investment Portfolio Overview */}
               <div className='lg:col-span-1 xl:col-span-2'>
                 <ChartBarInteractive data={investments} />
               </div>
