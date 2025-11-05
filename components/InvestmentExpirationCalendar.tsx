@@ -83,11 +83,11 @@ export function InvestmentExpirationCalendar({
     return expiredInvestments.length > 0;
   }, [expiredInvestments]);
 
-  const hasExpiringIn7Days = React.useMemo(() => {
+  const isExpiringIn7Days = React.useMemo(() => {
     return allInvestmentsWithStatus.some((inv) => inv.isExpiringIn7Days);
   }, [allInvestmentsWithStatus]);
 
-  const hasExpiringIn30Days = React.useMemo(() => {
+  const isExpiringIn30Days = React.useMemo(() => {
     return allInvestmentsWithStatus.some((inv) => inv.isExpiringIn30Days);
   }, [allInvestmentsWithStatus]);
 
@@ -111,8 +111,8 @@ export function InvestmentExpirationCalendar({
         </CardDescription>
       </CardHeader>
       <CardContent className='flex-1 flex flex-col p-4 pb-6 gap-4'>
-        {/* Calendar */}
-        <div className='flex-1 flex items-center justify-center overflow-auto'>
+        {/* Calendar - Fixed container to prevent shifting */}
+        <div className='flex-shrink-0 flex justify-center'>
           <Calendar
             mode='single'
             selected={selectedDate}
@@ -166,11 +166,21 @@ export function InvestmentExpirationCalendar({
                   }
                 }
 
+                const isSelected =
+                  selectedDate &&
+                  day.date.toLocaleDateString() ===
+                    selectedDate.toLocaleDateString();
+
                 return (
                   <button
                     {...props}
                     className={cn(
                       props.className,
+                      'relative w-full h-full flex items-center justify-center rounded-md transition-all duration-150',
+                      isSelected &&
+                        'bg-teal-600/30 text-white shadow-md scale-105',
+                      !isSelected &&
+                        'hover:bg-blue-50 dark:hover:bg-blue-900/30',
                       hasInvestments && 'font-bold'
                     )}
                     title={
@@ -179,32 +189,18 @@ export function InvestmentExpirationCalendar({
                         : undefined
                     }
                   >
-                    <div className='relative w-full h-full flex items-center justify-center'>
-                      <span
-                        className={cn(
-                          'text-xs sm:text-sm relative z-10',
-                          hasInvestments && 'font-bold'
-                        )}
-                      >
-                        {day.date.getDate()}
-                      </span>
-
-                      {/* Dot indicator for expiring dates */}
-                      {hasInvestments && (
-                        <div
-                          className={cn(
-                            'absolute top-0.5 left-0.5 w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full',
-                            expirationCategory === 'expired'
-                              ? 'bg-red-500'
-                              : expirationCategory === 'urgent'
-                                ? 'bg-yellow-500'
-                                : expirationCategory === 'soon'
-                                  ? 'bg-green-600'
-                                  : 'bg-blue-500'
-                          )}
-                        />
+                    <span
+                      className={cn(
+                        'relative text-xs sm:text-sm z-10 pb-1 font-bold',
+                        hasInvestments && 'custom-underline',
+                        expirationCategory === 'expired' && 'text-red-600',
+                        expirationCategory === 'urgent' && 'text-yellow-600',
+                        expirationCategory === 'soon' && 'text-green-600',
+                        hasInvestments && !expirationCategory && 'text-blue-600'
                       )}
-                    </div>
+                    >
+                      {day.date.getDate()}
+                    </span>
                   </button>
                 );
               },
@@ -212,8 +208,8 @@ export function InvestmentExpirationCalendar({
           />
         </div>
 
-        {/* Legend - matching ChartBarInteractive style */}
-        <div className='mx-auto mt-2 flex justify-center flex-wrap gap-y-0'>
+        {/* Legend - Fixed position */}
+        <div className='flex-shrink-0 mx-auto mt-2 flex justify-center flex-wrap gap-y-0'>
           {hasExpired && (
             <Item variant='default' size='xs'>
               <ItemMedia>
@@ -227,7 +223,7 @@ export function InvestmentExpirationCalendar({
               </ItemContent>
             </Item>
           )}
-          {hasExpiringIn7Days && (
+          {isExpiringIn7Days && (
             <Item variant='default' size='xs'>
               <ItemMedia>
                 <div
@@ -237,12 +233,12 @@ export function InvestmentExpirationCalendar({
               </ItemMedia>
               <ItemContent>
                 <ItemTitle className='text-xs lg:text-sm'>
-                  Expires in 7 Days
+                  Expires in {'<'} 7 Days
                 </ItemTitle>
               </ItemContent>
             </Item>
           )}
-          {hasExpiringIn30Days && (
+          {isExpiringIn30Days && (
             <Item variant='default' size='xs'>
               <ItemMedia>
                 <div
@@ -252,34 +248,36 @@ export function InvestmentExpirationCalendar({
               </ItemMedia>
               <ItemContent>
                 <ItemTitle className='text-xs lg:text-sm'>
-                  Expires in 30 Days
+                  Expires in {'<'} 30 Days
                 </ItemTitle>
               </ItemContent>
             </Item>
           )}
         </div>
 
-        {/* Selected date details */}
-        {selectedDateInvestments.length > 0 && (
-          <div className='mt-4 pt-4 border-t border-gray-200 dark:border-gray-800'>
-            <p className='text-xs lg:text-sm font-semibold text-gray-400 mb-2'>
-              Expiring on {selectedDate?.toLocaleDateString('en-GB')}:
-            </p>
-            <div className='space-y-1'>
-              {selectedDateInvestments.map((inv) => (
-                <div
-                  key={inv.id}
-                  className='text-xs lg:text-sm text-gray-500 flex justify-between'
-                >
-                  <span>{inv.organisationName}</span>
-                  <span className='text-gray-400'>
-                    {inv.investmentAmount} {inv.currency}
-                  </span>
-                </div>
-              ))}
+        {/* Selected date details - Container always exists but content conditionally rendered */}
+        <div className='flex-shrink-0 min-h-[90px]'>
+          {selectedDateInvestments.length > 0 && (
+            <div className='pt-4 border-t border-gray-200 dark:border-gray-800'>
+              <p className='text-xs lg:text-sm font-semibold text-gray-400 mb-2'>
+                Expiring on {selectedDate?.toLocaleDateString('en-GB')}:
+              </p>
+              <div className='space-y-1'>
+                {selectedDateInvestments.map((inv) => (
+                  <div
+                    key={inv.id}
+                    className='text-xs lg:text-sm text-gray-500 flex justify-between'
+                  >
+                    <span>{inv.organisationName}</span>
+                    <span className='text-gray-400'>
+                      {inv.investmentAmount} {inv.currency}
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </CardContent>
     </Card>
   );

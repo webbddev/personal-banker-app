@@ -89,17 +89,14 @@ body {
   }
 }
 
-.expiring-day {
-  position: relative;
-}
-
-.expiring-day::after {
+.custom-underline::after {
   content: '';
   position: absolute;
-  top: 15%;
-  right: 15%;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background-color: hsl(var(--destructive));
+  bottom: 0;
+  left: 50%;
+  width: 120%; /* ← controls underline length */
+  height: 2px;
+  background-color: currentColor; /* same as text color */
+  transform: translateX(-50%);
+  border-radius: 1px;
 }
