@@ -88,3 +88,18 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+.expiring-day {
+  position: relative;
+}
+
+.expiring-day::after {
+  content: '';
+  position: absolute;
+  top: 15%;
+  right: 15%;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: hsl(var(--destructive));
+}

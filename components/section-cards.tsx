@@ -29,6 +29,7 @@ import {
 import { formatAmount } from '@/utils/currency-formatter';
 import { Investment } from '@prisma/client';
 import { investmentTypeOptions } from '@/utils/investment-constants';
+import { InvestmentExpirationCalendar } from './InvestmentExpirationCalendar';
 
 interface SectionCardsProps {
   monthlyReturns: CurrencyTotals;
@@ -38,6 +39,7 @@ interface SectionCardsProps {
   expiringIn30Days: Investment[];
   monthlyReturnsByType: MonthlyReturnsByInvestmentType;
   expiredInvestments: Investment[];
+  allInvestments?: Investment[];
 }
 
 const getInvestmentTypeLabel = (typeValue: string) => {
@@ -53,6 +55,7 @@ export function SectionCards({
   expiringIn30Days,
   monthlyReturnsByType,
   expiredInvestments,
+  allInvestments = [],
 }: SectionCardsProps) {
   const cardClassName =
     'relative overflow-hidden hover:shadow-lg transition-shadow duration-300';
@@ -332,24 +335,12 @@ export function SectionCards({
           )}
         </CardContent>
       </Card>
-      {/* Card 4 */}
-      <Card
-        className={`${cardClassName} sm:col-span-1 lg:col-span-2 xl:col-span-4 2xl:col-span-1`}
+      {/* Card 4 - Investment Expiration Calendar */}
+      <div
+        className={`sm:col-span-1 lg:col-span-2 xl:col-span-4 2xl:col-span-1`}
       >
-        <div className={hoverEffect} />
-        <CardHeader>
-          <CardTitle className='flex items-center justify-between text-xl lg:text-2xl'>
-            <span>Quick Actions</span>
-            <Zap className='h-6 w-6 text-purple-500' />
-          </CardTitle>
-          <CardDescription className='lg:text-base'>Shortcuts</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className='text-center text-gray-500 lg:text-base'>
-            No actions available
-          </p>
-        </CardContent>
-      </Card>
+        <InvestmentExpirationCalendar investments={allInvestments} />
+      </div>
     </div>
   );
 }

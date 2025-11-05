@@ -21,6 +21,7 @@ import {
 import { getLatestRates } from '@/utils/exchange-rate-service';
 import { ChartPieLabel } from '@/components/ChartPieLabel';
 import { ChartPieInteractive } from '@/components/ChartPieInteractive';
+import { InvestmentExpirationCalendar } from '@/components/InvestmentExpirationCalendar';
 
 export default async function DashboardPage() {
   const investments = await getAllInvestmentsSortedByExpiration();
@@ -38,8 +39,7 @@ export default async function DashboardPage() {
   const totalInvestments = allInvestments.length;
   const expiringIn7Days = getInvestmentsExpiringIn7Days(allInvestments);
   const expiringIn30Days = getInvestmentsExpiringIn30Days(allInvestments);
-    const expiredInvestments = getExpiredInvestments(allInvestments);
-
+  const expiredInvestments = getExpiredInvestments(allInvestments);
 
   return (
     <SidebarInset className='w-full'>
@@ -57,6 +57,7 @@ export default async function DashboardPage() {
                 expiringIn30Days={expiringIn30Days}
                 monthlyReturnsByType={monthlyReturnsByType}
                 expiredInvestments={expiredInvestments}
+                allInvestments={allInvestments}
               />
             </div>
 
@@ -75,6 +76,11 @@ export default async function DashboardPage() {
               {/* Pie Chart - Currency Exposure */}
               <div className='lg:col-span-1 xl:col-span-2'>
                 <ChartPieInteractive data={investmentsByCurrency} />
+              </div>
+
+              {/* Maturities Calendar - Upcoming Expirations */}
+              <div className='lg:col-span-2 xl:col-span-2'>
+                <InvestmentExpirationCalendar investments={allInvestments} />
               </div>
 
               {/* Additional Chart Area - Full width on large screens */}
