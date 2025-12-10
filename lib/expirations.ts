@@ -13,8 +13,12 @@ export async function findInvestmentsExpiringIn30Days() {
 /** Investments expiring in the current month (UTC) */
 export async function findInvestmentsExpiringThisMonth() {
   const now = new Date();
-  const start = startOfMonth(now);
-  const end = endOfMonth(now);
+  const year = now.getUTCFullYear();
+  const month = now.getUTCMonth();
+
+  // Create date based on UTC values to avoid timezone issues.
+  const start = startOfMonth(new Date(Date.UTC(year, month, 1)));
+  const end = endOfMonth(new Date(Date.UTC(year, month, 1)));
 
   return prisma.investment.findMany({
     where: {
