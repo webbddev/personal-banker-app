@@ -27,7 +27,8 @@ import {
   MonthlyReturnsByInvestmentType,
 } from '@/utils/investment-calculations';
 import { formatAmount } from '@/utils/currency-formatter';
-import { Investment } from '@prisma/client';
+// import { Investment } from '@prisma/client';
+import { Investment } from '@/prisma/generated/prisma/client';
 import { investmentTypeOptions } from '@/utils/investment-constants';
 import { InvestmentExpirationCalendar } from './InvestmentExpirationCalendar';
 

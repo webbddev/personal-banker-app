@@ -1,8 +1,10 @@
 'use server';
 
-import { prisma } from '@/lib/prisma';
+import { checkUser } from '@/lib/checkUser.js';
+import { prisma } from '@/lib/prisma.js';
+// import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
-import { checkUser } from '@/lib/checkUser';
+// import { checkUser } from '@/lib/checkUser';
 
 export async function createInvestment(data: any) {
   const user = await checkUser();

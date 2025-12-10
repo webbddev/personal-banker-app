@@ -2,7 +2,9 @@
 
 import * as React from 'react';
 import { Bar, BarChart, CartesianGrid, Cell, XAxis, YAxis } from 'recharts';
-import { Investment } from '@prisma/client';
+// import { Investment } from '@prisma/client';
+import { Investment } from '@/prisma/generated/prisma/client';
+
 
 import {
   Card,

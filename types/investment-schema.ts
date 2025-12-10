@@ -4,7 +4,9 @@ import {
   investmentValidationRules,
 } from '@/utils/investment-constants';
 import { SUPPORTED_CURRENCY_LABELS } from '@/utils/currency-formatter';
-import { Investment } from '@prisma/client';
+import { Investment } from '@/prisma/generated/prisma/client';
+// import { Investment } from '@prisma/client';
+import { ExpirationStatus } from '@/types/enums';
 
 // Use Prisma's generated Investment type as the main type
 export type FinancialInstrument = Investment;
@@ -59,4 +61,7 @@ export const formSchema = z.object({
 export type CreateInvestmentFormValues = z.infer<typeof formSchema>;
 
 // Export Prisma types for convenience
-export { ExpirationStatus, type Investment } from '@prisma/client';
+// export { ExpirationStatus, type Investment } from '@prisma/client';
+export type { Investment }; // Re-export the type we imported above
+export { ExpirationStatus } 
+

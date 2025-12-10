@@ -10,7 +10,9 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Item, ItemContent, ItemMedia, ItemTitle } from '@/components/ui/item';
-import { Investment } from '@prisma/client';
+// import { Investment } from '@prisma/client';
+import { Investment } from '@/prisma/generated/prisma/client';
+
 import { calculateDaysUntilExpiration } from '@/utils/investment-calculations';
 import { cn } from '@/lib/utils';
 import { CalendarDays } from 'lucide-react';

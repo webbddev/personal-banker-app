@@ -1,5 +1,6 @@
 import { Resend } from 'resend';
-import type { Investment, User } from '@prisma/client';
+// import type { Investment, User } from '@prisma/client';
+import { Investment, User } from '@/prisma/generated/prisma/client';
 import { format } from 'date-fns';
 import { render } from '@react-email/render';
 import { DailyReminderEmail } from '@/emails/DailyReminderEmail';
