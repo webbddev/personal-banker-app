@@ -4,9 +4,9 @@ import {
   investmentValidationRules,
 } from '@/utils/investment-constants';
 import { SUPPORTED_CURRENCY_LABELS } from '@/utils/currency-formatter';
-import { Investment } from '@/prisma/generated/prisma/client';
-// import { Investment } from '@prisma/client';
-import { ExpirationStatus } from '@/types/enums';
+import { Investment } from '@/prisma/generated/prisma/client.js';
+// ✅ Import from Prisma's generated enums instead of custom file
+import { ExpirationStatus } from '@/prisma/generated/prisma/enums.js';
 
 // Use Prisma's generated Investment type as the main type
 export type FinancialInstrument = Investment;
@@ -33,7 +33,6 @@ export const formSchema = z.object({
 
   investmentAmount: z.number().positive('Amount must be greater than 0'),
 
-  // Use z.number() directly without error options
   incomeTax: z
     .number()
     .min(0, 'Income tax cannot be negative')
@@ -42,7 +41,6 @@ export const formSchema = z.object({
       `Income tax must be between ${investmentValidationRules.MIN_INCOME_TAX} and ${investmentValidationRules.MAX_INCOME_TAX}`
     ),
 
-  // Use z.number() directly without error options
   interestRate: z
     .number()
     .min(investmentValidationRules.MIN_INTEREST_RATE)
@@ -51,7 +49,6 @@ export const formSchema = z.object({
       `Interest rate must be between ${investmentValidationRules.MIN_INTEREST_RATE} and ${investmentValidationRules.MAX_INTEREST_RATE}%`
     ),
 
-  // Use z.date() directly without error options
   expirationDate: z.date().refine((date) => date > new Date(), {
     message: 'Expiration date must be in the future',
   }),
@@ -60,8 +57,6 @@ export const formSchema = z.object({
 // Form type derived from the schema
 export type CreateInvestmentFormValues = z.infer<typeof formSchema>;
 
-// Export Prisma types for convenience
-// export { ExpirationStatus, type Investment } from '@prisma/client';
-export type { Investment }; // Re-export the type we imported above
-export { ExpirationStatus } 
-
+// Re-export Prisma types for convenience
+export type { Investment };
+export { ExpirationStatus };
