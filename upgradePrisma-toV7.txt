@@ -1,0 +1,258 @@
+ORMMoreUpgrade guidesUpgrading versions
+Upgrade to Prisma ORM 7
+Prisma ORM v7 introduces breaking changes when you upgrade from an earlier Prisma ORM version. This guide explains how this upgrade might affect your application and gives instructions on how to handle any changes.
+
+Questions answered in this page
+For developers using AI Agents, we have a migration prompt that you can add to your project for automatic migrations.
+
+info
+If you are using MongoDB, please note that Prisma ORM v7 does not yet support MongoDB. You should continue using Prisma ORM v6 for now. Support for MongoDB is coming soon in v7.
+
+Upgrade the prisma and @prisma/client packages to v7
+To upgrade to Prisma ORM v7 from an earlier version, you need to update both the prisma and @prisma/client packages:
+
+npm
+yarn
+pnpm
+bun
+npm install @prisma/client@7
+npm install -D prisma@7
+
+danger
+Before you upgrade, check each breaking change below to see how the upgrade might affect your application.
+
+Breaking changes
+This section gives an overview of breaking changes in Prisma ORM v7.
+
+Minimum supported Node.js & TypeScript versions
+Minimum Version	Recommended
+Node	20.19.0	22.x
+TypeScript	5.4.0	5.9.x
+ESM support
+Prisma ORM now ships as an ES module, the module format supported in Bun, Deno, and Node. Set the type field in your package.json to module
+
+{
+  "type": "module",
+  "scripts": {...},
+}
+
+If you are using TypeScript, you need to configure your tsconfig.json to be able to consume ES modules
+
+{
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "target": "ES2023",
+    "strict": true,
+    "esModuleInterop": true
+  }
+}
+
+Prisma schema changes
+The older prisma-client-js provider will be removed in future releases of Prisma ORM. Upgrade to the new prisma-client provider which uses the new Rust-free client. This will give you faster queries, smaller bundle size, and require less system resources when deployed to your server.
+
+Additionally, the output field is now required in the generator block. Prisma Client will no longer be generated in node_modules by default. You must specify a custom output path.
+
+Before
+generator client {
+  provider = "prisma-client-js"
+  engineType = "binary"
+}
+
+After
+generator client {
+  provider = "prisma-client"
+  output   = "./generated/prisma"
+}
+
+After running npx prisma generate, you'll need to update your imports to use the new generated path:
+
+// Before
+import { PrismaClient } from '@prisma/client'
+
+// After
+import { PrismaClient } from './generated/prisma/client'
+
+note
+The import path depends on where you place your generated client. Adjust the path based on your output configuration and the location of the file you're importing from.
+
+Additionally other fields such as url, directUrl, and shadowDatabaseUrl in the datasource block are deprecated. You can configure them in the Prisma Config.
+
+If you were previously using directUrl to run migrations then you need to pass the directUrl value in the url field of prisma.config.ts instead as the connection string defined in url is used by Prisma CLI for migrations.
+
+import 'dotenv/config'
+import { defineConfig, env } from 'prisma/config'
+
+export default defineConfig({
+  datasource: {
+    url: env('DATABASE_URL'),
+    shadowDatabaseUrl: env('SHADOW_DATABASE_URL')
+  },
+})
+
+Driver adapters and client instantiation
+The way to create a new Prisma Client has changed to require a driver adapter for all databases. This change aligns with the move to make the main Prisma Client as lean and open as possible. For instance, if you are using Prisma Postgres, you now need the @prisma/adapter-pg adapter. This also means the signature for creating a new Prisma Client has changed slightly:
+
+Before
+import { PrismaClient } from '@prisma/client';
+const prisma = new PrismaClient({
+  datasources: {
+    db: { url: process.env.DATABASE_URL },
+  },
+  datasourceUrl: process.env.DATABASE_URL,
+});
+
+After
+import { PrismaClient } from './generated/prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
+
+const adapter = new PrismaPg({ 
+  connectionString: process.env.DATABASE_URL 
+});
+const prisma = new PrismaClient({ adapter });
+
+If you are using SQLite, you can use the @prisma/adapter-better-sqlite3:
+
+import { PrismaClient } from './generated/prisma/client';
+import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3';
+
+const adapter = new PrismaBetterSqlite3({
+  url: process.env.DATABASE_URL || 'file:./dev.db'
+})
+
+export const prisma = new PrismaClient({ adapter })
+
+Prisma Accelerate users upgrading from v6
+If you used Prisma Accelerate (including Prisma Postgres' prisma+postgres:// URLs) in v6, keep using the Accelerate URL with the Accelerate extension. Do not pass the Accelerate URL to a driver adapter—PrismaPg expects a direct database connection string and will fail with prisma:// or prisma+postgres://.
+
+Keep your Accelerate URL in .env (for example DATABASE_URL="prisma://..." or prisma+postgres://...).
+You can point prisma.config.ts directly to that same Accelerate URL for CLI operations:
+prisma.config.ts
+import 'dotenv/config'
+import { defineConfig, env } from 'prisma/config'
+
+export default defineConfig({
+  schema: 'prisma/schema.prisma',
+  datasource: {
+    url: env('DATABASE_URL'),
+  },
+})
+
+If you prefer a separate direct URL for migrations, you can still use DIRECT_DATABASE_URL as above—but it's optional for Accelerate users.
+Instantiate Prisma Client with the Accelerate URL and extension (no adapter):
+import { PrismaClient } from './generated/prisma/client'
+import { withAccelerate } from '@prisma/extension-accelerate'
+
+export const prisma = new PrismaClient({
+  accelerateUrl: process.env.DATABASE_URL,
+}).$extends(withAccelerate())
+
+If you later switch away from Accelerate to direct TCP, provide the direct URL to the appropriate driver adapter (for example PrismaPg) instead of accelerateUrl.
+
+Explicit loading of environment variables
+In Prisma ORM 7.0.0, environment variables are not loaded by default. Instead developers need to explicitly load the variables when calling the prisma CLI. Libraries like 
+dotenv
+ can be used to manage loading environment variables by reading the appropriate .env file.
+
+npm
+yarn
+pnpm
+npm install dotenv
+
+For bun users, no action is required as bun will automatically load .env files.
+
+Prisma config is now used to configure the Prisma CLI
+Prisma Config is now the default place for configuring how the Prisma CLI interacts with your database. You now configure your database URL, schema location, migration output, and custom seed scripts.
+
+info
+The prisma.config.ts file should be placed at the root of your project (where your package.json is located).
+
+import 'dotenv/config'
+import { defineConfig, env } from 'prisma/config'
+
+export default defineConfig({
+  // the main entry for your schema
+  schema: 'prisma/schema.prisma',
+  // where migrations should be generated
+  // what script to run for "prisma db seed"
+  migrations: {
+    path: 'prisma/migrations',
+    seed: 'tsx prisma/seed.ts',
+  },
+  // The database URL 
+  datasource: {
+    // Type Safe env() helper 
+    // Does not replace the need for dotenv
+    url: env('DATABASE_URL'),
+  },
+})
+
+Metrics has been removed from the Client extensions
+The Metrics preview feature was deprecated in Prisma ORM 6.14.0 and has been removed for Prisma ORM 7.0.0. If you need this feature, you can use the underlying driver adapter for your database, or Client Extensions to make this information available.
+
+For example, a basic totalQueries counter:
+
+const total = 0
+const prisma = new PrismaClient().$extends({
+  client: {
+    $log: (s: string) => console.log(s),
+    async $totalQueries() { return total; },
+  },
+  query: {
+      $allModels: {
+        async $allOperations({ query, args }) {
+          total += 1;
+          return query(args);
+        },
+      },
+    },
+})
+
+async function main() {
+  prisma.$log('Hello world')
+  const totalQueries = await prisma.$totalQueries()
+  console.log(totalQueries)
+}
+
+Client middleware has been removed
+The client middleware API has been removed. If possible, use Client Extensions.
+
+// ❌ Old (removed)
+prisma.$use(async (params, next) => {
+  // middleware logic
+  return next(params)
+})
+// ✅ New (use extensions)
+const prisma = new PrismaClient().$extends({
+  query: {
+    user: {
+      async findMany({ args, query }) {
+        // extension logic
+        return query(args)
+      }
+    }
+  }
+})
+
+Automatic seeding during migrations has been removed
+In Prisma ORM v6 and earlier, running prisma migrate dev or prisma migrate reset would automatically execute your seed script after applying migrations. This automatic seeding behavior has been removed in Prisma ORM v7.
+
+To seed your database in v7, you must explicitly run:
+
+npx prisma db seed
+
+Various environment variables have been removed
+We've removed a small selection of Prisma-specific environment variables.
+
+PRISMA_CLI_QUERY_ENGINE_TYPE
+PRISMA_CLIENT_ENGINE_TYPE
+PRISMA_QUERY_ENGINE_BINARY
+PRISMA_QUERY_ENGINE_LIBRARY
+PRISMA_GENERATE_SKIP_AUTOINSTALL
+PRISMA_SKIP_POSTINSTALL_GENERATE
+PRISMA_GENERATE_IN_POSTINSTALL
+PRISMA_GENERATE_DATAPROXY
+PRISMA_GENERATE_NO_ENGINE
+PRISMA_CLIENT_NO_RETRY
+PRISMA_MIGRATE_SKIP_GENERATE
+PRISMA_MIGRATE_SKIP_SEED

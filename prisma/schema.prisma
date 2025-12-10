@@ -2,12 +2,16 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  // 1. Updated provider for Prisma ORM v7 (Rust-free client)
+  provider = "prisma-client"
+  // 2. Output path is now mandatory in Prisma 7
+  output   = "./generated/prisma" 
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  // 3. The 'url' property has been removed from the schema.
+  // The connection string must now be configured in prisma.config.ts
 }
 
 model User {
@@ -33,6 +37,7 @@ model Investment {
   expirationDate   DateTime
   expirationStatus ExpirationStatus
   userId           String
+  // Ensuring the relation is correct, referencing Clerk ID on User model
   user             User             @relation(fields: [userId], references: [clerkUserId], onDelete: Cascade)
   createdAt        DateTime         @default(now()) @map("created_at")
   updatedAt        DateTime         @updatedAt @map("updated_at")
@@ -47,6 +52,15 @@ enum ExpirationStatus {
   EXPIRING_IN_A_MONTH
   EXPIRED
 }
+
+// NOTE: I've kept the original InvestmentType enum for now, 
+// but if you are using this enum to type the field above, 
+// you may have a conflict since both the field and the enum 
+// are named `InvestmentType` in the original schema (if it was used).
+// If the enum below is what defines the type, the model field 
+// must refer to it correctly (which it currently does not in the original model).
+// I assume the InvestmentType field should be defined as:
+// investmentType   InvestmentType // <-- If you want to use the enum below
 
 enum InvestmentType {
   deposit
