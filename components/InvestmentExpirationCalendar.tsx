@@ -19,6 +19,23 @@ interface InvestmentExpirationCalendarProps {
   investments: Investment[];
 }
 
+// 1. Helper for stable date keys (YYYY-MM-DD) avoids locale issues
+const getDateKey = (date: Date | string) => {
+  const d = new Date(date);
+  return d.toISOString().split('T')[0];
+};
+
+type InvestmentStatus = 'expired' | 'urgent' | 'soon' | 'active';
+
+// 2. Helper to determine the "worst" status for a group of investments
+// Priority: Expired > Urgent (7d) > Soon (30d) > Active
+const getHighestPriorityStatus = (invs: any[]): InvestmentStatus => {
+  if (invs.some((i) => i.isExpired)) return 'expired';
+  if (invs.some((i) => i.isExpiringIn7Days)) return 'urgent';
+  if (invs.some((i) => i.isExpiringIn30Days)) return 'soon';
+  return 'active';
+};
+
 export function InvestmentExpirationCalendar({
   investments,
 }: InvestmentExpirationCalendarProps) {
@@ -26,77 +43,117 @@ export function InvestmentExpirationCalendar({
   const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(
     today
   );
+  const [month, setMonth] = React.useState<Date>(today);
 
-  // Get all investments with expiration status
-  const allInvestmentsWithStatus = React.useMemo(() => {
-    return investments.map((inv) => {
+  // 3. Consolidated Data Processing
+  // We process everything in one pass for efficiency and readability.
+  const { expirationMap, viewStats, expiringCount } = React.useMemo(() => {
+    const map = new Map<string, any[]>();
+    let count = 0;
+
+    const enrichedInvestments = investments.map((inv) => {
       const days = calculateDaysUntilExpiration(inv.expirationDate);
+
+      // Count total expiring soon (1-30 days) globally
+      if (days > 0 && days <= 30) count++;
+
       return {
         ...inv,
         daysUntilExpiration: days,
         isExpired: days <= 0,
         isExpiringIn7Days: days > 0 && days <= 7,
         isExpiringIn30Days: days > 7 && days <= 30,
+        isActive: days > 30,
       };
     });
-  }, [investments]);
 
-  // Get investments expiring within 30 days for calendar view
-  const expiringInvestments = React.useMemo(() => {
-    return allInvestmentsWithStatus.filter((inv) => {
-      return inv.daysUntilExpiration > 0 && inv.daysUntilExpiration <= 30;
+    enrichedInvestments.forEach((inv) => {
+      const key = getDateKey(inv.expirationDate);
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(inv);
     });
-  }, [allInvestmentsWithStatus]);
 
-  // Get expired investments
-  const expiredInvestments = React.useMemo(() => {
-    return allInvestmentsWithStatus.filter((inv) => inv.isExpired);
-  }, [allInvestmentsWithStatus]);
+    // Calculate view-specific stats based on the current 'month' state
+    const currentMonthKey = `${month.getFullYear()}-${month.getMonth()}`;
+    const stats = {
+      hasExpired: false,
+      hasUrgent: false,
+      hasSoon: false,
+      hasActive: false,
+    };
 
-  // Create a map of dates with all investments (expiring and expired)
-  const expirationMap = React.useMemo(() => {
-    const map = new Map<string, Investment[]>();
-
-    // Add expiring investments
-    expiringInvestments.forEach((inv) => {
-      const dateKey = new Date(inv.expirationDate).toLocaleDateString();
-      if (!map.has(dateKey)) {
-        map.set(dateKey, []);
+    enrichedInvestments.forEach((inv) => {
+      const invDate = new Date(inv.expirationDate);
+      if (
+        invDate.getMonth() === month.getMonth() &&
+        invDate.getFullYear() === month.getFullYear()
+      ) {
+        if (inv.isExpired) stats.hasExpired = true;
+        if (inv.isExpiringIn7Days) stats.hasUrgent = true;
+        if (inv.isExpiringIn30Days) stats.hasSoon = true;
+        if (inv.isActive) stats.hasActive = true;
       }
-      map.get(dateKey)!.push(inv);
     });
 
-    // Add expired investments
-    expiredInvestments.forEach((inv) => {
-      const dateKey = new Date(inv.expirationDate).toLocaleDateString();
-      if (!map.has(dateKey)) {
-        map.set(dateKey, []);
-      }
-      map.get(dateKey)!.push(inv);
-    });
+    return { expirationMap: map, viewStats: stats, expiringCount: count };
+  }, [investments, month]);
 
-    return map;
-  }, [expiringInvestments, expiredInvestments]);
-
-  // Check what types of expirations we have
-  const hasExpired = React.useMemo(() => {
-    return expiredInvestments.length > 0;
-  }, [expiredInvestments]);
-
-  const isExpiringIn7Days = React.useMemo(() => {
-    return allInvestmentsWithStatus.some((inv) => inv.isExpiringIn7Days);
-  }, [allInvestmentsWithStatus]);
-
-  const isExpiringIn30Days = React.useMemo(() => {
-    return allInvestmentsWithStatus.some((inv) => inv.isExpiringIn30Days);
-  }, [allInvestmentsWithStatus]);
-
-  // Get investments for selected date
   const selectedDateInvestments = React.useMemo(() => {
     if (!selectedDate) return [];
-    const dateKey = selectedDate.toLocaleDateString();
-    return expirationMap.get(dateKey) || [];
+    return expirationMap.get(getDateKey(selectedDate)) || [];
   }, [selectedDate, expirationMap]);
+
+  // 4. Critical Fix: Memoize the components object
+  // This prevents the DayButton from being re-created (unmounted/remounted) on every render.
+  const calendarComponents = React.useMemo(
+    () => ({
+      DayButton: ({ day, ...props }: any) => {
+        const dateKey = getDateKey(day.date);
+        const investmentsOnDay = expirationMap.get(dateKey);
+        const hasInvestments = !!investmentsOnDay?.length;
+
+        let status: InvestmentStatus | null = null;
+        if (hasInvestments) {
+          status = getHighestPriorityStatus(investmentsOnDay);
+        }
+
+        const isSelected =
+          selectedDate && getDateKey(day.date) === getDateKey(selectedDate);
+
+        return (
+          <button
+            {...props}
+            className={cn(
+              props.className,
+              'relative w-full h-full flex items-center justify-center rounded-md transition-all duration-150',
+              isSelected && 'bg-teal-600/30 text-white shadow-md scale-105',
+              !isSelected && 'hover:bg-blue-50 dark:hover:bg-blue-900/30',
+              hasInvestments && 'font-bold'
+            )}
+            title={
+              hasInvestments
+                ? `${investmentsOnDay.length} investment(s) on this day`
+                : undefined
+            }
+          >
+            <span
+              className={cn(
+                'relative text-xs sm:text-sm z-10 pb-1 font-bold',
+                hasInvestments && 'custom-underline',
+                status === 'expired' && 'text-red-600',
+                status === 'urgent' && 'text-yellow-600',
+                status === 'soon' && 'text-green-600',
+                status === 'active' && 'text-blue-600'
+              )}
+            >
+              {day.date.getDate()}
+            </span>
+          </button>
+        );
+      },
+    }),
+    [expirationMap, selectedDate]
+  );
 
   return (
     <Card className='h-full flex flex-col'>
@@ -106,156 +163,40 @@ export function InvestmentExpirationCalendar({
           <CalendarDays className='h-6 w-6 text-blue-500' />
         </CardTitle>
         <CardDescription className='lg:text-base'>
-          {expiringInvestments.length} investment(s) expiring in the next 30
-          days
+          {expiringCount} investment(s) expiring in the next 30 days
         </CardDescription>
       </CardHeader>
       <CardContent className='flex-1 flex flex-col p-4 pb-6 gap-4'>
-        {/* Calendar - Fixed container to prevent shifting */}
         <div className='flex-shrink-0 flex justify-center'>
           <Calendar
             mode='single'
             selected={selectedDate}
             onSelect={setSelectedDate}
-            defaultMonth={today}
-            className='rounded-lg  [--cell-size:3.5rem] sm:[--cell-size:2.25rem] md:[--cell-size:2.5rem] lg:[--cell-size:3.25rem]'
-            modifiers={{
-              expiringIn7Days: (day) => {
-                const dateKey = day.toLocaleDateString();
-                const investmentsOnDay = expirationMap.get(dateKey);
-                if (!investmentsOnDay) return false;
-                return investmentsOnDay.some((inv) => {
-                  const days = calculateDaysUntilExpiration(inv.expirationDate);
-                  return days > 0 && days <= 7;
-                });
-              },
-              expiringIn30Days: (day) => {
-                const dateKey = day.toLocaleDateString();
-                const investmentsOnDay = expirationMap.get(dateKey);
-                if (!investmentsOnDay) return false;
-                return investmentsOnDay.some((inv) => {
-                  const days = calculateDaysUntilExpiration(inv.expirationDate);
-                  return days > 7 && days <= 30;
-                });
-              },
-            }}
-            modifiersClassNames={{
-              expiringIn7Days: 'relative',
-              expiringIn30Days: 'relative',
-            }}
-            components={{
-              DayButton: ({ day, modifiers, ...props }) => {
-                const dateKey = day.date.toLocaleDateString();
-                const investmentsOnDay = expirationMap.get(dateKey);
-                const hasInvestments =
-                  !!investmentsOnDay && investmentsOnDay.length > 0;
-
-                let daysUntil = null;
-                let expirationCategory = '';
-
-                if (investmentsOnDay) {
-                  daysUntil = calculateDaysUntilExpiration(
-                    investmentsOnDay[0].expirationDate
-                  );
-                  if (daysUntil <= 0) {
-                    expirationCategory = 'expired';
-                  } else if (daysUntil > 0 && daysUntil <= 7) {
-                    expirationCategory = 'urgent';
-                  } else if (daysUntil > 7 && daysUntil <= 30) {
-                    expirationCategory = 'soon';
-                  }
-                }
-
-                const isSelected =
-                  selectedDate &&
-                  day.date.toLocaleDateString() ===
-                    selectedDate.toLocaleDateString();
-
-                return (
-                  <button
-                    {...props}
-                    className={cn(
-                      props.className,
-                      'relative w-full h-full flex items-center justify-center rounded-md transition-all duration-150',
-                      isSelected &&
-                        'bg-teal-600/30 text-white shadow-md scale-105',
-                      !isSelected &&
-                        'hover:bg-blue-50 dark:hover:bg-blue-900/30',
-                      hasInvestments && 'font-bold'
-                    )}
-                    title={
-                      investmentsOnDay
-                        ? `${investmentsOnDay.length} investment(s) expiring`
-                        : undefined
-                    }
-                  >
-                    <span
-                      className={cn(
-                        'relative text-xs sm:text-sm z-10 pb-1 font-bold',
-                        hasInvestments && 'custom-underline',
-                        expirationCategory === 'expired' && 'text-red-600',
-                        expirationCategory === 'urgent' && 'text-yellow-600',
-                        expirationCategory === 'soon' && 'text-green-600',
-                        hasInvestments && !expirationCategory && 'text-blue-600'
-                      )}
-                    >
-                      {day.date.getDate()}
-                    </span>
-                  </button>
-                );
-              },
-            }}
+            month={month}
+            onMonthChange={setMonth}
+            className='rounded-lg [--cell-size:3.5rem] sm:[--cell-size:2.25rem] md:[--cell-size:2.5rem] lg:[--cell-size:3.25rem]'
+            // Since we handle styling in DayButton, we don't need complex modifiers for logic anymore
+            components={calendarComponents}
           />
         </div>
 
-        {/* Legend - Fixed position */}
+        {/* Legend */}
         <div className='flex-shrink-0 mx-auto mt-2 flex justify-center flex-wrap gap-y-0'>
-          {hasExpired && (
-            <Item variant='default' size='xs'>
-              <ItemMedia>
-                <div
-                  className='h-3 w-3 rounded-full'
-                  style={{ backgroundColor: '#ef4444' }}
-                />
-              </ItemMedia>
-              <ItemContent>
-                <ItemTitle className='text-xs lg:text-sm'>Expired</ItemTitle>
-              </ItemContent>
-            </Item>
+          {viewStats.hasExpired && (
+            <LegendItem color='#ef4444' label='Expired' />
           )}
-          {isExpiringIn7Days && (
-            <Item variant='default' size='xs'>
-              <ItemMedia>
-                <div
-                  className='h-3 w-3 rounded-full'
-                  style={{ backgroundColor: '#eab308' }}
-                />
-              </ItemMedia>
-              <ItemContent>
-                <ItemTitle className='text-xs lg:text-sm'>
-                  Expires in {'<'} 7 Days
-                </ItemTitle>
-              </ItemContent>
-            </Item>
+          {viewStats.hasUrgent && (
+            <LegendItem color='#eab308' label='Expires in 1-7 Days' />
           )}
-          {isExpiringIn30Days && (
-            <Item variant='default' size='xs'>
-              <ItemMedia>
-                <div
-                  className='h-3 w-3 rounded-full'
-                  style={{ backgroundColor: '#16a34a' }}
-                />
-              </ItemMedia>
-              <ItemContent>
-                <ItemTitle className='text-xs lg:text-sm'>
-                  Expires in {'<'} 30 Days
-                </ItemTitle>
-              </ItemContent>
-            </Item>
+          {viewStats.hasSoon && (
+            <LegendItem color='#16a34a' label='Expires in 8-30 Days' />
+          )}
+          {viewStats.hasActive && (
+            <LegendItem color='#2563eb' label='Expiring in > 30 Days' />
           )}
         </div>
 
-        {/* Selected date details - Container always exists but content conditionally rendered */}
+        {/* Selected date details */}
         <div className='flex-shrink-0 min-h-[90px]'>
           {selectedDateInvestments.length > 0 && (
             <div className='pt-4 border-t border-gray-200 dark:border-gray-800'>
@@ -280,5 +221,22 @@ export function InvestmentExpirationCalendar({
         </div>
       </CardContent>
     </Card>
+  );
+}
+
+// Small sub-component to clean up the JSX
+function LegendItem({ color, label }: { color: string; label: string }) {
+  return (
+    <Item variant='default' size='xs'>
+      <ItemMedia>
+        <div
+          className='h-3 w-3 rounded-full'
+          style={{ backgroundColor: color }}
+        />
+      </ItemMedia>
+      <ItemContent>
+        <ItemTitle className='text-xs lg:text-sm'>{label}</ItemTitle>
+      </ItemContent>
+    </Item>
   );
 }

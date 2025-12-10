@@ -246,6 +246,7 @@ export async function updateInvestmentAction(formData: FormData) {
     const expirationDate = new Date(formData.get('expirationDate') as string);
     const currency = formData.get('currency') as string;
     const investmentType = formData.get('investmentType') as string;
+    const relatedData = formData.get('relatedData') as string;
 
     // Server-side validation
     if (!organisationName || organisationName.trim().length < 2) {
@@ -287,6 +288,7 @@ export async function updateInvestmentAction(formData: FormData) {
         expirationDate,
         currency,
         investmentType,
+        relatedData,
         updatedAt: new Date(),
       },
     });

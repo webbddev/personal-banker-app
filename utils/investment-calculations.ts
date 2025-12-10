@@ -164,7 +164,7 @@ export function getInvestmentsExpiringIn30Days(
 ): FinancialInstrument[] {
   return investments.filter((inv) => {
     const days = calculateDaysUntilExpiration(inv.expirationDate);
-    return days > 0 && days <= 30;
+    return days > 7 && days <= 30;
   });
 }
 
