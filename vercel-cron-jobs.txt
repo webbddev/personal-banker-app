@@ -1,85 +1,1405 @@
-(111) How to set up Cron Jobs on Vercel - NextJS - YouTube
-https://www.youtube.com/watch?v=uMNoCJSGtrY
+Configuring projects with vercel.json
+Last updated November 14, 2025
+The vercel.json file lets you configure, and override the default behavior of Vercel from within your project.
 
-Transcript:
-(00:00) [Music] Hello everyone and welcome to a new video. So in this video I'm going to be showing you how to run a chrome job using Versel Nex.js. Okay, there's like a few tricks that I want to show you because I encountered some problems when I was trying to do it myself. So I hope that you don't get into the same issues and I don't want you to get into the same issues and that's why I'm doing this video. So I'll show you.
-(00:28) So let's dive right into this and I have started uh programming with um well in this case you can see this is cursor and yeah so I already have my project and I'll just run it so that you can see I'm going to run the project and then we'll take it from there. Let me show you. Right. So, it's just like a social media scheduler. And if you go uh Okay.
-(01:04) So, it's just running, right? So, what what I want to show you is I already have like a chron job, but I want to show you uh how to set up a chron job from scratch. Okay. Okay. So, the first thing that you want to do is you want to create like a chrome job folder. Okay. So, this is I just called the chron and that's the name of the folder.
-(01:19) And inside of that folder, I have another folder which has the chron job. Okay. So you don't have to do it this way. I think uh you know in my case I think it's good if you do it that way just because uh you know you have like a like you know what it refers to because it says Chrome, right? So yeah. So you can do it here.
-(01:41) I'm just going to create a folder inside of a folder. Okay. And I'm going to call it test crown or something like that. Okay. Just test I guess. And inside of this one, I'll just create like a route.ts. And that would be our uh our route. Okay. All right. Next thing is we'll just import some of the things that we we do we do need.
-(02:08) So like this one and then also we need the request. So next request and like that. Okay. So we have those two and now we just need like a simple uh you know function here. So it just be like a get and it's going to be a sync. Okay. And then we have request and this will be of the type of and next request.
-(02:43) And since I'm using TypeScript, I need to I need to show that's like of a type next request. And what I'm going to be doing is I'm just going to console log here like something that you'll see in Versell once we deploy. So say hello from hello world amocron. Okay. So now we have the console log and then we just do the return and then this is going to be a next re response and the JSON have let's do this here message um just message and then say hello world something like that okay and then the status We'll say like give us like a 200 if
-(03:40) this is working. Um, okay. So, I think I have an extra. Yep. Just like that. And I forgot one here. All right. And I think that's pretty much it. So, just add this here. And then that's it. So, now we have our crown job. Right. So basically uh here we're just well this is a mistake here. Okay. Yeah.
-(04:12) So that was an import that we didn't need. So basically we have like um you know next response next request and now we're just setting our chrome job which we're just going to console log hello world. Chrome job is working and the return is going to be like a hello world message with a status of 200. Okay.
-(04:30) And this is like a get request. Okay. So we have our route. It's in chrome test route. Okay. So now what we want to do is we want to trigger the chrome job. So how do we do that? Okay. So now that we have our route, the next thing is to set our chron job to work on versel once we deploy it. Okay. So you want to create like a versel.
-(04:55) json at the same level as the package.json. That's where you want to create it. And you can see here I have versel.json. So if I open that one then we have this which yeah let me make it bigger. Yeah. So I already have all of this and sorry I keep typing that but yeah so versela JSON. So this is the file.
-(05:16) Okay and here I already have like a chrome job which is why I have all of this but I'm just going to remove this and I'm going to show you how to set it from scratch. Right. So you create the versel the JSON and then we'll just follow the and all of this documentation I can show you that some versels overl managing chrome jobs and I'll show you something here.
-(05:39) Yeah. So here you uh you cannot see yet but yeah here we have like the chrome jobs and this is like how to do it for the app for the pages other frameworks and then it tells you that you need to create um our celljson and it's here it says that you need to create it and then it has to have this um has to have this uh uh you know this syntax and this is how it has to look. Okay. All right.
-(06:08) So I'm just going to maybe copy this and then replace it. And this is once again in versel docs chron jobs. Okay. So let's just replace it. And I I just have one chrome job. So I'm just going to remove this one. I'm going to remove that one. And basically here we have the chrome jobs.
-(06:28) We're setting up the chrome jobs. And in path we want the path to the chrome job. So we have it at API chrome test. So we'll change that. and we'll do API chron test. Okay. And then once we have the path then we have to set up an schedule. So when do we want the chron job to run like every uh what amount of time right so in this case this is like every five hours.
-(06:55) Okay just go to chat gpd just be like crunch job every two minutes and then you can just copy this expression and then just go back and paste it. Okay. And here you can see that the first one refers to um let me see if I can open this one. Yeah. So first one refers to the minute from 0 to 59. Second one the hour from 0 to 23.
-(07:16) And then you have day of the month, month of uh the month from 1 to 12 and day of the week. Okay. And then here it's an explanation. Okay. But this is the schedule. Okay. So let's just go to or you can use this tool that I found. So here you can say like I want a crown job every 3 minutes right and click enter and then it give you it will give you this and then you can just go back paste it here and then this is going to run every 3 minutes. Okay.
-(07:51) And let's test this. Okay. All right. And let me put every two minutes because I want to show you something. And is it giving me a problem here? Let's see. No, I think it's good. It is good. Yeah. Yeah, I think it's good. Okay. All right. So, next thing that we want to do, uh, we can just deploy this. So, I'm just going to deploy this on Versel and then you'll see that all the changes have been done. Okay.
-(08:23) So, let me go here. I'll just do the G add get commit. I'll just commit this. I'll just say chrome test and get get push and then we'll see if it runs or not. Okay. So then how can we uh see if the chrome job has been scheduled on Versel? So if we did all of this correctly, if we have our route and if we set up our Versel.
-(08:51) json correctly, then we can just go to Verscell. So let's go to Verscell. go to your project and then go to settings and here you can go to crown jobs. Okay, but let me see if it has finished. So it's still uh building. So let's just give it a second and then I'll show you. Okay. All right. So meanwhile, uh let's see, let me refresh. Okay, it's done.
-(09:17) So it's been uh pushed to production 45 seconds ago. And now let's go to settings. Let's go to chron jobs. And you can also see them in logs, but I'll just go to chron jobs. And as you can see, I already have here a chrome job. And I removed the one that I had. So here it's the chron job, right? And you can see and you can run it if you wanted to uh manually from here or you can just go and view logs.
-(09:48) And this is supposed to run every two minutes. Okay, every two minutes. So let me refresh. And you can see that it hasn't run so far. Okay. So, let's just wait for two minutes and I'll be back. It's 1120. Yeah. So, 11:22 or 23. I'll come back just to make sure that the chrome job is running. Okay. And I'll I'll let you know something. It's not going to run.
-(10:10) But let's just uh let's just show you. Okay. Okay. So, if you see that your Chrome job is not running, it's because of the following. And I'll show you. And I did this purposely because I wanted to show you uh how to fix it. Okay. So if you just deploy this, this is not going to work. This is not going to cut it.
-(10:28) So I'll show you why. So here you can see that's working. But it's because I added something behind the scenes. But since then it hasn't um hasn't worked again. See? So this is not working because you don't have the message. And this was at 11:32. It's already 11:33. We should wait until 11:34, but it's not going to work. Okay.
-(10:49) and see it's 11:30 uh 34 and it's not working. Okay. So basically what you have to do is you want to go here and what you need to add is the following. So you need to come here and add export const uh revalidate equal to zero like that. Okay. So you want to add this line and what does this line do? So basically this line tells uh Verscell.
-(11:20) So if you don't have that line uh Verscell is just gonna cache your route. Okay. So it's just going to cach your route and then the crown job won't run each time. But if you tell Verscell you know this export comes revalidate equal to zero. This invokes the function uh fresh.
-(11:39) So then the crown job is going to run each time. So this is just like a caching thing with Verscell. So if you don't have that line, Verscell is going to cach that route and your chron job won't run ever. But if you have this revalidate equal to zero, then it's going to tell vers always start fresh. Always call this route fresh. Okay? And then that's what's going to fix it.
-(12:01) So if we go I haven't committed this change and just to keep showing you here. So if we uh refresh, you see that the crown job hasn't run. Last time that it ran was 11:32 and that's when I had it because I added it just to test it. But see since then it hasn't run and it's been already like two minutes 3 minutes right so it's not going to work.
-(12:26) So let me come here and let me just deploy this and then you'll see that it will start working again. So force dynamics uh get push and then we'll go and check here once again. So let me So it's still building. So let's just wait and then we'll see that it keeps running every two minutes. Okay. And I might come back at 11:40 something just so that I can show you that it's running and working properly.
-(12:54) Okay. All right. So since we're still waiting uh the next thing that I wanted to show you is the usage and pricing for the chron jobs. So maybe if you have like a hobby plan and you see that your chrome job is not running even after you know doing all of the things correctly then you'll see that it's because of the pricing and the usage.
-(13:15) So if you have like a hobby plan then you'll get like two crown jobs per month or per account as it says and it trigger once a day. Okay, I have the pro. So that's why I I have like 40 crown jobs and it's unlimited crown invocations. So I can call them, you know, at specific times and stuff like that. And enterprise has like a 100 crown jobs.
-(13:37) Okay? So if your thing is not working, if your crown job is not working, then maybe you have to update your plan. But first try all of the things that I've showed you and then see if it doesn't work. Okay. Okay. It's it's already 11:40. So by this time the chrome job had to run twice already. Okay. So let's go here. Let's refresh. Okay.
-(13:59) We're just waiting for another one because it's 11. Okay. Let's just wait a few seconds and then you'll see that the crown job is going to run once again. But it's working. You can see that 11:38 it just run. So if we give it two minutes, you'll see that it will run again. Let's just wait. Okay. 11:40. Almost there. Almost there.
-(14:33) Not yet. Hasn't hit the 11 40 and 38 seconds yet. Okay. See, it run once again. Okay. So, and you can see the timing. 1138 38 11:40 38 Okay, so it's super exact. That's why. And then here it's going to run once again at 1142 and 38 seconds. Okay, so that's pretty much it for this tutorial.
-(15:02) If you want to learn more about Chrome jobs, just visit the versel.com docs and here you can learn more about the chrome jobs. And just to recap, just create like a route. Just create like your Chrome folder. And yeah, you can put it inside of a this is just like a test one. And don't forget this line because this is the line that's going to tell Verscell to actually fetch the route fresh. Okay.
-(15:25) And Versel.json. This sets up the chrome job on Versell once you deployed. So this is super important. Okay. And that's it for this tutorial. I I hope that you've learned something and uh yeah, if you like this video, just you know, leave a comment, ask your questions, uh subscribe to the channel, share it with other people, and that would be that would be all.
-(15:48) But um thank you. Thank you for watching these videos. Don't forget to subscribe to the channel and I'll see you on the next one. Okay, there we go. Thank you. Bye. [Music]
+This file should be created in your project's root directory and allows you to set:
 
-How to Setup Cron Jobs on Vercel
-Learn how to setup and use cron jobs on Vercel
+schema autocomplete
+buildCommand
+bunVersion
+cleanUrls
+crons
+devCommand
+fluid
+framework
+functions
+headers
+ignoreCommand
+images
+installCommand
+outputDirectory
+public
+redirects
+bulkRedirectsPath
+regions
+functionFailoverRegions
+rewrites
+trailingSlash
+Schema autocomplete
+To add autocompletion, type checking, and schema validation to your vercel.json file, add the following to the top of your file:
 
- Rich Haines
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json"
+}
+buildCommand
+Type: string | null
 
-Knowledge Base/Backend
-2 min read
-Copy page
-Ask AI about this page
-Last updated November 10, 2025
-Cron jobs are time-based scheduling tools used to automate repetitive tasks. By using a specific syntax called a cron expression, you can define the frequency and timing of each task. This helps improve efficiency and ensures that important processes are performed consistently.
-Vercel supports cron jobs for Serverless and Edge Functions. This guide will show you how to create your first cron job. Alternatively, you can start from a template.
-Create a cron job
-The following steps will demonstrate how to create a cron job on Vercel that executes every day at 5 am UTC.
-Create a function
-First, create a Serverless or Edge Function for your project. The function will be called every time the cron job is triggered.
-Create or update your vercel.json file
-Go to your vercel.json file and add the following code:
+The buildCommand property can be used to override the Build Command in the Project Settings dashboard, and the build script from the package.json file for a given deployment. For more information on the default behavior of the Build Command, visit the Configure a Build - Build Command section.
+
 vercel.json
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "next build"
+}
+This value overrides the Build Command in Project Settings.
+
+bunVersion
+The Bun runtime is available in Beta on all plans
+
+Type: string
+
+Value: "1.x"
+
+The bunVersion property configures your project to use the Bun runtime instead of Node.js. When set, all Vercel Functions and Routing Middleware not using the Edge runtime will run using the specified Bun version.
+
+vercel.json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "bunVersion": "1.x"
+}
+Vercel manages the Bun minor and patch versions automatically. 1.x is the only valid value currently.
+
+When using Next.js with ISR (Incremental Static Regeneration), you must also update your build and dev commands in package.json:
+
+package.json
+{
+  "scripts": {
+    "dev": "bun run --bun next dev",
+    "build": "bun run --bun next build"
+  }
+}
+To learn more about using Bun with Vercel Functions, see the Bun runtime documentation.
+
+cleanUrls
+Type: Boolean.
+
+Default Value: false.
+
+When set to true, all HTML files and Vercel functions will have their extension removed. When visiting a path that ends with the extension, a 308 response will redirect the client to the extensionless path.
+
+For example, a static file named about.html will be served when visiting the /about path. Visiting /about.html will redirect to /about.
+
+Similarly, a Vercel Function named api/user.go will be served when visiting /api/user. Visiting /api/user.go will redirect to /api/user.
+
+vercel.json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "cleanUrls": true
+}
+If you are using Next.js and running vercel dev, you will get a 404 error when visiting a route configured with cleanUrls locally. It does however work fine when deployed to Vercel. In the example above, visiting /about locally will give you a 404 with vercel dev but /about will render correctly on Vercel.
+
+crons
+Used to configure cron jobs for the production deployment of a project.
+
+Type: Array of cron Object.
+
+Limits:
+
+A maximum of string length of 512 for the path value.
+A maximum of string length of 256 for the schedule value.
+Cron object definition
+path - Required - The path to invoke when the cron job is triggered. Must start with /.
+schedule - Required - The cron schedule expression to use for the cron job.
+vercel.json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
   "crons": [
     {
-      "path": "/api/cron",
-      "schedule": "0 5 * * *"
+      "path": "/api/every-minute",
+      "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/every-hour",
+      "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/every-day",
+      "schedule": "0 0 * * *"
     }
   ]
 }
-•	The path must start with /
-•	The schedule property must be a string that represents a cron expression. In this example, the job is scheduled to execute every day at 5:00 am UTC
-Deploy your project
-Once your project is deployed on Vercel, our build process will create the cron job. Cron jobs are invoked only for production deployments. Preview deployments are ignored. You can also deploy to your production domain via Git.
-Your cron job is now active and will call the /api/cron path every day at 5:00 am UTC. Learn more about cron jobs.
-Alternative cron providers
-If you prefer using a different provider for cron jobs, the following services pair well with Vercel:
-•	Upstash's QStash
-•	Pipedream
-•	Cronhub
-•	Zeplo
-•	Mergent
-•	Inngest
-•	Defer
+devCommand
+This value overrides the Development Command in Project Settings.
 
+Type: string | null
 
+The devCommand property can be used to override the Development Command in the Project Settings dashboard. For more information on the default behavior of the Development Command, visit the Configure a Build - Development Command section.
+
+vercel.json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "devCommand": "next dev"
+}
+fluid
+This value allows you to enable Fluid compute programmatically.
+
+Type: boolean | null
+
+The fluid property allows you to test Fluid compute on a per-deployment or per custom environment basis when using branch tracking, without needing to enable Fluid in production.
+
+As of April 23, 2025, Fluid compute is enabled by default for new projects.
+
+vercel.json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "fluid": true
+}
+framework
+This value overrides the Framework in Project Settings.
+
+Type: string | null
+
+Available framework slugs:
+
+nextjs
+nuxtjs
+svelte
+create-react-app
+gatsby
+remix
+react-router
+solidstart
+sveltekit
+blitzjs
+astro
+hexo
+eleventy
+docusaurus-2
+docusaurus
+preact
+solidstart-1
+dojo
+ember
+vue
+scully
+ionic-angular
+angular
+polymer
+sveltekit-1
+ionic-react
+gridsome
+umijs
+sapper
+saber
+stencil
+redwoodjs
+hugo
+jekyll
+brunch
+middleman
+zola
+hydrogen
+vite
+tanstack-start
+vitepress
+vuepress
+parcel
+fastapi
+flask
+fasthtml
+sanity-v3
+sanity
+storybook
+nitro
+hono
+express
+h3
+nestjs
+elysia
+fastify
+xmcp
+The framework property can be used to override the Framework Preset in the Project Settings dashboard. The value must be a valid framework slug. For more information on the default behavior of the Framework Preset, visit the Configure a Build - Framework Preset section.
+
+To select "Other" as the Framework Preset, use null.
+
+vercel.json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "nextjs"
+}
+functions
+Type: Object of key String and value Object.
+
+Key definition
+A glob pattern that matches the paths of the Vercel functions you would like to customize:
+
+api/*.js (matches one level e.g. api/hello.js but not api/hello/world.js)
+api/**/*.ts (matches all levels api/hello.ts and api/hello/world.ts)
+src/pages/**/* (matches all functions from src/pages)
+api/test.js
+Value definition
+runtime (optional): The npm package name of a Runtime, including its version.
+memory: Memory cannot be set in vercel.json with Fluid compute enabled. Instead set it in the Functions tab of your project dashboard. See setting default function memory for more information.
+maxDuration (optional): An integer defining how long your Vercel Function should be allowed to run on every request in seconds (between 1 and the maximum limit of your plan, as mentioned below).
+supportsCancellation (optional): A boolean defining whether your Vercel Function should support request cancellation. This is only available when you're using the Node.js runtime.
+includeFiles (optional): A glob pattern to match files that should be included in your Vercel Function. If you’re using a Community Runtime, the behavior might vary. Please consult its documentation for more details. (Not supported in Next.js, instead use outputFileTracingIncludes in next.config.js )
+excludeFiles (optional): A glob pattern to match files that should be excluded from your Vercel Function. If you’re using a Community Runtime, the behavior might vary. Please consult its documentation for more details. (Not supported in Next.js, instead use outputFileTracingExcludes in next.config.js )
+Description
+By default, no configuration is needed to deploy Vercel functions to Vercel.
+
+For all officially supported runtimes, the only requirement is to create an api directory at the root of your project directory, placing your Vercel functions inside.
+
+The functions property cannot be used in combination with builds. Since the latter is a legacy configuration property, we recommend dropping it in favor of the new one.
+
+Because Incremental Static Regeneration (ISR) uses Vercel functions, the same configurations apply. The ISR route can be defined using a glob pattern, and accepts the same properties as when using Vercel functions.
+
+When deployed, each Vercel Function receives the following properties:
+
+Memory: 1024 MB (1 GB) - (Optional)
+Maximum Duration: 10s default - 60s / 1 minute (Hobby), 15s default - 300s / 5 minutes (Pro), or 15s default - 900s / 15 minutes (Enterprise). This can be configured up to the respective plan limit) - (Optional)
+To configure them, you can add the functions property.
+
+functions property with Vercel functions
+vercel.json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "api/test.js": {
+      "memory": 3009,
+      "maxDuration": 30
+    },
+    "api/*.js": {
+      "memory": 3009,
+      "maxDuration": 30
+    }
+  }
+}
+functions property with ISR
+vercel.json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "pages/blog/[hello].tsx": {
+      "memory": 1024
+    },
+    "src/pages/isr/**/*": {
+      "maxDuration": 10
+    }
+  }
+}
+Using unsupported runtimes
+In order to use a runtime that is not officially supported, you can add a runtime property to the definition:
+
+vercel.json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "api/test.php": {
+      "runtime": "vercel-php@0.5.2"
+    }
+  }
+}
+In the example above, the api/test.php Vercel Function does not use one of the officially supported runtimes. In turn, a runtime property was added in order to invoke the vercel-php community runtime.
+
+For more information on Runtimes, see the Runtimes documentation:
+
+headers
+Type: Array of header Object.
+
+Valid values: a list of header definitions.
+
+vercel.json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "headers": [
+    {
+      "source": "/service-worker.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        }
+      ]
+    },
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "query",
+          "key": "authorized"
+        }
+      ],
+      "headers": [
+        {
+          "key": "x-authorized",
+          "value": "true"
+        }
+      ]
+    }
+  ]
+}
+This example configures custom response headers for static files, Vercel functions, and a wildcard that matches all routes.
+
+Header object definition
+Property	Description
+source	A pattern that matches each incoming pathname (excluding querystring).
+headers	A non-empty array of key/value pairs representing each response header.
+has	An optional array of has objects with the type, key and value properties. Used for conditional path matching based on the presence of specified properties.
+missing	An optional array of missing objects with the type, key and value properties. Used for conditional path matching based on the absence of specified properties.
+Header has or missing object definition
+Property	Type	Description
+type	String	Must be either header, cookie, host, or query. The type property only applies to request headers sent by clients, not response headers sent by your functions or backends.
+key	String	The key from the selected type to match against. For example, if the type is header and the key is X-Custom-Header, we will match against the X-Custom-Header header key.
+value	String or Object or undefined	The value to check for, if undefined any value will match. A regex like string can be used to capture a specific part of the value. For example, if the value first-(?<paramName>.*) is used for first-second then second will be usable in the destination with :paramName. If an object is provided, it will match when all conditions are met for its fields below.
+If value is an object, it has one or more of the following fields:
+
+Condition	Type	Description
+eq	String (optional)	Check for equality
+neq	String (optional)	Check for inequality
+inc	Array<String> (optional)	Check for inclusion in the array
+ninc	Array<String> (optional)	Check for non-inclusion in the array
+pre	String (optional)	Check for prefix
+suf	String (optional)	Check for suffix
+re	String (optional)	Check for a regex match
+gt	Number (optional)	Check for greater than
+gte	Number (optional)	Check for greater than or equal to
+lt	Number (optional)	Check for less than
+lte	Number (optional)	Check for less than or equal to
+This example demonstrates using the expressive value object to append the header x-authorized: true if the X-Custom-Header request header's value is prefixed by valid and ends with value.
+
+vercel.json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "headers": [
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "header",
+          "key": "X-Custom-Header",
+          "value": {
+            "pre": "valid",
+            "suf": "value"
+          }
+        }
+      ],
+      "headers": [
+        {
+          "key": "x-authorized",
+          "value": "true"
+        }
+      ]
+    }
+  ]
+}
+Learn more about rewrites on Vercel and see limitations.
+
+ignoreCommand
+This value overrides the Ignored Build Step in Project Settings.
+
+Type: string | null
+
+This ignoreCommand property will override the Command for Ignoring the Build Step for a given deployment. When the command exits with code 1, the build will continue. When the command exits with 0, the build is ignored. For more information on the default behavior of the Ignore Command, visit the Ignored Build Step section.
+
+vercel.json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "ignoreCommand": "git diff --quiet HEAD^ HEAD ./"
+}
+installCommand
+This value overrides the Install Command in Project Settings.
+
+Type: string | null
+
+The installCommand property can be used to override the Install Command in the Project Settings dashboard for a given deployment. This setting is useful for trying out a new package manager for the project. An empty string value will cause the Install Command to be skipped. For more information on the default behavior of the install command visit the Configure a Build - Install Command section.
+
+vercel.json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "installCommand": "npm install"
+}
+images
+The images property defines the behavior of Vercel's native Image Optimization API, which allows on-demand optimization of images at runtime.
+
+Type: Object
+
+Value definition
+sizes - Required - Array of allowed image widths. The Image Optimization API will return an error if the w parameter is not defined in this list.
+localPatterns - Allow-list of local image paths which can be used with the Image Optimization API.
+remotePatterns - Allow-list of external domains which can be used with the Image Optimization API.
+minimumCacheTTL - Cache duration (in seconds) for the optimized images.
+qualities - Array of allowed image qualities. The Image Optimization API will return an error if the q parameter is not defined in this list.
+formats - Supported output image formats. Allowed values are either "image/avif" and/or "image/webp".
+dangerouslyAllowSVG - Allow SVG input image URLs. This is disabled by default for security purposes.
+contentSecurityPolicy - Specifies the Content Security Policy of the optimized images.
+contentDispositionType - Specifies the value of the "Content-Disposition" response header. Allowed values are "inline" or "attachment".
+vercel.json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "images": {
+    "sizes": [256, 640, 1080, 2048, 3840],
+    "localPatterns": [{
+      "pathname": "^/assets/.*$",
+      "search": ""
+    }]
+    "remotePatterns": [
+      {
+        "protocol": "https",
+        "hostname": "example.com",
+        "port": "",
+        "pathname": "^/account123/.*$",
+        "search": "?v=1"
+      }
+    ],
+    "minimumCacheTTL": 60,
+    "qualities": [25, 50, 75],
+    "formats": ["image/webp"],
+    "dangerouslyAllowSVG": false,
+    "contentSecurityPolicy": "script-src 'none'; frame-src 'none'; sandbox;",
+    "contentDispositionType": "inline"
+  }
+}
+outputDirectory
+This value overrides the Output Directory in Project Settings.
+
+Type: string | null
+
+The outputDirectory property can be used to override the Output Directory in the Project Settings dashboard for a given deployment.
+
+In the following example, the deployment will look for the build directory rather than the default public or . root directory. For more information on the default behavior of the Output Directory see the Configure a Build - Output Directory section. The following example is a vercel.json file that overrides the outputDirectory to build:
+
+vercel.json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "outputDirectory": "build"
+}
+public
+Type: Boolean.
+
+Default Value: false.
+
+When set to true, both the source view and logs view will be publicly accessible.
+
+vercel.json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "public": true
+}
+redirects
+Type: Array of redirect Object.
+
+Valid values: a list of redirect definitions.
+
+Redirects examples
+Some redirects and rewrites configurations can accidentally become gateways for semantic attacks. Learn how to check and protect your configurations with the Enhancing Security for Redirects and Rewrites guide.
+This example redirects requests to the path /me from your site's root to the profile.html file relative to your site's root with a 307 Temporary Redirect:
+
+vercel.json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "redirects": [
+    { "source": "/me", "destination": "/profile.html", "permanent": false }
+  ]
+}
+This example redirects requests to the path /me from your site's root to the profile.html file relative to your site's root with a 308 Permanent Redirect:
+
+vercel.json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "redirects": [
+    { "source": "/me", "destination": "/profile.html", "permanent": true }
+  ]
+}
+This example redirects requests to the path /user from your site's root to the api route /api/user relative to your site's root with a 301 Moved Permanently:
+
+vercel.json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "redirects": [
+    { "source": "/user", "destination": "/api/user", "statusCode": 301 }
+  ]
+}
+This example redirects requests to the path /view-source from your site's root to the absolute path https://github.com/vercel/vercel of an external site with a redirect status of 308:
+
+vercel.json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "redirects": [
+    {
+      "source": "/view-source",
+      "destination": "https://github.com/vercel/vercel"
+    }
+  ]
+}
+This example redirects requests to all the paths (including all sub-directories and pages) from your site's root to the absolute path https://vercel.com/docs of an external site with a redirect status of 308:
+
+vercel.json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "destination": "https://vercel.com/docs"
+    }
+  ]
+}
+This example uses wildcard path matching to redirect requests to any path (including subdirectories) under /blog/ from your site's root to a corresponding path under /news/ relative to your site's root with a redirect status of 308:
+
+vercel.json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "redirects": [
+    {
+      "source": "/blog/:path*",
+      "destination": "/news/:path*"
+    }
+  ]
+}
+This example uses regex path matching to redirect requests to any path under /posts/ that only contain numerical digits from your site's root to a corresponding path under /news/ relative to your site's root with a redirect status of 308:
+
+vercel.json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "redirects": [
+    {
+      "source": "/post/:path(\\d{1,})",
+      "destination": "/news/:path*"
+    }
+  ]
+}
+This example redirects requests to any path from your site's root that does not start with /uk/ and has x-vercel-ip-country header value of GB to a corresponding path under /uk/ relative to your site's root with a redirect status of 307:
+
+vercel.json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "redirects": [
+    {
+      "source": "/:path((?!uk/).*)",
+      "has": [
+        {
+          "type": "header",
+          "key": "x-vercel-ip-country",
+          "value": "GB"
+        }
+      ],
+      "destination": "/uk/:path*",
+      "permanent": false
+    }
+  ]
+}
+Using has does not yet work locally while using vercel dev, but does work when deployed.
+
+Redirect object definition
+Property	Description
+source	A pattern that matches each incoming pathname (excluding querystring).
+destination	A location destination defined as an absolute pathname or external URL.
+permanent	An optional boolean to toggle between permanent and temporary redirect (default true). When true, the status code is 308. When false the status code is 307.
+statusCode	An optional integer to define the status code of the redirect. Used when you need a value other than 307/308 from permanent, and therefore cannot be used with permanent boolean.
+has	An optional array of has objects with the type, key and value properties. Used for conditional redirects based on the presence of specified properties.
+missing	An optional array of missing objects with the type, key and value properties. Used for conditional redirects based on the absence of specified properties.
+Redirect has or missing object definition
+Property	Type	Description
+type	String	Must be either header, cookie, host, or query. The type property only applies to request headers sent by clients, not response headers sent by your functions or backends.
+key	String	The key from the selected type to match against. For example, if the type is header and the key is X-Custom-Header, we will match against the X-Custom-Header header key.
+value	String or Object or undefined	The value to check for, if undefined any value will match. A regex like string can be used to capture a specific part of the value. For example, if the value first-(?<paramName>.*) is used for first-second then second will be usable in the destination with :paramName. If an object is provided, it will match when all conditions are met for its fields below.
+If value is an object, it has one or more of the following fields:
+
+Condition	Type	Description
+eq	String (optional)	Check for equality
+neq	String (optional)	Check for inequality
+inc	Array<String> (optional)	Check for inclusion in the array
+ninc	Array<String> (optional)	Check for non-inclusion in the array
+pre	String (optional)	Check for prefix
+suf	String (optional)	Check for suffix
+re	String (optional)	Check for a regex match
+gt	Number (optional)	Check for greater than
+gte	Number (optional)	Check for greater than or equal to
+lt	Number (optional)	Check for less than
+lte	Number (optional)	Check for less than or equal to
+This example uses the expressive value object to define a route that redirects users with a redirect status of 308 to /end only if the X-Custom-Header header's value is prefixed by valid and ends with value.
+
+vercel.json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "redirects": [
+    {
+      "source": "/start",
+      "destination": "/end",
+      "has": [
+        {
+          "type": "header",
+          "key": "X-Custom-Header",
+          "value": {
+            "pre": "valid",
+            "suf": "value"
+          }
+        }
+      ]
+    }
+  ]
+}
+Learn more about redirects on Vercel and see limitations.
+
+bulkRedirectsPath
+Learn more about bulk redirects on Vercel and see limits and pricing.
+
+Type: string path to a file or folder.
+
+The bulkRedirectsPath property can be used to import many thousands of redirects per project. These redirects do not support wildcard or header matching.
+
+CSV, JSON, and JSONL file formats are supported, and the redirect files can be generated at build time as long as they end up in the location specified by bulkRedirectsPath. This can point to either a single file or a folder containing multiple redirect files.
+
+CSV
+CSV headers must match the field names below, can be specific in any order, and optional fields can be ommitted.
+
+redirects.csv
+source,destination,permanent
+/source/path,/destination/path,true
+/source/path-2,https://destination-site.com/destination/path,true
+JSON
+redirects.json
+[
+    {
+        "source": "/source/path",
+        "destination": "/destination/path",
+        "permanent": true
+    },
+    {
+        "source": "/source/path-2",
+        "destination": "https://destination-site.com/destination/path",
+        "permanent": true
+    }
+]
+JSONL
+redirects.jsonl
+{"source": "/source/path", "destination": "/destination/path", "permanent": true}
+{"source": "/source/path-2", "destination": "https://destination-site.com/destination/path", "permanent": true}
+Bulk redirects do not work locally while using vercel dev
+
+Bulk redirect field definition
+Field	Type	Required	Description
+source	string	Yes	An absolute path that matches each incoming pathname (excluding querystring). Max 2048 characters.
+destination	string	Yes	A location destination defined as an absolute pathname or external URL. Max 2048 characters.
+permanent	boolean	No	Toggle between permanent (308) and temporary (307) redirect. Default: false.
+statusCode	integer	No	Specify the exact status code. Can be 301, 302, 303, 307, or 308. Overrides permanent when set, otherwise defers to permanent value or default.
+caseSensitive	boolean	No	Toggle whether source path matching is case sensitive. Default: false.
+query	boolean	No	Toggle whether to preserve the query string on the redirect. Default: false.
+In order to improve space efficiency, all boolean values can be the single characters t (true) or f (false) while using the CSV format.
+
+regions
+This value overrides the Vercel Function Region in Project Settings.
+
+Type: Array of region identifier String.
+
+Valid values: List of regions, defaults to iad1.
+
+You can define the regions where your Vercel functions are executed. Users on Pro and Enterprise can deploy to multiple regions. Hobby plans can select any single region. To learn more, see Configuring Regions.
+
+Function responses can be cached in the requested regions. Selecting a Vercel Function region does not impact static files, which are deployed to every region by default.
+
+vercel.json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "regions": ["sfo1"]
+}
+functionFailoverRegions
+Setting failover regions for Vercel functions are available on Enterprise plans
+
+Set this property to specify the region to which a Vercel Function should fallback when the default region(s) are unavailable.
+
+Type: Array of region identifier String.
+
+Valid values: List of regions.
+
+vercel.json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functionFailoverRegions": ["iad1", "sfo1"]
+}
+These regions serve as a fallback to any regions specified in the regions configuration. The region Vercel selects to invoke your function depends on availability and ingress. For instance:
+
+Vercel always attempts to invoke the function in the primary region. If you specify more than one primary region in the regions property, Vercel selects the region geographically closest to the request
+If all primary regions are unavailable, Vercel automatically fails over to the regions specified in functionFailoverRegions, selecting the region geographically closest to the request
+The order of the regions in functionFailoverRegions does not matter as Vercel automatically selects the region geographically closest to the request
+To learn more about automatic failover for Vercel Functions, see Automatic failover. Vercel Functions using the Edge runtime will automatically failover with no configuration required.
+
+Region failover is supported with Secure Compute, see Region Failover to learn more.
+
+Want to talk to our team?
+
+This feature is available on the Enterprise plan.
+
+rewrites
+Type: Array of rewrite Object.
+
+Valid values: a list of rewrite definitions.
+
+If cleanUrls is set to true in your project's vercel.json, do not include the file extension in the source or destination path. For example, /about-our-company.html would be /about-our-company
+
+Some redirects and rewrites configurations can accidentally become gateways for semantic attacks. Learn how to check and protect your configurations with the Enhancing Security for Redirects and Rewrites guide.
+Rewrites examples
+This example rewrites requests to the path /about from your site's root to the /about-our-company.html file relative to your site's root:
+
+vercel.json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    { "source": "/about", "destination": "/about-our-company.html" }
+  ]
+}
+This example rewrites all requests to the root path which is often used for a Single Page Application (SPA).
+
+vercel.json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+}
+This example rewrites requests to the paths under /resize that with 2 paths levels (defined as variables width and height that can be used in the destination value) to the api route /api/sharp relative to your site's root:
+
+vercel.json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    { "source": "/resize/:width/:height", "destination": "/api/sharp" }
+  ]
+}
+This example uses wildcard path matching to rewrite requests to any path (including subdirectories) under /proxy/ from your site's root to a corresponding path under the root of an external site https://example.com/:
+
+vercel.json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    {
+      "source": "/proxy/:match*",
+      "destination": "https://example.com/:match*"
+    }
+  ]
+}
+This example rewrites requests to any path from your site's root that does not start with /uk/ and has x-vercel-ip-country header value of GB to a corresponding path under /uk/ relative to your site's root:
+
+vercel.json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    {
+      "source": "/:path((?!uk/).*)",
+      "has": [
+        {
+          "type": "header",
+          "key": "x-vercel-ip-country",
+          "value": "GB"
+        }
+      ],
+      "destination": "/uk/:path*"
+    }
+  ]
+}
+This example rewrites requests to the path /dashboard from your site's root that does not have a cookie with key auth_token to the path /login relative to your site's root:
+
+vercel.json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    {
+      "source": "/dashboard",
+      "missing": [
+        {
+          "type": "cookie",
+          "key": "auth_token"
+        }
+      ],
+      "destination": "/login"
+    }
+  ]
+}
+Rewrite object definition
+Property	Description
+source	A pattern that matches each incoming pathname (excluding querystring).
+destination	A location destination defined as an absolute pathname or external URL.
+permanent	A boolean to toggle between permanent and temporary redirect (default true). When true, the status code is 308. When false the status code is 307.
+has	An optional array of has objects with the type, key and value properties. Used for conditional rewrites based on the presence of specified properties.
+missing	An optional array of missing objects with the type, key and value properties. Used for conditional rewrites based on the absence of specified properties.
+Rewrite has or missing object definition
+Property	Type	Description
+type	String	Must be either header, cookie, host, or query. The type property only applies to request headers sent by clients, not response headers sent by your functions or backends.
+key	String	The key from the selected type to match against. For example, if the type is header and the key is X-Custom-Header, we will match against the X-Custom-Header header key.
+value	String or Object or undefined	The value to check for, if undefined any value will match. A regex like string can be used to capture a specific part of the value. For example, if the value first-(?<paramName>.*) is used for first-second then second will be usable in the destination with :paramName. If an object is provided, it will match when all conditions are met for its fields below.
+If value is an object, it has one or more of the following fields:
+
+Condition	Type	Description
+eq	String (optional)	Check for equality
+neq	String (optional)	Check for inequality
+inc	Array<String> (optional)	Check for inclusion in the array
+ninc	Array<String> (optional)	Check for non-inclusion in the array
+pre	String (optional)	Check for prefix
+suf	String (optional)	Check for suffix
+re	String (optional)	Check for a regex match
+gt	Number (optional)	Check for greater than
+gte	Number (optional)	Check for greater than or equal to
+lt	Number (optional)	Check for less than
+lte	Number (optional)	Check for less than or equal to
+This example demonstrates using the expressive value object to define a route that rewrites users to /end only if the X-Custom-Header header's value is prefixed by valid and ends with value.
+
+vercel.json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    {
+      "source": "/start",
+      "destination": "/end",
+      "has": [
+        {
+          "type": "header",
+          "key": "X-Custom-Header",
+          "value": {
+            "pre": "valid",
+            "suf": "value"
+          }
+        }
+      ]
+    }
+  ]
+}
+The source property should NOT be a file because precedence is given to the filesystem prior to rewrites being applied. Instead, you should rename your static file or Vercel Function.
+
+Using has does not yet work locally while using vercel dev, but does work when deployed.
+
+Learn more about rewrites on Vercel.
+
+trailingSlash
+Type: Boolean.
+
+Default Value: undefined.
+
+false
+When trailingSlash: false, visiting a path that ends with a forward slash will respond with a 308 status code and redirect to the path without the trailing slash.
+
+For example, the /about/ path will redirect to /about.
+
+vercel.json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "trailingSlash": false
+}
+true
+When trailingSlash: true, visiting a path that does not end with a forward slash will respond with a 308 status code and redirect to the path with a trailing slash.
+
+For example, the /about path will redirect to /about/.
+
+However, paths with a file extension will not redirect to a trailing slash.
+
+For example, the /about/styles.css path will not redirect, but the /about/styles path will redirect to /about/styles/.
+
+vercel.json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "trailingSlash": true
+}
+undefined
+When trailingSlash: undefined, visiting a path with or without a trailing slash will not redirect.
+
+For example, both /about and /about/ will serve the same content without redirecting.
+
+This is not recommended because it could lead to search engines indexing two different pages with duplicate content.
+
+Legacy
+Legacy properties are still supported for backwards compatibility, but are deprecated.
+
+name
+The name property has been deprecated in favor of Project Linking, which allows you to link a Vercel project to your local codebase when you run vercel.
+
+Type: String.
+
+Valid values: string name for the deployment.
+
+Limits:
+
+A maximum length of 52 characters
+Only lower case alphanumeric characters or hyphens are allowed
+Cannot begin or end with a hyphen, or contain multiple consecutive hyphens
+The prefix for all new deployment instances. Vercel CLI usually generates this field automatically based on the name of the directory. But if you'd like to define it explicitly, this is the way to go.
+
+The defined name is also used to organize the deployment into a project.
+
+vercel.json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "name": "example-app"
+}
+version
+The version property should not be used anymore.
+
+Type: Number.
+
+Valid values: 1, 2.
+
+Specifies the Vercel Platform version the deployment should use.
+
+vercel.json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "version": 2
+}
+alias
+The alias property should not be used anymore. To assign a custom Domain to your project, please define it in the Project Settings instead. Once your domains are, they will take precedence over the configuration property.
+
+Type: Array or String.
+
+Valid values: domain names (optionally including subdomains) added to the account, or a string for a suffixed URL using .vercel.app or a Custom Deployment Suffix (available on the Enterprise plan).
+
+Limit: A maximum of 64 aliases in the array.
+
+The alias or aliases are applied automatically using Vercel for GitHub, Vercel for GitLab, or Vercel for Bitbucket when merging or pushing to the Production Branch.
+
+You can deploy to the defined aliases using Vercel CLI by setting the production deployment environment target.
+
+vercel.json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "alias": ["my-domain.com", "my-alias"]
+}
+scope
+The scope property has been deprecated in favor of Project Linking, which allows you to link a Vercel project to your local codebase when you run vercel.
+
+Type: String.
+
+Valid values: For teams, either an ID or slug. For users, either a email address, username, or ID.
+
+This property determines the scope (Hobby team or team) under which the project will be deployed by Vercel CLI.
+
+It also affects any other actions that the user takes within the directory that contains this configuration (e.g. listing environment variables using vercel secrets ls).
+
+vercel.json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "scope": "my-team"
+}
+Deployments made through Git will ignore the scope property because the repository is already connected to project.
+
+env
+We recommend against using this property. To add custom environment variables to your project define them in the Project Settings.
+
+Type: Object of String keys and values.
+
+Valid values: environment keys and values.
+
+Environment variables passed to the invoked Vercel functions.
+
+This example will pass the MY_KEY static env to all Vercel functions and the SECRET resolved from the my-secret-name secret dynamically.
+
+vercel.json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "env": {
+    "MY_KEY": "this is the value",
+    "SECRET": "@my-secret-name"
+  }
+}
+build.env
+We recommend against using this property. To add custom environment variables to your project define them in the Project Settings.
+
+Type: Object of String keys and values inside the build Object.
+
+Valid values: environment keys and values.
+
+Environment variables passed to the Build processes.
+
+The following example will pass the MY_KEY environment variable to all Builds and the SECRET resolved from the my-secret-name secret dynamically.
+
+vercel.json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "env": {
+    "MY_KEY": "this is the value",
+    "SECRET": "@my-secret-name"
+  }
+}
+builds
+We recommend against using this property. To customize Vercel functions, please use the functions property instead. If you'd like to deploy a monorepo, see the Monorepo docs.
+
+Type: Array of build Object.
+
+Valid values: a list of build descriptions whose src references valid source files.
+
+Build object definition
+src (String): A glob expression or pathname. If more than one file is resolved, one build will be created per matched file. It can include * and **.
+use (String): An npm module to be installed by the build process. It can include a semver compatible version (e.g.: @org/proj@1).
+config (Object): Optionally, an object including arbitrary metadata to be passed to the Builder.
+The following will include all HTML files as-is (to be served statically), and build all Python files and JS files into Vercel functions:
+
+vercel.json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "builds": [
+    { "src": "*.html", "use": "@vercel/static" },
+    { "src": "*.py", "use": "@vercel/python" },
+    { "src": "*.js", "use": "@vercel/node" }
+  ]
+}
+When at least one builds item is specified, only the outputs of the build processes will be included in the resulting deployment as a security precaution. This is why we need to allowlist static files explicitly with @vercel/static.
+
+routes
+We recommend using cleanUrls, trailingSlash, redirects, rewrites, and/or headers instead.
+
+The routes property is only meant to be used for advanced integration purposes, such as the Build Output API, and cannot be used in conjunction with any of the properties mentioned above.
+
+See the upgrading routes section to learn how to migrate away from this property.
+
+Type: Array of route Object.
+
+Valid values: a list of route definitions.
+
+Route object definition
+src: A PCRE-compatible regular expression that matches each incoming pathname (excluding querystring).
+methods: A set of HTTP method types. If no method is provided, requests with any HTTP method will be a candidate for the route.
+dest: A destination pathname or full URL, including querystring, with the ability to embed capture groups as $1, $2…
+headers: A set of headers to apply for responses.
+status: A status code to respond with. Can be used in tandem with Location: header to implement redirects.
+continue: A boolean to change matching behavior. If true, routing will continue even when the src is matched.
+has: An optional array of has objects with the type, key and value properties. Used for conditional path matching based on the presence of specified properties
+missing: An optional array of missing objects with the type, key and value properties. Used for conditional path matching based on the absence of specified properties
+mitigate: An optional object with the property action, which can either be "challenge" or "deny". These perform mitigation actions on requests that match the route.
+transforms: An optional array of transform objects to apply. Transform rules let you append, set, or remove request/response headers and query parameters at the edge so you can enforce security headers, inject analytics tags, or personalize content without touching your application code. See examples below.
+Routes are processed in the order they are defined in the array, so wildcard/catch-all patterns should usually be last.
+
+Route has and missing object definition
+Property	Type	Description
+type	String	Must be either header, cookie, host, or query. The type property only applies to request headers sent by clients, not response headers sent by your functions or backends.
+key	String	The key from the selected type to match against. For example, if the type is header and the key is X-Custom-Header, we will match against the X-Custom-Header header key.
+value	String or Object or undefined	The value to check for, if undefined any value will match. A regex like string can be used to capture a specific part of the value. For example, if the value first-(?<paramName>.*) is used for first-second then second will be usable in the destination with :paramName. If an object is provided, it will match when all conditions are met for its fields below.
+If value is an object, it has one or more of the following fields:
+
+Condition	Type	Description
+eq	String (optional)	Check for equality
+neq	String (optional)	Check for inequality
+inc	Array<String> (optional)	Check for inclusion in the array
+ninc	Array<String> (optional)	Check for non-inclusion in the array
+pre	String (optional)	Check for prefix
+suf	String (optional)	Check for suffix
+re	String (optional)	Check for a regex match
+gt	Number (optional)	Check for greater than
+gte	Number (optional)	Check for greater than or equal to
+lt	Number (optional)	Check for less than
+lte	Number (optional)	Check for less than or equal to
+This example uses the expressive value object to define a route that will only rewrite users to /end if the X-Custom-Header header's value is prefixed by valid and ends with value:
+
+vercel.json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "routes": [
+    {
+      "src": "/start",
+      "dest": "/end",
+      "has": [
+        {
+          "type": "header",
+          "key": "X-Custom-Header",
+          "value": {
+            "pre": "valid",
+            "suf": "value"
+          }
+        }
+      ]
+    }
+  ]
+}
+This example configures custom routes that map to static files and Vercel functions:
+
+vercel.json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "routes": [
+    {
+      "src": "/redirect",
+      "status": 308,
+      "headers": { "Location": "https://example.com/" }
+    },
+    {
+      "src": "/custom-page",
+      "headers": { "cache-control": "s-maxage=1000" },
+      "dest": "/index.html"
+    },
+    { "src": "/api", "dest": "/my-api.js" },
+    { "src": "/users", "methods": ["POST"], "dest": "/users-api.js" },
+    { "src": "/users/(?<id>[^/]*)", "dest": "/users-api.js?id=$id" },
+    { "src": "/legacy", "status": 404 },
+    { "src": "/.*", "dest": "https://my-old-site.com" }
+  ]
+}
+Transform object definition
+Property	Type	Description
+type	String	Must be either request.query, request.headers, or response.headers. This specifies the scope of what your transforms will apply to.
+op	String	These specify the possible operations:
+- append appends args to the value of the key, and will set if missing
+- set sets the key and value if missing
+- delete deletes the key entirely if args is not provided; otherwise, it will delete the value of args from the matching key
+target	Object	An object with key key, which is either a String or an Object. If it is a string, it will be used as the key for the target. If it is an object, it may contain one or more of the properties seen below.
+args	String or String[] or undefined	If args is a string or string array, it will be used as the value for the target according to the op property.
+Transform target object definition
+Target is an object with a key property. For the set operation, the key property is used as the header or query key. For other operations, it is used as a matching condition to determine if the transform should be applied.
+
+Property	Type	Description
+key	String or Object	It may be a string or an object. If it is an object, it must have one or more of the properties defined in the Transform key object definition below.
+Transform key object definition
+When the key property is an object, it can contain one or more of the following conditional matching properties:
+
+Property	Type	Description
+eq	String or Number	Check equality on a value
+neq	String	Check inequality on a value
+inc	String[]	Check inclusion in an array of values
+ninc	String[]	Check non-inclusion in an array of values
+pre	String	Check if value starts with a prefix
+suf	String	Check if value ends with a suffix
+gt	Number	Check if value is greater than
+gte	Number	Check if value is greater than or equal to
+lt	Number	Check if value is less than
+lte	Number	Check if value is less than or equal to
+Transform examples
+These examples demonstrate practical use-cases for route transforms.
+
+In this example, you remove the incoming request header x-custom-header from all requests and responses to the /home route:
+
+vercel.json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "routes": [
+    {
+      "src": "/home",
+      "transforms": [
+        {
+          "type": "request.headers",
+          "op": "delete",
+          "target": {
+            "key": "x-custom-header"
+          }
+        },
+        {
+          "type": "response.headers",
+          "op": "delete",
+          "target": {
+            "key": "x-custom-header"
+          }
+        }
+      ]
+    }
+  ]
+}
+In this example, you override the incoming query parameter theme to dark for all requests to the /home route, and set if it doesn't already exist:
+
+vercel.json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "routes": [
+    {
+      "src": "/home",
+      "transforms": [
+        {
+          "type": "request.query",
+          "op": "set",
+          "target": {
+            "key": "theme"
+          },
+          "args": "dark"
+        }
+      ]
+    }
+  ]
+}
+In this example, you append multiple values to the incoming request header x-content-type-options for all requests to the /home route:
+
+vercel.json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "routes": [
+    {
+      "src": "/home",
+      "transforms": [
+        {
+          "type": "request.headers",
+          "op": "append",
+          "target": {
+            "key": "x-content-type-options"
+          },
+          "args": ["nosniff", "no-sniff"]
+        }
+      ]
+    }
+  ]
+}
+In this example, you delete any header that begins with x-react-router- for all requests to the /home route:
+
+vercel.json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "routes": [
+    {
+      "src": "/home",
+      "transforms": [
+        {
+          "type": "request.headers",
+          "op": "delete",
+          "target": {
+            "key": {
+              "pre": "x-react-router-"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
+You can integrate transforms with existing matching capabilities through the has and missing properties for routes, along with using expressive matching conditions through the Transform key object definition.
+
+Upgrading legacy routes
+In most cases, you can upgrade legacy routes usage to the newer rewrites, redirects, headers, cleanUrls or trailingSlash properties.
+
+Here are some examples that show how to upgrade legacy routes to the equivalent new property.
+
+Route Parameters
+With routes, you use a PCRE Regex named group to match the ID and then pass that parameter in the query string. The following example matches a URL like /product/532004 and proxies to /api/product?id=532004:
+
+vercel.json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "routes": [{ "src": "/product/(?<id>[^/]+)", "dest": "/api/product?id=$id" }]
+}
+With rewrites, named parameters are automatically passed in the query string. The following example is equivalent to the legacy routes usage above, but uses rewrites instead:
+
+vercel.json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [{ "source": "/product/:id", "destination": "/api/product" }]
+}
+Legacy redirects
+With routes, you specify the status code to use a 307 Temporary Redirect. Also, this redirect needs to be defined before other routes. The following example redirects all paths in the posts directory to the blog directory, but keeps the path in the new location:
+
+vercel.json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "routes": [
+    {
+      "src": "/posts/(.*)",
+      "headers": { "Location": "/blog/$1" },
+      "status": 307
+    }
+  ]
+}
+With redirects, you disable the permanent property to use a 307 Temporary Redirect. Also, redirects are always processed before rewrites. The following example is equivalent to the legacy routes usage above, but uses redirects instead:
+
+vercel.json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "redirects": [
+    {
+      "source": "/posts/:id",
+      "destination": "/blog/:id",
+      "permanent": false
+    }
+  ]
+}
+Legacy SPA Fallback
+With routes, you use "handle": "filesystem" to give precedence to the filesystem and exit early if the requested path matched a file. The following example will serve the index.html file for all paths that do not match a file in the filesystem:
+
+vercel.json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "routes": [
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "dest": "/index.html" }
+  ]
+}
+With rewrites, the filesystem check is the default behavior. If you want to change the name of files at the filesystem level, file renames can be performed during the Build Step, but not with rewrites. The following example is equivalent to the legacy routes usage above, but uses rewrites instead:
+
+vercel.json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+}
+Legacy Headers
+With routes, you use "continue": true to prevent stopping at the first match. The following example adds Cache-Control headers to the favicon and other static assets:
+
+vercel.json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "routes": [
+    {
+      "src": "/favicon.ico",
+      "headers": { "Cache-Control": "public, max-age=3600" },
+      "continue": true
+    },
+    {
+      "src": "/assets/(.*)",
+      "headers": { "Cache-Control": "public, max-age=31556952, immutable" },
+      "continue": true
+    }
+  ]
+}
+With headers, this is no longer necessary since that is the default behavior. The following example is equivalent to the legacy routes usage above, but uses headers instead:
+
+vercel.json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "headers": [
+    {
+      "source": "/favicon.ico",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600"
+        }
+      ]
+    },
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31556952, immutable"
+        }
+      ]
+    }
+  ]
+}
+Legacy Pattern Matching
+With routes, you need to escape a dot with two backslashes, otherwise it would match any character PCRE Regex. The following example matches the literal atom.xml and proxies to /api/rss to dynamically generate RSS:
+
+vercel.json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "routes": [{ "src": "/atom\\.xml", "dest": "/api/rss" }]
+}
+With rewrites, the . is not a special character so it does not need to be escaped. The following example is equivalent to the legacy routes usage above, but instead uses rewrites:
+
+vercel.json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [{ "source": "/atom.xml", "destination": "/api/rss" }]
+}
+Legacy Negative Lookahead
+With routes, you use PCRE Regex negative lookahead. The following example proxies all requests to the /maintenance page except for /maintenance itself to avoid infinite loop:
+
+vercel.json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "routes": [{ "src": "/(?!maintenance)", "dest": "/maintenance" }]
+}
+With rewrites, the Regex needs to be wrapped. The following example is equivalent to the legacy routes usage above, but instead uses rewrites:
+
+vercel.json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    { "source": "/((?!maintenance).*)", "destination": "/maintenance" }
+  ]
+}
+Legacy Case Sensitivity
+With routes, the src property is case-insensitive leading to duplicate content, where multiple request paths with difference cases serve the same page.
+
+With rewrites / redirects / headers, the source property is case-sensitive so you don't accidentally create duplicate content.
