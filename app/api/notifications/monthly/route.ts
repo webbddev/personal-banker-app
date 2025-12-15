@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { sendMonthlyDigests } from '@/app/actions/send-reminders';
 
+export const revalidate = 0;
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const cronSecret = searchParams.get('cron_secret');
@@ -13,7 +15,7 @@ export async function GET(request: Request) {
 
   try {
     const result = await sendMonthlyDigests();
-    return NextResponse.json({  ...result, success: true });
+    return NextResponse.json({ ...result, success: true });
   } catch (error) {
     console.error('Error in monthly notifications route:', error);
     return NextResponse.json(

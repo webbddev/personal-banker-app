@@ -43,7 +43,6 @@ import { createInvestment } from '@/app/actions/investmentActions';
 import { useState } from 'react';
 import { ExpirationStatus } from '@/prisma/generated/prisma/enums.js';
 
-
 export default function CreateInvestmentForm() {
   const { toast } = useToast();
   const router = useRouter();
