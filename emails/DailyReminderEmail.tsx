@@ -46,8 +46,7 @@ export const DailyReminderEmail = ({
   investments = mockInvestments,
   appBaseUrl = defaultBaseUrl,
 }: DailyReminderEmailProps) => {
-  // Changed to explicit function block
-  // FIX: Sanitize appBaseUrl (remove trailing slash) for safer URL construction.
+  // Add URL sanitization and store in 'base'
   const base = appBaseUrl.replace(/\/$/, '');
 
   const imageUrl = `${base}/logo/colour-logo_no-background.png`;
@@ -60,8 +59,6 @@ export const DailyReminderEmail = ({
           Important: You have investments expiring in the next 30 days.
         </Preview>
         <Container style={container}>
-          {/* FIX: Switching to PNG to resolve black background issue caused by email clients misinterpreting WEBP transparency.
-              ACTION REQUIRED: Ensure a file named 'Colour-Logo_noBackground.png' is available at the public/logo path. */}
           <Img
             src={imageUrl}
             width='240'

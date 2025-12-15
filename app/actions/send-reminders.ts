@@ -1,8 +1,8 @@
 'use server';
 
 import {
-  findInvestmentsExpiringIn30Days,
-  findInvestmentsExpiringThisMonth,
+  findInvestmentsFor30DayNotification,
+  findInvestmentsForMonthlyNotification,
 } from '@/lib/expirations';
 import { sendDailyReminder, sendMonthlyDigest } from '@/lib/mailer';
 import { groupBy } from '@/utils/group-by';
@@ -14,7 +14,7 @@ import { groupBy } from '@/utils/group-by';
 export async function sendDailyReminders() {
   console.log('Running daily reminder job...');
   try {
-    const investments = await findInvestmentsExpiringIn30Days();
+    const investments = await findInvestmentsFor30DayNotification();
     console.log(`Found ${investments.length} investments expiring in 30 days.`);
 
     // We use Promise.all to send emails in parallel, which is more efficient.
@@ -48,7 +48,7 @@ export async function sendDailyReminders() {
 export async function sendMonthlyDigests() {
   console.log('Running monthly digest job...');
   try {
-    const investments = await findInvestmentsExpiringThisMonth();
+    const investments = await findInvestmentsForMonthlyNotification();
     console.log(`Found ${investments.length} investments expiring this month.`);
 
     // Group investments by the owner (userId)
