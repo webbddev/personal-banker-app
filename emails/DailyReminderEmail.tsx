@@ -61,7 +61,7 @@ export const DailyReminderEmail = ({
           {/* FIX: Switching to PNG to resolve black background issue caused by email clients misinterpreting WEBP transparency.
               ACTION REQUIRED: Ensure a file named 'Colour-Logo_noBackground.png' is available at the public/logo path. */}
           <Img
-            src={`${base}/logo/Colour-Logo_noBackground.png`}
+            src={`${base}/logo/colour-logo_no-background.png`}
             width='240'
             alt='My Personal Banker'
             style={logo}

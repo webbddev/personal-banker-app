@@ -72,7 +72,7 @@ export const MonthlyDigestEmail = ({
         <Container style={container}>
           {/* FIX 1: Switch to PNG for reliable transparency, fixing the black background issue. */}
           <Img
-            src={`${base}/logo/Colour-Logo_noBackground.png`}
+            src={`${base}/logo/colour-logo_no-background.png`}
             width='240'
             alt='My Personal Banker'
             style={logo}
