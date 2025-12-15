@@ -47,14 +47,16 @@ const mockInvestments = [
   },
 ];
 
-const baseUrl = process.env.VERCEL_URL
-  ? `https://${process.env.VERCEL_URL}`
-  : 'http://localhost:3000';
+const defaultBaseUrl = process.env.APP_BASE_URL
+  ? process.env.APP_BASE_URL
+  : process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : 'http://localhost:3000';
 
 export const MonthlyDigestEmail = ({
   userFirstName = 'Investor',
   investments = mockInvestments,
-  appBaseUrl = baseUrl,
+  appBaseUrl = defaultBaseUrl,
 }: MonthlyDigestEmailProps) => (
   <Html>
     <Head />
@@ -65,7 +67,7 @@ export const MonthlyDigestEmail = ({
       </Preview>
       <Container style={container}>
         <Img
-          src={`${baseUrl}/logo/Colour-Logo_noBackground.webp`}
+          src={`${appBaseUrl}/logo/Colour-Logo_noBackground.webp`}
           width='240'
           alt='My Personal Banker'
           style={logo}
@@ -87,15 +89,13 @@ export const MonthlyDigestEmail = ({
               </Text>
               <Text style={investmentDetails}>
                 Expires on:{' '}
-                <span style={expirationDate}>
-                  {investment.expirationDate}
-                </span>
+                <span style={expirationDate}>{investment.expirationDate}</span>
               </Text>
             </Container>
           ))}
         </Section>
         <Section style={btnContainer}>
-          <Button style={button} href={`${baseUrl}/investments`}>
+          <Button style={button} href={`${appBaseUrl}/investments`}>
             View All Investments
           </Button>
         </Section>

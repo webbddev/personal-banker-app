@@ -31,23 +31,20 @@ const mockInvestments = [
     formattedValue: '$15,000.00',
     expirationDate: '2024-08-15',
   },
-  {
-    id: '2',
-    name: 'Green Energy Fund',
-    interestRate: 6.8,
-    formattedValue: '$10,000.00',
-    expirationDate: '2024-08-20',
-  },
 ];
 
-const baseUrl = process.env.VERCEL_URL
-  ? `https://${process.env.VERCEL_URL}`
-  : 'http://localhost:3000';
+// Priority: Passed Prop > Env Var > Vercel URL > Localhost
+// This ensures that if you set APP_BASE_URL in Vercel, it always uses that.
+const defaultBaseUrl = process.env.APP_BASE_URL
+  ? process.env.APP_BASE_URL
+  : process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : 'http://localhost:3000';
 
 export const DailyReminderEmail = ({
   userFirstName = 'Investor',
   investments = mockInvestments,
-  appBaseUrl = baseUrl,
+  appBaseUrl = defaultBaseUrl,
 }: DailyReminderEmailProps) => (
   <Html>
     <Head />
@@ -57,7 +54,7 @@ export const DailyReminderEmail = ({
       </Preview>
       <Container style={container}>
         <Img
-          src={`${baseUrl}/logo/Colour-Logo_noBackground.webp`}
+          src={`${appBaseUrl}/logo/Colour-Logo_noBackground.webp`}
           width='240'
           alt='My Personal Banker'
           style={logo}
@@ -84,7 +81,7 @@ export const DailyReminderEmail = ({
           ))}
         </Section>
         <Section style={btnContainer}>
-          <Button style={button} href={`${baseUrl}/investments`}>
+          <Button style={button} href={`${appBaseUrl}/investments`}>
             View All Investments
           </Button>
         </Section>
