@@ -57,62 +57,71 @@ export const MonthlyDigestEmail = ({
   userFirstName = 'Investor',
   investments = mockInvestments,
   appBaseUrl = defaultBaseUrl,
-}: MonthlyDigestEmailProps) => (
-  <Html>
-    <Head />
-    <Body style={main}>
-      <Preview>
-        Your Monthly Investment Digest for{' '}
-        {new Date().toLocaleString('default', { month: 'long' })}
-      </Preview>
-      <Container style={container}>
-        <Img
-          src={`${appBaseUrl}/logo/Colour-Logo_noBackground.webp`}
-          width='240'
-          alt='My Personal Banker'
-          style={logo}
-        />
-        <Text style={paragraph}>Hi {userFirstName},</Text>
-        <Text style={paragraph}>
-          Here is your monthly investment digest. Below you'll find a summary of
-          your current investments that are expiring in{' '}
-          {new Date().toLocaleString('default', { month: 'long' })} and their
-          details.
-        </Text>
-        <Section style={listSection}>
-          {investments.map((investment) => (
-            <Container key={investment.id} style={investmentBox}>
-              <Text style={investmentName}>{investment.name}</Text>
-              <Text style={investmentValue}>
-                {investment.formattedValue} &mdash;{' '}
-                {investment.interestRate.toFixed(2)}% Rate
-              </Text>
-              <Text style={investmentDetails}>
-                Expires on:{' '}
-                <span style={expirationDate}>{investment.expirationDate}</span>
-              </Text>
-            </Container>
-          ))}
-        </Section>
-        <Section style={btnContainer}>
-          <Button style={button} href={`${appBaseUrl}/investments`}>
-            View All Investments
-          </Button>
-        </Section>
-        <Text style={paragraph}>
-          Best,
-          <br />
-          The My Personal Banker team
-        </Text>
-        <Hr style={hr} />
-        <Text style={footer}>
-          © {new Date().getFullYear()} My Personal Banker Inc. All Rights
-          Reserved.
-        </Text>
-      </Container>
-    </Body>
-  </Html>
-);
+}: MonthlyDigestEmailProps) => {
+  // Add URL sanitization and store in 'base'
+  const base = appBaseUrl.replace(/\/$/, '');
+
+  return (
+    <Html>
+      <Head />
+      <Body style={main}>
+        <Preview>
+          Your Monthly Investment Digest for{' '}
+          {new Date().toLocaleString('default', { month: 'long' })}
+        </Preview>
+        <Container style={container}>
+          {/* FIX 1: Switch to PNG for reliable transparency, fixing the black background issue. */}
+          <Img
+            src={`${base}/logo/Colour-Logo_noBackground.png`}
+            width='240'
+            alt='My Personal Banker'
+            style={logo}
+          />
+          <Text style={paragraph}>Hi {userFirstName},</Text>
+          <Text style={paragraph}>
+            Here is your monthly investment digest. Below you'll find a summary
+            of your current investments that are expiring in{' '}
+            {new Date().toLocaleString('default', { month: 'long' })} and their
+            details.
+          </Text>
+          <Section style={listSection}>
+            {investments.map((investment) => (
+              <Container key={investment.id} style={investmentBox}>
+                <Text style={investmentName}>{investment.name}</Text>
+                <Text style={investmentValue}>
+                  {investment.formattedValue} &mdash;{' '}
+                  {investment.interestRate.toFixed(2)}% Rate
+                </Text>
+                <Text style={investmentDetails}>
+                  Expires on:{' '}
+                  <span style={expirationDate}>
+                    {investment.expirationDate}
+                  </span>
+                </Text>
+              </Container>
+            ))}
+          </Section>
+          <Section style={btnContainer}>
+            {/* FIX 2: Use the sanitized 'base' URL for the button link. */}
+            <Button style={button} href={`${base}/investments`}>
+              View All Investments
+            </Button>
+          </Section>
+          <Text style={paragraph}>
+            Best,
+            <br />
+            The My Personal Banker team
+          </Text>
+          <Hr style={hr} />
+          <Text style={footer}>
+            © {new Date().getFullYear()} My Personal Banker Inc. All Rights
+            Reserved.
+          </Text>
+        </Container>
+      </Body>
+    </Html>
+  );
+};
 
 MonthlyDigestEmail.PreviewProps = {
   userFirstName: 'Investor',

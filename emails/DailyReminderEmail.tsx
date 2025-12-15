@@ -45,60 +45,71 @@ export const DailyReminderEmail = ({
   userFirstName = 'Investor',
   investments = mockInvestments,
   appBaseUrl = defaultBaseUrl,
-}: DailyReminderEmailProps) => (
-  <Html>
-    <Head />
-    <Body style={main}>
-      <Preview>
-        Important: You have investments expiring in the next 30 days.
-      </Preview>
-      <Container style={container}>
-        <Img
-          src={`${appBaseUrl}/logo/Colour-Logo_noBackground.png`}
-          width='240'
-          alt='My Personal Banker'
-          style={logo}
-        />
-        <Text style={paragraph}>Hi {userFirstName},</Text>
-        <Text style={paragraph}>
-          The following investments in your portfolio are expiring within the
-          next 30 days. Please review their details and take any necessary
-          action.
-        </Text>
-        <Section style={listSection}>
-          {investments.map((investment) => (
-            <Container key={investment.id} style={investmentBox}>
-              <Text style={investmentName}>{investment.name}</Text>
-              <Text style={investmentValue}>
-                {investment.formattedValue} &mdash;{' '}
-                {investment.interestRate.toFixed(2)}% Rate
-              </Text>
-              <Text style={investmentDetails}>
-                Expires on:{' '}
-                <span style={expirationDate}>{investment.expirationDate}</span>
-              </Text>
-            </Container>
-          ))}
-        </Section>
-        <Section style={btnContainer}>
-          <Button style={button} href={`${appBaseUrl}/investments`}>
-            View All Investments
-          </Button>
-        </Section>
-        <Text style={paragraph}>
-          Best,
-          <br />
-          The My Personal Banker team
-        </Text>
-        <Hr style={hr} />
-        <Text style={footer}>
-          © {new Date().getFullYear()} My Personal Banker Inc. All Rights
-          Reserved.
-        </Text>
-      </Container>
-    </Body>
-  </Html>
-);
+}: DailyReminderEmailProps) => {
+  // Changed to explicit function block
+  // FIX: Sanitize appBaseUrl (remove trailing slash) for safer URL construction.
+  const base = appBaseUrl.replace(/\/$/, '');
+
+  return (
+    <Html>
+      <Head />
+      <Body style={main}>
+        <Preview>
+          Important: You have investments expiring in the next 30 days.
+        </Preview>
+        <Container style={container}>
+          {/* FIX: Switching to PNG to resolve black background issue caused by email clients misinterpreting WEBP transparency.
+              ACTION REQUIRED: Ensure a file named 'Colour-Logo_noBackground.png' is available at the public/logo path. */}
+          <Img
+            src={`${base}/logo/Colour-Logo_noBackground.png`}
+            width='240'
+            alt='My Personal Banker'
+            style={logo}
+          />
+          <Text style={paragraph}>Hi {userFirstName},</Text>
+          <Text style={paragraph}>
+            The following investments in your portfolio are expiring within the
+            next 30 days. Please review their details and take any necessary
+            action.
+          </Text>
+          <Section style={listSection}>
+            {investments.map((investment) => (
+              <Container key={investment.id} style={investmentBox}>
+                <Text style={investmentName}>{investment.name}</Text>
+                <Text style={investmentValue}>
+                  {investment.formattedValue} &mdash;{' '}
+                  {investment.interestRate.toFixed(2)}% Rate
+                </Text>
+                <Text style={investmentDetails}>
+                  Expires on:{' '}
+                  <span style={expirationDate}>
+                    {investment.expirationDate}
+                  </span>
+                </Text>
+              </Container>
+            ))}
+          </Section>
+          <Section style={btnContainer}>
+            {/* FIX: Using 'base' for the button URL */}
+            <Button style={button} href={`${base}/investments`}>
+              View All Investments
+            </Button>
+          </Section>
+          <Text style={paragraph}>
+            Best,
+            <br />
+            The My Personal Banker team
+          </Text>
+          <Hr style={hr} />
+          <Text style={footer}>
+            © {new Date().getFullYear()} My Personal Banker Inc. All Rights
+            Reserved.
+          </Text>
+        </Container>
+      </Body>
+    </Html>
+  );
+};
 
 DailyReminderEmail.PreviewProps = {
   userFirstName: 'Investor',
