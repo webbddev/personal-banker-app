@@ -1,5 +1,11 @@
 // import { prisma } from '@/lib/prisma';
-// import { addDays, startOfDay, startOfMonth, endOfMonth, endOfDay } from 'date-fns';
+// import {
+//   addDays,
+//   startOfDay,
+//   startOfMonth,
+//   endOfMonth,
+//   endOfDay,
+// } from 'date-fns';
 
 // /** Investments expiring in exactly 30 days (UTC) */
 // export async function findInvestmentsExpiringIn30Days() {
@@ -40,56 +46,61 @@
 //   });
 // }
 
-import { prisma } from './prisma';
+import { prisma } from '@/lib/prisma';
 
+/** Investments expiring in exactly 30 days (UTC) */
 export async function findInvestmentsExpiringIn30Days() {
-  // Get today's date and add 30 days in a UTC-safe way
-  const today = new Date();
-  today.setUTCDate(today.getUTCDate() + 30);
+  const now = new Date();
+  // Get the start of the calendar day in the server's local timezone.
+  const startOfToday = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate()
+  );
 
-  // Get the year, month, and day in UTC
-  const year = today.getUTCFullYear();
-  const month = today.getUTCMonth();
-  const day = today.getUTCDate();
+  // Calculate the target calendar day 30 days from now.
+  const targetDate = new Date(startOfToday);
+  targetDate.setDate(startOfToday.getDate() + 30);
 
-  // Create the start and end of the target day in UTC
-  const start = new Date(Date.UTC(year, month, day, 0, 0, 0, 0));
-  const end = new Date(Date.UTC(year, month, day, 23, 59, 59, 999));
+  // Create a 48-hour window around the target date to account for all timezones.
+  // This ensures we find the investment regardless of how the time was stored.
+  const start = new Date(targetDate);
+  start.setHours(0, 0, 0, 0); // Start of the target calendar day.
+
+  const end = new Date(start);
+  end.setDate(start.getDate() + 1); // End of the target calendar day.
 
   return prisma.investment.findMany({
     where: {
       expirationDate: {
         gte: start,
-        lte: end,
+        lt: end, // Use 'lt' (less than) the start of the next day.
       },
     },
-    include: {
-      user: true,
-    },
+    include: { user: true },
   });
 }
 
+/** Investments expiring in the current month (UTC) */
 export async function findInvestmentsExpiringThisMonth() {
-  // Get today's date in UTC
   const now = new Date();
-  const year = now.getUTCFullYear();
-  const month = now.getUTCMonth();
+  const year = now.getFullYear();
+  const month = now.getMonth();
 
-  // Create the start of the current month in UTC
-  const start = new Date(Date.UTC(year, month, 1, 0, 0, 0, 0));
+  // The start of the current month in the server's local timezone.
+  const start = new Date(year, month, 1);
 
-  // Get the end of the month by going to the next month and subtracting a millisecond
-  const end = new Date(Date.UTC(year, month + 1, 1, 0, 0, 0, 0) - 1);
+  // The start of the next month.
+  const end = new Date(year, month + 1, 1);
 
   return prisma.investment.findMany({
     where: {
       expirationDate: {
         gte: start,
-        lte: end,
+        lt: end, // Use 'lt' to include everything up to the end of the month.
       },
     },
-    include: {
-      user: true,
-    },
+    include: { user: true },
+    orderBy: { expirationDate: 'asc' },
   });
 }
