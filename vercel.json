@@ -1,11 +1,11 @@
 {
-  "crons": [
+  "cron": [
     {
-      "path": "/api/notifications/daily?cron_secret=${CRON_SECRET}",
+      "path": "/api/notifications/daily",
       "schedule": "0 9 * * *"
     },
     {
-      "path": "/api/notifications/monthly?cron_secret=${CRON_SECRET}",
+      "path": "/api/notifications/monthly",
       "schedule": "0 9 1 * *"
     }
   ]

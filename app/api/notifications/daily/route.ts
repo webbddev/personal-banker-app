@@ -1,15 +1,17 @@
 import { NextResponse } from 'next/server';
 import { sendDailyReminders } from '@/app/actions/send-reminders';
-
-export const revalidate = 0;
+import { headers } from 'next/headers';
 
 export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const cronSecret = searchParams.get('cron_secret');
+  const headersList = await headers();
+  const cronSecret = headersList.get('x-vercel-cron-secret');
 
   if (process.env.NODE_ENV === 'production') {
     if (cronSecret !== process.env.CRON_SECRET) {
-      return new NextResponse('Unauthorized', { status: 401 });
+      return NextResponse.json(
+        { success: false, message: 'Unauthorized' },
+        { status: 401 }
+      );
     }
   }
 
