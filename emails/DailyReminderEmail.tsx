@@ -54,7 +54,7 @@ export const DailyReminderEmail = ({
       </Preview>
       <Container style={container}>
         <Img
-          src={`${appBaseUrl}/logo/Colour-Logo_noBackground.webp`}
+          src={`${appBaseUrl}/logo/Colour-Logo_noBackground.png`}
           width='240'
           alt='My Personal Banker'
           style={logo}
