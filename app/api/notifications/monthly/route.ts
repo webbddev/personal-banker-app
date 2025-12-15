@@ -4,10 +4,11 @@ import { headers } from 'next/headers';
 
 export async function GET(request: Request) {
   const headersList = await headers();
-  const cronSecret = headersList.get('x-vercel-cron-secret');
+  const authHeader = headersList.get('authorization');
 
+  // Vercel sends the secret in the Authorization header as "Bearer <CRON_SECRET>"
   if (process.env.NODE_ENV === 'production') {
-    if (cronSecret !== process.env.CRON_SECRET) {
+    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
       return NextResponse.json(
         { success: false, message: 'Unauthorized' },
         { status: 401 }
