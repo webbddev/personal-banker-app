@@ -9,7 +9,7 @@ import { formatAmount } from '@/utils/currency-formatter';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const fromEmail = process.env.EMAIL_FROM;
-const appBaseUrl = process.env.APP_BASE_URL || 'http://localhost:3000';
+// const appBaseUrl = process.env.APP_BASE_URL || 'http://localhost:3000';
 
 if (!fromEmail) {
   console.error(
@@ -67,7 +67,7 @@ export async function sendDailyReminder(
       <DailyReminderEmail
         userFirstName={investment.user.name || 'there'}
         investments={[formatInvestment(investment)]}
-        appBaseUrl={appBaseUrl}
+        // appBaseUrl={appBaseUrl}
       />
     ),
   });
@@ -89,7 +89,7 @@ export async function sendMonthlyDigest(
       <MonthlyDigestEmail
         userFirstName={user.name || 'there'}
         investments={investments.map(formatInvestment)}
-        appBaseUrl={appBaseUrl}
+        // appBaseUrl={appBaseUrl}
       />
     ),
   });

@@ -10,7 +10,6 @@ import {
   Section,
   Text,
 } from '@react-email/components';
-import * as React from 'react';
 
 interface DailyReminderEmailProps {
   userFirstName?: string;
@@ -58,7 +57,7 @@ export const DailyReminderEmail = ({
       </Preview>
       <Container style={container}>
         <Img
-          src={`${appBaseUrl}/logo/Colour-Logo_noBackground.webp`}
+          src={`${baseUrl}/logo/Colour-Logo_noBackground.webp`}
           width='240'
           alt='My Personal Banker'
           style={logo}
@@ -85,7 +84,7 @@ export const DailyReminderEmail = ({
           ))}
         </Section>
         <Section style={btnContainer}>
-          <Button style={button} href={`${appBaseUrl}/investments`}>
+          <Button style={button} href={`${baseUrl}/investments`}>
             View All Investments
           </Button>
         </Section>

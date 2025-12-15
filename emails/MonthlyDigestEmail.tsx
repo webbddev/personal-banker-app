@@ -65,7 +65,7 @@ export const MonthlyDigestEmail = ({
       </Preview>
       <Container style={container}>
         <Img
-          src={`${appBaseUrl}/logo/Colour-Logo_noBackground.webp`}
+          src={`${baseUrl}/logo/Colour-Logo_noBackground.webp`}
           width='240'
           alt='My Personal Banker'
           style={logo}
@@ -95,7 +95,7 @@ export const MonthlyDigestEmail = ({
           ))}
         </Section>
         <Section style={btnContainer}>
-          <Button style={button} href={`${appBaseUrl}/investments`}>
+          <Button style={button} href={`${baseUrl}/investments`}>
             View All Investments
           </Button>
         </Section>
