@@ -61,6 +61,8 @@ export const MonthlyDigestEmail = ({
   // Add URL sanitization and store in 'base'
   const base = appBaseUrl.replace(/\/$/, '');
 
+  const imageUrl = `${base}/logo/colour-logo_no-background.png`;
+
   return (
     <Html>
       <Head />
@@ -72,7 +74,8 @@ export const MonthlyDigestEmail = ({
         <Container style={container}>
           {/* FIX 1: Switch to PNG for reliable transparency, fixing the black background issue. */}
           <Img
-            src={`${base}/logo/colour-logo_no-background.png`}
+            // src={`${base}/logo/colour-logo_no-background.png`}
+            src={imageUrl}
             width='240'
             alt='My Personal Banker'
             style={logo}
