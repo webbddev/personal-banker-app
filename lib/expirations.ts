@@ -1,14 +1,23 @@
 import { prisma } from '@/lib/prisma';
-import { addDays, startOfDay, startOfMonth, endOfMonth } from 'date-fns';
+import { addDays, startOfDay, startOfMonth, endOfMonth, endOfDay } from 'date-fns';
 
 /** Investments expiring in exactly 30 days (UTC) */
 export async function findInvestmentsExpiringIn30Days() {
-  const targetDate = startOfDay(addDays(new Date(), 30));
+  const dateIn30Days = addDays(new Date(), 30);
+  const start = startOfDay(dateIn30Days);
+  const end = endOfDay(dateIn30Days);
+
   return prisma.investment.findMany({
-    where: { expirationDate: targetDate },
+    where: {
+      expirationDate: {
+        gte: start,
+        lte: end,
+      },
+    },
     include: { user: true },
   });
 }
+
 
 /** Investments expiring in the current month (UTC) */
 export async function findInvestmentsExpiringThisMonth() {
