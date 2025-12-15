@@ -51,30 +51,34 @@ import { prisma } from '@/lib/prisma';
 /** Investments expiring in exactly 30 days (UTC) */
 export async function findInvestmentsExpiringIn30Days() {
   const now = new Date();
-  // Get the start of the calendar day in the server's local timezone.
-  const startOfToday = new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate()
-  );
 
-  // Calculate the target calendar day 30 days from now.
-  const targetDate = new Date(startOfToday);
-  targetDate.setDate(startOfToday.getDate() + 30);
+  // 1. Calculate the target date (30 days from now)
+  const targetDate = new Date();
+  targetDate.setDate(now.getDate() + 30);
 
-  // Create a 48-hour window around the target date to account for all timezones.
-  // This ensures we find the investment regardless of how the time was stored.
+  // 2. Create a 48-hour search window
+  // We look from the START of the PREVIOUS day to the END of the TARGET day.
+  // Example: If target is Jan 14, we search Jan 13 00:00 to Jan 14 23:59.
+  // This catches:
+  // - "Jan 14" stored as "Jan 13 22:00 UTC" (Timezones ahead of UTC)
+  // - "Jan 14" stored as "Jan 14 05:00 UTC" (Timezones behind UTC)
+
   const start = new Date(targetDate);
-  start.setHours(0, 0, 0, 0); // Start of the target calendar day.
+  start.setDate(start.getDate() - 1); // Go back 1 day
+  start.setHours(0, 0, 0, 0); // Start of that day
 
-  const end = new Date(start);
-  end.setDate(start.getDate() + 1); // End of the target calendar day.
+  const end = new Date(targetDate);
+  end.setHours(23, 59, 59, 999); // End of target day
+
+  console.log(
+    `Checking for investments between ${start.toISOString()} and ${end.toISOString()}`
+  );
 
   return prisma.investment.findMany({
     where: {
       expirationDate: {
-        gte: start,
-        lt: end, // Use 'lt' (less than) the start of the next day.
+        gte: start, // Greater than or equal to start of yesterday
+        lte: end, // Less than or equal to end of target day
       },
     },
     include: { user: true },
