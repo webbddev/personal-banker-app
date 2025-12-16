@@ -22,6 +22,7 @@ import { getLatestRates } from '@/utils/exchange-rate-service';
 import { ChartPieLabel } from '@/components/ChartPieLabel';
 import { ChartPieInteractive } from '@/components/ChartPieInteractive';
 import { InvestmentExpirationCalendar } from '@/components/InvestmentExpirationCalendar';
+import { ExchangeRatesDisplay } from '@/components/ExchangeRatesDisplay';
 
 export default async function DashboardPage() {
   const investments = await getAllInvestmentsSortedByExpiration();
@@ -78,9 +79,9 @@ export default async function DashboardPage() {
                 <ChartPieInteractive data={investmentsByCurrency} />
               </div>
 
-              {/* Maturities Calendar - Upcoming Expirations */}
-              <div className='lg:col-span-2 xl:col-span-2'>
-                <InvestmentExpirationCalendar investments={allInvestments} />
+              {/* Currency Rates */}
+              <div className='lg:col-span- xl:col-span-2'>
+                <ExchangeRatesDisplay />
               </div>
 
               {/* Additional Chart Area - Full width on large screens */}
