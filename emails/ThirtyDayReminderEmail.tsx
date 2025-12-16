@@ -60,7 +60,7 @@ export const ThirtyDayReminderEmail = ({
 }: ThirtyDayReminderEmailProps) => {
   const base = appBaseUrl.replace(/\/$/, '');
 
-  const imageUrl = `${base}/logo/colour-logo_no-background.png`;
+  const imageUrl = `${base}/logo/logo_white_background.jpeg`;
 
   return (
     <Html>
@@ -76,9 +76,8 @@ export const ThirtyDayReminderEmail = ({
           /> */}
           <Img
             src={imageUrl}
-            width='100%' // Set width to 100% of the container
+            width='100%'
             alt='My Personal Banker'
-            // We will define a new style inline or use a modified logo style
             style={fullWidthLogo}
           />
           <Text style={paragraph}>Hi {userFirstName},</Text>
@@ -174,9 +173,9 @@ const container = {
 // };
 
 const fullWidthLogo = {
-  width: '100%', // Ensures it takes up the full width of the container
-  height: 'auto', // Important for maintaining aspect ratio
-  display: 'block', // Necessary for block-level behavior
+  width: '100%',
+  height: 'auto',
+  display: 'block',
 };
 
 const paragraph = {
@@ -248,14 +247,14 @@ const footer = {
 
 const todayDateStyle = {
   fontWeight: 'bold',
-  color: '#2b6cb0', 
+  color: '#2b6cb0',
   padding: '2px 4px',
   borderRadius: '3px',
 };
 
 const timeframeStyle = {
   fontWeight: 'bold',
-  color: '#e53e3e', 
+  color: '#e53e3e',
   backgroundColor: '#fee2e2',
   padding: '1px 3px',
   borderRadius: '3px',
