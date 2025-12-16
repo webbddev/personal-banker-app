@@ -1,11 +1,85 @@
 'use server';
 
+import { checkUser } from '@/lib/checkUser';
 import {
   findInvestmentsFor30DayNotification,
   findInvestmentsForMonthlyNotification,
 } from '@/lib/expirations';
-import { sendDailyReminder, sendMonthlyDigest } from '@/lib/mailer';
+import {
+  sendDailyReminder,
+  sendMonthlyDigest,
+  sendThirtyDayReminder,
+} from '@/lib/mailer';
+import { prisma } from '@/lib/prisma';
 import { groupBy } from '@/utils/group-by';
+import { addDays } from 'date-fns';
+
+/**
+ * Sends an on-demand email to the current user with a list of their investments
+ * expiring in the next 30 days.
+ */
+export async function sendReminderEmail() {
+  try {
+    const user = await checkUser();
+
+    if (!user) {
+      return {
+        success: false,
+        error: 'User not authenticated',
+      };
+    }
+
+    if (!user.email) {
+      return {
+        success: false,
+        error: 'User email not found',
+      };
+    }
+
+    // Get investments expiring in the next 30 days
+    const now = new Date();
+    const thirtyDaysFromNow = addDays(now, 30);
+
+    const investments = await prisma.investment.findMany({
+      where: {
+        userId: user.clerkUserId,
+        expirationDate: {
+          gte: now,
+          lte: thirtyDaysFromNow,
+        },
+      },
+      orderBy: { expirationDate: 'asc' },
+    });
+
+    if (investments.length === 0) {
+      return {
+        success: true,
+        message: 'No investments are expiring in the next 30 days.',
+      };
+    }
+
+    // Send the email
+    const emailSent = await sendThirtyDayReminder(user, investments);
+
+    if (emailSent) {
+      return {
+        success: true,
+        message: `Reminder email sent to ${user.email} with ${investments.length} investment(s)`,
+      };
+    } else {
+      return {
+        success: false,
+        error: 'Failed to send email',
+      };
+    }
+  } catch (error) {
+    console.error('Error sending reminder email:', error);
+    return {
+      success: false,
+      error: 'An error occurred while sending the reminder email',
+    };
+  }
+}
 
 /**
  * Fetches all investments that are expiring in exactly 30 days and sends a

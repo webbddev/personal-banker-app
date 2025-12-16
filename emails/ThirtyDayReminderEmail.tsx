@@ -11,7 +11,7 @@ import {
   Text,
 } from '@react-email/components';
 
-interface MonthlyDigestEmailProps {
+interface ThirtyDayReminderEmailProps {
   userFirstName?: string;
   investments?: {
     id: string;
@@ -53,12 +53,11 @@ const defaultBaseUrl = process.env.APP_BASE_URL
     ? `https://${process.env.VERCEL_URL}`
     : 'http://localhost:3000';
 
-export const MonthlyDigestEmail = ({
+export const ThirtyDayReminderEmail = ({
   userFirstName = 'Investor',
   investments = mockInvestments,
   appBaseUrl = defaultBaseUrl,
-}: MonthlyDigestEmailProps) => {
-  // Add URL sanitization and store in 'base'
+}: ThirtyDayReminderEmailProps) => {
   const base = appBaseUrl.replace(/\/$/, '');
 
   const imageUrl = `${base}/logo/colour-logo_no-background.png`;
@@ -67,24 +66,55 @@ export const MonthlyDigestEmail = ({
     <Html>
       <Head />
       <Body style={main}>
-        <Preview>
-          Your Monthly Investment Digest for{' '}
-          {new Date().toLocaleString('default', { month: 'long' })}
-        </Preview>
+        <Preview>Your 30-day investment expiration reminder</Preview>
         <Container style={container}>
-          <Img
-            // src={`${base}/logo/colour-logo_no-background.png`}
+          {/* <Img
             src={imageUrl}
             width='240'
             alt='My Personal Banker'
             style={logo}
+          /> */}
+          <Img
+            src={imageUrl}
+            width='100%' // Set width to 100% of the container
+            alt='My Personal Banker'
+            // We will define a new style inline or use a modified logo style
+            style={fullWidthLogo}
           />
           <Text style={paragraph}>Hi {userFirstName},</Text>
+          {/* <Text style={paragraph}>
+            Below you will find a list of your current holdings that will reach
+            their{' '}
+            <span style={timeframeStyle}>
+              expiration date within the coming 30 days
+            </span>{' '}
+            from the date this reminder was sent, which was{' '}
+            <span style={todayDateStyle}>
+              {new Date().toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })}
+            </span>
+            . Review these details promptly to ensure a seamless transition or
+            reinvestment.
+          </Text> */}
           <Text style={paragraph}>
-            Here is your monthly investment digest. Below you'll find a summary
-            of your current investments that are expiring in{' '}
-            {new Date().toLocaleString('default', { month: 'long' })} and their
-            details.
+            Below you will find a summary of your investments scheduled to{' '}
+            <span style={timeframeStyle}>expire within the next 30 days</span>{' '}
+            from the date this reminder was sent, which was{' '}
+            <span style={todayDateStyle}>
+              {new Date().toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })}
+            </span>
+            .
+          </Text>
+          <Text style={paragraph}>
+            Review these details promptly to ensure a seamless transition or
+            reinvestment.
           </Text>
           <Section style={listSection}>
             {investments.map((investment) => (
@@ -104,7 +134,6 @@ export const MonthlyDigestEmail = ({
             ))}
           </Section>
           <Section style={btnContainer}>
-            {/* FIX 2: Use the sanitized 'base' URL for the button link. */}
             <Button style={button} href={`${base}/investments`}>
               View All Investments
             </Button>
@@ -125,11 +154,7 @@ export const MonthlyDigestEmail = ({
   );
 };
 
-MonthlyDigestEmail.PreviewProps = {
-  userFirstName: 'Investor',
-} as MonthlyDigestEmailProps;
-
-export default MonthlyDigestEmail;
+export default ThirtyDayReminderEmail;
 
 const main = {
   backgroundColor: '#ffffff',
@@ -143,9 +168,15 @@ const container = {
   maxWidth: '580px',
 };
 
-const logo = {
-  margin: '0 auto',
-  display: 'block',
+// const logo = {
+//   margin: '0 auto',
+//   display: 'block',
+// };
+
+const fullWidthLogo = {
+  width: '100%', // Ensures it takes up the full width of the container
+  height: 'auto', // Important for maintaining aspect ratio
+  display: 'block', // Necessary for block-level behavior
 };
 
 const paragraph = {
@@ -213,4 +244,19 @@ const footer = {
   fontSize: '12px',
   textAlign: 'center' as const,
   marginTop: '24px',
+};
+
+const todayDateStyle = {
+  fontWeight: 'bold',
+  color: '#2b6cb0', 
+  padding: '2px 4px',
+  borderRadius: '3px',
+};
+
+const timeframeStyle = {
+  fontWeight: 'bold',
+  color: '#e53e3e', 
+  backgroundColor: '#fee2e2',
+  padding: '1px 3px',
+  borderRadius: '3px',
 };

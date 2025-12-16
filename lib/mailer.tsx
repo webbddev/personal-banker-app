@@ -5,6 +5,7 @@ import { render } from '@react-email/render';
 import { DailyReminderEmail } from '@/emails/DailyReminderEmail';
 import { MonthlyDigestEmail } from '@/emails/MonthlyDigestEmail';
 import { formatAmount } from '@/utils/currency-formatter';
+import ThirtyDayReminderEmail from '@/emails/ThirtyDayReminderEmail';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const fromEmail = process.env.EMAIL_FROM;
@@ -90,6 +91,28 @@ export async function sendMonthlyDigest(
     subject: '🗓️ Your Monthly Investment Expiration Summary',
     component: (
       <MonthlyDigestEmail
+        userFirstName={user.name || 'there'}
+        investments={investments.map(formatInvestment)}
+        appBaseUrl={appBaseUrl}
+      />
+    ),
+  });
+}
+
+export async function sendThirtyDayReminder(
+  user: User,
+  investments: Investment[]
+): Promise<boolean> {
+  if (!user.email || investments.length === 0) {
+    console.error(`Skipping 30-day reminder for ${user.id}`);
+    return false;
+  }
+
+  return sendEmail({
+    to: user.email,
+    subject: '🔔 Your 30-Day Investment Expiration Reminder',
+    component: (
+      <ThirtyDayReminderEmail
         userFirstName={user.name || 'there'}
         investments={investments.map(formatInvestment)}
         appBaseUrl={appBaseUrl}

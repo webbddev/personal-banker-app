@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Mail, Loader2 } from 'lucide-react';
-import { sendReminderEmail } from '@/app/actions/send-reminder-email';
+import { sendReminderEmail } from '@/app/actions/send-reminders';
 
 export function SendEmailReminderButton() {
   const [isLoading, setIsLoading] = useState(false);
