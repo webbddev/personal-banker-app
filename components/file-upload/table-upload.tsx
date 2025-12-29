@@ -8,10 +8,23 @@ import {
   type FileMetadata,
   type FileWithPreview,
 } from '@/hooks/use-file-upload';
-import { Alert, AlertContent, AlertDescription, AlertIcon, AlertTitle } from '@/components/ui/alert';
+import {
+  Alert,
+  AlertContent,
+  AlertDescription,
+  AlertIcon,
+  AlertTitle,
+} from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import {
   CloudUpload,
   Download,
@@ -99,7 +112,8 @@ export default function TableUpload({
     status: 'completed' as const,
   }));
 
-  const [uploadFiles, setUploadFiles] = useState<FileUploadItem[]>(defaultUploadFiles);
+  const [uploadFiles, setUploadFiles] =
+    useState<FileUploadItem[]>(defaultUploadFiles);
 
   const [
     { isDragging, errors },
@@ -123,7 +137,9 @@ export default function TableUpload({
       // Convert to upload items when files change, preserving existing status
       const newUploadFiles = newFiles.map((file) => {
         // Check if this file already exists in uploadFiles
-        const existingFile = uploadFiles.find((existing) => existing.id === file.id);
+        const existingFile = uploadFiles.find(
+          (existing) => existing.id === file.id
+        );
 
         if (existingFile) {
           // Preserve existing file status and progress
@@ -164,12 +180,14 @@ export default function TableUpload({
               ...file,
               progress: 100,
               status: shouldFail ? ('error' as const) : ('completed' as const),
-              error: shouldFail ? 'Upload failed. Please try again.' : undefined,
+              error: shouldFail
+                ? 'Upload failed. Please try again.'
+                : undefined,
             };
           }
 
           return { ...file, progress: newProgress };
-        }),
+        })
       );
     }, 500);
 
@@ -184,21 +202,31 @@ export default function TableUpload({
   const retryUpload = (fileId: string) => {
     setUploadFiles((prev) =>
       prev.map((file) =>
-        file.id === fileId ? { ...file, progress: 0, status: 'uploading' as const, error: undefined } : file,
-      ),
+        file.id === fileId
+          ? {
+              ...file,
+              progress: 0,
+              status: 'uploading' as const,
+              error: undefined,
+            }
+          : file
+      )
     );
   };
 
   const getFileIcon = (file: File | FileMetadata) => {
     const type = file instanceof File ? file.type : file.type;
-    if (type.startsWith('image/')) return <ImageIcon className="size-4" />;
-    if (type.startsWith('video/')) return <VideoIcon className="size-4" />;
-    if (type.startsWith('audio/')) return <HeadphonesIcon className="size-4" />;
-    if (type.includes('pdf')) return <FileTextIcon className="size-4" />;
-    if (type.includes('word') || type.includes('doc')) return <FileTextIcon className="size-4" />;
-    if (type.includes('excel') || type.includes('sheet')) return <FileSpreadsheetIcon className="size-4" />;
-    if (type.includes('zip') || type.includes('rar')) return <FileArchiveIcon className="size-4" />;
-    return <FileTextIcon className="size-4" />;
+    if (type.startsWith('image/')) return <ImageIcon className='size-4' />;
+    if (type.startsWith('video/')) return <VideoIcon className='size-4' />;
+    if (type.startsWith('audio/')) return <HeadphonesIcon className='size-4' />;
+    if (type.includes('pdf')) return <FileTextIcon className='size-4' />;
+    if (type.includes('word') || type.includes('doc'))
+      return <FileTextIcon className='size-4' />;
+    if (type.includes('excel') || type.includes('sheet'))
+      return <FileSpreadsheetIcon className='size-4' />;
+    if (type.includes('zip') || type.includes('rar'))
+      return <FileArchiveIcon className='size-4' />;
+    return <FileTextIcon className='size-4' />;
   };
 
   const getFileTypeLabel = (file: File | FileMetadata) => {
@@ -221,38 +249,43 @@ export default function TableUpload({
       <div
         className={cn(
           'relative rounded-lg border border-dashed p-6 text-center transition-colors',
-          isDragging ? 'border-primary bg-primary/5' : 'border-muted-foreground/25 hover:border-muted-foreground/50',
+          isDragging
+            ? 'border-primary bg-primary/5'
+            : 'border-muted-foreground/25 hover:border-muted-foreground/50'
         )}
         onDragEnter={handleDragEnter}
         onDragLeave={handleDragLeave}
         onDragOver={handleDragOver}
         onDrop={handleDrop}
       >
-        <input {...getInputProps()} className="sr-only" />
+        <input {...getInputProps()} className='sr-only' />
 
-        <div className="flex flex-col items-center gap-4">
+        <div className='flex flex-col items-center gap-4'>
           <div
             className={cn(
               'flex h-12 w-12 items-center justify-center rounded-full bg-muted transition-colors',
-              isDragging ? 'border-primary bg-primary/10' : 'border-muted-foreground/25',
+              isDragging
+                ? 'border-primary bg-primary/10'
+                : 'border-muted-foreground/25'
             )}
           >
-            <Upload className="h-5 w-5 text-muted-foreground" />
+            <Upload className='h-5 w-5 text-muted-foreground' />
           </div>
 
-          <div className="space-y-2">
-            <p className="text-sm font-medium">
+          <div className='space-y-2'>
+            <p className='text-sm font-medium'>
               Drop files here or{' '}
               <button
-                type="button"
+                type='button'
                 onClick={openFileDialog}
-                className="cursor-pointer text-primary underline-offset-4 hover:underline"
+                className='cursor-pointer text-primary underline-offset-4 hover:underline'
               >
                 browse files
               </button>
             </p>
-            <p className="text-xs text-muted-foreground">
-              Maximum file size: {formatBytes(maxSize)} • Maximum files: {maxFiles}
+            <p className='text-xs text-muted-foreground'>
+              Maximum file size: {formatBytes(maxSize)} • Maximum files:{' '}
+              {maxFiles}
             </p>
           </div>
         </div>
@@ -260,123 +293,138 @@ export default function TableUpload({
 
       {/* Files Table */}
       {uploadFiles.length > 0 && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-medium">Files ({uploadFiles.length})</h3>
-            <div className="flex gap-2">
-              <Button onClick={openFileDialog} variant="outline" size="sm">
+        <div className='space-y-4'>
+          <div className='flex items-center justify-between'>
+            <h3 className='text-sm font-medium'>
+              Files ({uploadFiles.length})
+            </h3>
+            <div className='flex gap-2'>
+              <Button onClick={openFileDialog} variant='outline' size='sm'>
                 <CloudUpload />
                 Add files
               </Button>
-              <Button onClick={clearFiles} variant="outline" size="sm">
+              <Button onClick={clearFiles} variant='outline' size='sm'>
                 <Trash2 />
                 Remove all
               </Button>
             </div>
           </div>
 
-          <div className="rounded-lg border">
+          <div className='rounded-lg border'>
             <Table>
               <TableHeader>
-                <TableRow className="text-xs">
-                  <TableHead className="h-9">Name</TableHead>
-                  <TableHead className="h-9">Type</TableHead>
-                  <TableHead className="h-9">Size</TableHead>
-                  <TableHead className="h-9 w-[100px] text-end">Actions</TableHead>
+                <TableRow className='text-xs'>
+                  <TableHead className='h-9'>Name</TableHead>
+                  <TableHead className='h-9'>Type</TableHead>
+                  <TableHead className='h-9'>Size</TableHead>
+                  <TableHead className='h-9 w-[100px] text-end'>
+                    Actions
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {uploadFiles.map((fileItem) => (
                   <TableRow key={fileItem.id}>
-                    <TableCell className="py-2 ps-1.5">
-                      <div className="flex items-center gap-1">
+                    <TableCell className='py-2 ps-1.5'>
+                      <div className='flex items-center gap-1'>
                         <div
                           className={cn(
-                            'size-8 shrink-0 relative flex items-center justify-center text-muted-foreground/80',
+                            'size-8 shrink-0 relative flex items-center justify-center text-muted-foreground/80'
                           )}
                         >
                           {fileItem.status === 'uploading' ? (
-                            <div className="relative">
+                            <div className='relative'>
                               {/* Circular progress background */}
-                              <svg className="size-8 -rotate-90" viewBox="0 0 32 32">
+                              <svg
+                                className='size-8 -rotate-90'
+                                viewBox='0 0 32 32'
+                              >
                                 <circle
-                                  cx="16"
-                                  cy="16"
-                                  r="14"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  strokeWidth="2"
-                                  className="text-muted-foreground/20"
+                                  cx='16'
+                                  cy='16'
+                                  r='14'
+                                  fill='none'
+                                  stroke='currentColor'
+                                  strokeWidth='2'
+                                  className='text-muted-foreground/20'
                                 />
                                 {/* Progress circle */}
                                 <circle
-                                  cx="16"
-                                  cy="16"
-                                  r="14"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  strokeWidth="2"
+                                  cx='16'
+                                  cy='16'
+                                  r='14'
+                                  fill='none'
+                                  stroke='currentColor'
+                                  strokeWidth='2'
                                   strokeDasharray={`${2 * Math.PI * 14}`}
                                   strokeDashoffset={`${2 * Math.PI * 14 * (1 - fileItem.progress / 100)}`}
-                                  className="text-primary transition-all duration-300"
-                                  strokeLinecap="round"
+                                  className='text-primary transition-all duration-300'
+                                  strokeLinecap='round'
                                 />
                               </svg>
                               {/* File icon in center */}
-                              <div className="absolute inset-0 flex items-center justify-center">
+                              <div className='absolute inset-0 flex items-center justify-center'>
                                 {getFileIcon(fileItem.file)}
                               </div>
                             </div>
                           ) : (
-                            <div className="not-[]:size-8 flex items-center justify-center">
+                            <div className='not-[]:size-8 flex items-center justify-center'>
                               {getFileIcon(fileItem.file)}
                             </div>
                           )}
                         </div>
-                        <p className="flex items-center gap-1 truncate text-sm font-medium">
+                        <p className='flex items-center gap-1 truncate text-sm font-medium'>
                           {fileItem.file.name}
                           {fileItem.status === 'error' && (
-                            <Badge variant="destructive" size="sm" appearance="light">
+                            <Badge
+                              variant='destructive'
+                              className='h-5 px-1.5 text-[10px] uppercase'
+                            >
                               Error
                             </Badge>
                           )}
                         </p>
                       </div>
                     </TableCell>
-                    <TableCell className="py-2">
-                      <Badge variant="secondary" className="text-xs">
+                    <TableCell className='py-2'>
+                      <Badge variant='secondary' className='text-xs'>
                         {getFileTypeLabel(fileItem.file)}
                       </Badge>
                     </TableCell>
-                    <TableCell className="py-2 text-sm text-muted-foreground">
+                    <TableCell className='py-2 text-sm text-muted-foreground'>
                       {formatBytes(fileItem.file.size)}
                     </TableCell>
-                    <TableCell className="py-2 pe-1">
-                      <div className="flex items-center gap-1">
+                    <TableCell className='py-2 pe-1'>
+                      <div className='flex items-center gap-1'>
                         {fileItem.preview && (
-                          <Button variant="dim" size="icon" className="size-8" asChild>
-                            <Link href={fileItem.preview} target="_blank">
-                              <Download className="size-3.5" />
+                          <Button
+                            variant='ghost'
+                            size='icon'
+                            className='size-8'
+                            asChild
+                          >
+                            <Link href={fileItem.preview} target='_blank'>
+                              <Download className='size-3.5' />
                             </Link>
                           </Button>
                         )}
                         {fileItem.status === 'error' ? (
                           <Button
                             onClick={() => retryUpload(fileItem.id)}
-                            variant="dim"
-                            size="icon"
-                            className="size-8 text-destructive/80 hover:text-destructive"
+                            variant='ghost'
+                            size='icon'
+                            className='size-8 text-destructive/80 hover:text-destructive'
                           >
-                            <RefreshCwIcon className="size-3.5" />
+                            <RefreshCwIcon className='size-3.5' />
                           </Button>
                         ) : (
                           <Button
                             onClick={() => removeUploadFile(fileItem.id)}
-                            variant="dim"
-                            size="icon"
-                            className="size-8"
+                            variant='ghost'
+                            size='icon'
+                            className='size-8'
                           >
-                            <Trash2 className="size-3.5" />
+                            <Trash2 className='size-3.5' />
                           </Button>
                         )}
                       </div>
@@ -391,7 +439,7 @@ export default function TableUpload({
 
       {/* Error Messages */}
       {errors.length > 0 && (
-        <Alert variant="destructive" appearance="light" className="mt-5">
+        <Alert variant='destructive' appearance='light' className='mt-5'>
           <AlertIcon>
             <TriangleAlert />
           </AlertIcon>
@@ -399,7 +447,7 @@ export default function TableUpload({
             <AlertTitle>File upload error(s)</AlertTitle>
             <AlertDescription>
               {errors.map((error, index) => (
-                <p key={index} className="last:mb-0">
+                <p key={index} className='last:mb-0'>
                   {error}
                 </p>
               ))}

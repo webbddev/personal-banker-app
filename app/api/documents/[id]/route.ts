@@ -1,12 +1,16 @@
 // app/api/documents/[id]/route.ts
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma';
 import { del } from '@vercel/blob';
 
+/**
+ * REFACTORED: Next.js 15 requires 'params' to be awaited as a Promise.
+ * Also changed 'Request' to 'NextRequest' for better type alignment.
+ */
 export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> } // Define params as a Promise
 ) {
   try {
     const { userId } = await auth();
@@ -15,10 +19,13 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Await the params promise to get the ID
+    const { id } = await context.params;
+
     // Find the document and verify ownership
     const document = await prisma.document.findUnique({
       where: {
-        id: params.id,
+        id: id,
       },
     });
 
@@ -38,17 +45,17 @@ export async function DELETE(
       await del(document.blobUrl);
       console.log('Blob deleted successfully:', document.blobUrl);
     } catch (blobError) {
+      // Log but continue; if the blob is already gone, we still want the DB record removed
       console.error(
         'Error deleting blob (continuing with DB deletion):',
         blobError
       );
-      // Continue with database deletion even if blob deletion fails
     }
 
     // Delete from database
     await prisma.document.delete({
       where: {
-        id: params.id,
+        id: id,
       },
     });
 
