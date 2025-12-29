@@ -4,13 +4,9 @@ import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma';
 import { del } from '@vercel/blob';
 
-/**
- * REFACTORED: Next.js 15 requires 'params' to be awaited as a Promise.
- * Also changed 'Request' to 'NextRequest' for better type alignment.
- */
 export async function DELETE(
   request: NextRequest,
-  context: { params: Promise<{ id: string }> } // Define params as a Promise
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const { userId } = await auth();
@@ -19,37 +15,31 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Await the params promise to get the ID
+    // Await the params promise (Next.js 15 requirement)
     const { id } = await context.params;
 
-    // Find the document and verify ownership
-    const document = await prisma.document.findUnique({
+    // Find the document and verify ownership in one query
+    const document = await prisma.document.findFirst({
       where: {
         id: id,
+        userId: userId, // Verify ownership
       },
     });
 
     if (!document) {
       return NextResponse.json(
-        { error: 'Document not found' },
+        { error: 'Document not found or unauthorized' },
         { status: 404 }
       );
     }
 
-    if (document.userId !== userId) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
-
+    // Delete from Vercel Blob Storage first
     try {
-      // Delete from Vercel Blob Storage
       await del(document.blobUrl);
-      console.log('Blob deleted successfully:', document.blobUrl);
+      console.log('✅ Blob deleted:', document.blobUrl);
     } catch (blobError) {
-      // Log but continue; if the blob is already gone, we still want the DB record removed
-      console.error(
-        'Error deleting blob (continuing with DB deletion):',
-        blobError
-      );
+      console.error('⚠️ Blob deletion failed (continuing):', blobError);
+      // Continue to delete DB record even if blob deletion fails
     }
 
     // Delete from database
@@ -59,12 +49,14 @@ export async function DELETE(
       },
     });
 
+    console.log('✅ Database record deleted:', id);
+
     return NextResponse.json({
       success: true,
       message: 'Document deleted successfully',
     });
   } catch (error) {
-    console.error('Error deleting document:', error);
+    console.error('❌ DELETE Error:', error);
     return NextResponse.json(
       {
         error: 'Internal Server Error',

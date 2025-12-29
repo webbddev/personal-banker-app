@@ -1,35 +1,39 @@
-// app/api/documents/route.ts
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma';
 
+// GET: Fetch existing docs (Keep your existing GET logic here)
 export async function GET() {
+  const { userId } = await auth();
+  if (!userId) return NextResponse.json([], { status: 401 });
+  const docs = await prisma.document.findMany({ where: { userId } });
+  return NextResponse.json(docs);
+}
+
+// NEW POST: Save document metadata after successful upload
+export async function POST(request: NextRequest) {
   try {
     const { userId } = await auth();
+    if (!userId)
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    if (!userId) {
-      return new NextResponse('Unauthorized', { status: 401 });
-    }
+    const { blobUrl, filename, fileType, fileSize } = await request.json();
 
-    const documents = await prisma.document.findMany({
-      where: {
-        userId: userId,
-      },
-      select: {
-        id: true,
-        blobUrl: true,
-        filename: true,
-        fileType: true,
-        fileSize: true,
-      },
-      orderBy: {
-        id: 'desc',
+    const document = await prisma.document.create({
+      data: {
+        userId,
+        blobUrl,
+        filename,
+        fileType,
+        fileSize,
       },
     });
 
-    return NextResponse.json(documents);
+    return NextResponse.json(document);
   } catch (error) {
-    console.error('Error fetching documents:', error);
-    return new NextResponse('Internal Server Error', { status: 500 });
+    return NextResponse.json(
+      { error: 'Failed to save document' },
+      { status: 500 }
+    );
   }
 }
