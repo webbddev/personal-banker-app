@@ -52,6 +52,7 @@ export const AnyNull = runtime.AnyNull
 
 export const ModelName = {
   User: 'User',
+  Document: 'Document',
   Investment: 'Investment'
 } as const
 
@@ -82,6 +83,19 @@ export const UserScalarFieldEnum = {
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
+
+
+export const DocumentScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  blobUrl: 'blobUrl',
+  filename: 'filename',
+  fileType: 'fileType',
+  fileSize: 'fileSize',
+  uploadedAt: 'uploadedAt'
+} as const
+
+export type DocumentScalarFieldEnum = (typeof DocumentScalarFieldEnum)[keyof typeof DocumentScalarFieldEnum]
 
 
 export const InvestmentScalarFieldEnum = {

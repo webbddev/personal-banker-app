@@ -5,7 +5,7 @@ generator client {
   // 1. Updated provider for Prisma ORM v7 (Rust-free client)
   provider = "prisma-client"
   // 2. Output path is now mandatory in Prisma 7
-  output   = "./generated/prisma" 
+  output   = "./generated/prisma"
 }
 
 datasource db {
@@ -23,6 +23,20 @@ model User {
   createdAt   DateTime     @default(now()) @map("created_at")
   updatedAt   DateTime     @updatedAt @map("updated_at")
   investments Investment[]
+  documents   Document[]
+}
+
+model Document {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [clerkUserId], onDelete: Cascade)
+  blobUrl    String   @unique // Vercel Blob URL - marked as unique
+  filename   String
+  fileType   String
+  fileSize   Int
+  uploadedAt DateTime @default(now())
+
+  @@index([userId])
 }
 
 model Investment {

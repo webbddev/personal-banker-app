@@ -1,0 +1,254 @@
+BlobSkip to content
+webbddev's projects
+webbddev's projects
+
+Hobby
+
+Find…
+F
+
+Take action to secure your projects.
+
+Update Projects
+personal-banker-app
+All Databases
+
+Blob Store
+
+Region
+
+FRA1
+Created
+
+27m ago
+
+Storage
+
+0 B
+
+Storage (average)
+
+0 B/1 GB
+
+Simple Operations
+
+0/10k
+
+Advanced Operations
+
+0/2k
+
+Data Transfer
+
+0 B/10 GB
+
+Quickstart
+
+
+
+
+
+BLOB_READ_WRITE_TOKEN="vercel_blob_rw_uTm5HG1FqRKwP7Vc_iP7J7vobEMcd1EiwMiB5Eys6rWTrzX"
+Browser
+Getting Started
+Projects
+Settings
+RESOURCES
+
+Documentation
+@vercel/blob
+Getting Started
+Get started using this Blob Storage by following the steps in one of these guides.
+
+
+Next.js
+
+SvelteKit
+1
+
+Connect to a Vercel project
+
+If not yet done, start by connecting a project to your Blob store. This action injects the BLOB_READ_WRITE_TOKEN environment variable in your Vercel project.
+If you don’t already have a project, you can get started with a Blob template.
+2
+
+Prepare your local project
+
+Run vercel link and vercel env pull in your terminal so you have the latest environment variables for your project locally.
+3
+
+Install our package
+
+Then run npm install @vercel/blob to install the Vercel Blob SDK.
+4
+
+Use in code
+
+This example creates a page to upload files using the Next.js App Router and the server upload method: the file goes through your server first and then to Vercel Blob.
+
+⚠️ Server uploads are limited to 4.5 MB, if you need more than that, see the client uploads quickstart.
+
+src/app/avatar/upload/page.tsx
+TypeScript
+
+TypeScript
+
+'use client';
+
+import type { PutBlobResult } from '@vercel/blob';
+import { useState, useRef } from 'react';
+
+export default function AvatarUploadPage() {
+  const inputFileRef = useRef<HTMLInputElement>(null);
+  const [blob, setBlob] = useState<PutBlobResult | null>(null);
+  return (
+    <>
+      <h1>Upload Your Avatar</h1>
+
+      <form
+        onSubmit={async (event) => {
+          event.preventDefault();
+
+          if (!inputFileRef.current?.files) {
+            throw new Error("No file selected");
+          }
+
+          const file = inputFileRef.current.files[0];
+
+          const response = await fetch(
+            `/api/avatar/upload?filename=${file.name}`,
+            {
+              method: 'POST',
+              body: file,
+            },
+          );
+
+          const newBlob = (await response.json()) as PutBlobResult;
+
+          setBlob(newBlob);
+        }}
+      >
+        <input name="file" ref={inputFileRef} type="file" accept="image/jpeg, image/png, image/webp" required />
+        <button type="submit">Upload</button>
+      </form>
+      {blob && (
+        <div>
+          Blob url: <a href={blob.url}>{blob.url}</a>
+        </div>
+      )}
+    </>
+  );
+}
+src/app/api/avatar/upload/route.ts
+TypeScript
+
+TypeScript
+
+import { put } from '@vercel/blob';
+import { NextResponse } from 'next/server';
+
+export async function POST(request: Request): Promise<NextResponse> {
+  const { searchParams } = new URL(request.url);
+  const filename = searchParams.get('filename');
+
+  // ⚠️ The below code is for App Router Route Handlers only
+  const blob = await put(filename, request.body, {
+    access: 'public',
+  });
+
+  // Here's the code for Pages API Routes:
+  // const blob = await put(filename, request, {
+  //   access: 'public',
+  // });
+
+  return NextResponse.json(blob);
+}
+
+// The next lines are required for Pages API Routes only
+// export const config = {
+//   api: {
+//     bodyParser: false,
+//   },
+// };
+
+Home
+Docs
+Knowledge Base
+Academy
+Help
+Contact
+All systems normal.
+
+Select a display theme:
+
+system
+
+light
+
+dark
+
+132) File uploads in next.js using vercel blob – YouTube by Aditya Singh
+https://www.youtube.com/watch?v=t6tSwxIqXao
+
+Transcript:
+(00:00) Versel blob is a scalable and cost effective object storage service. That means you can upload files from your Nexus application and store it inside of the versel blob. The good thing is all of the files that get stored inside of versel blob is encrypted using AES 256 encryption and whenever a client requests those file it gets decrypted on the fly and then it gets delivered to the client.
+(00:27) Now there are two ways to upload files from your NexJS application. Now you can either use client upload or you can go with something like server upload. One thing to keep in mind is that if your application is hosted somewhere in a platform like Versel then you are going to have a limitation in terms of server upload because because that is a limitation from Versel itself.
+(00:49) You can only upload a file size of max up to 4.5 MB. So for that specific reason, I'm going to be showing you the client upload approach which will allow you to upload files up to 5TB in size. Okay, let's start this by creating a fresh NexJS project. So I'm going to execute this command create next app and then let's call this nextJS versal blob tutorial.
+(01:19) I will then choose all of the default option. Let's open this folder inside of the code editor now. Okay. Now, here's what I'm going to be doing. I'll first create a file upload page through which a user can choose their file and then we are going to create a client upload route.
+(01:36) This route will be responsible for generating a token that will allow us to upload the file to the versal blob. And we need this token because all of this upload functionality will be handled directly from the client side. That means directly from the client, we'll be uploading files to Versel blob. But before we do this, let's actually do the basic setup first.
+(01:59) If you do not have a versel account, make sure you create a versel account. And then once you are logged in, you need to click on this storage tab. And here we need to create a database. We need to use the blob fast object storage database that we are seeing over here. I'm going to click on continue. So it looks like I've already created a blob store and in free plan only one active blob store is allowed at a time.
+(02:28) So let me quickly delete that. I'll click on this one. I'll go to settings and then I'm going to click on delete store. I'm going to enter the name of my store and then I'm going to say delete my blob store. Okay, so this is giving me this error. Unable to delete the blob store. I don't know why that happened.
+(02:48) Let's wait for a few minutes. Actually, the issue was that it has some data. So, I had to delete that data and then it allowed me to delete the database. Okay. Now, I'm going to click on this create database. I'm going to choose this blob fast object storage. Continue. Let's give this a name.
+(03:06) I'm going to call this versal blob. Create. Now, the database has been created. If you scroll a little bit up, you'll see this section where it tells you how do you need to upload file from your application. But what we are interested in at this point is this env.local section. So just click on this and then we need to click on this show secret and then I'm going to copy this entire thing.
+(03:32) I'll come to my code editor and inside of this I'm going to create a new file called env.lo local and then within this file I'm going to paste that read write token. The next step is to install the versel blob npm module. To do that I'm going to execute this command pnpm adders blob. If you're using npm do npm install blob.
+(03:58) Now at this point our setup is ready. The next thing that I'll do I'll simply go to this homepage which is this page.tsx file inside of the app directory. And I'm going to replace this entire content with some simple JSX for now. Okay. So let me show you what do we have at this point. First of all, I've created this client component.
+(04:17) This is the homepage. This has this heading file upload. Then this has this form and then nothing else. The form contains the input which is going to be of type file. And for now we only allow image to be uploaded. And this is label. And then we have this button which actually submits the form.
+(04:36) Okay, let me start the development server. Let's go to localhost 3000. And this is what we have at this moment. Let's now do this step by step. The first thing that I'm going to be doing is whenever this form gets submitted, I'm going to execute a call back function. So let's actually set up an event listener on submit.
+(04:56) And let's call this handle form submit inside of this. And then here I'm going to create this function. handle form subummit. Let's make this an async function. Now this is going to give us access to the event and then this event is going to be of type a form event that is coming from react and then it is going to be an HTML form element.
+(05:19) The first thing that we are doing is we are preventing the default behavior. Then I'm going to add a try catch block. Inside of this try block we'll add the upload logic. So let's add this to for now. add file upload logic. If there's any error, let's log the error for now. And I think it's a good idea that we use try catch finally because we are also going to be showing the progress of the file upload.
+(05:46) So to do that, I'm going to first create some state variables. Let me come here and let me create this first state variable. Let's call this progress and then set progress. We'll use use state and we'll set this initial value to zero. I'm going to create another state variable. Let's call this loading. I mean let's call this uploading.
+(06:09) Set uploading. And initially this is going to have a value of false. In the finally block I'm going to say set uploading to false because if we are here that means we are done with the upload process. So every time when the form gets submitted we need to set the progress to zero like this and then the first thing that we need is we need to access the file that user has selected to do that we are going to create a ref and attach it to the HTML input element.
+(06:44) So inside of this function definition only I'm going to create HTML HTML input ref. Let's use use ref. And right now we are setting this to null. But we can specify that this is going to be an HTML input element. HTML input element. Okay. And then I'll go to my input element over here. I'm going to add the ref attribute.
+(07:14) So I'm going to come here, paste it right here. Perfect. Okay. Now at this point we will set up a validation that will make sure we only submit this form if the user has actually chosen a file. So to check that I'm going to check HTML input refiles and we need to make sure that this is not empty. If we do not have any file selected I'm going to throw this error. Select a file to continue.
+(07:44) If we are here that means user has selected some file that means we need to access the file and we can get the file by doing something like HTML input ref current dot files and we need to get the first item that is present in this one. Now inside of this try block I'm going to call this upload method and we need to import this upload method from the versal blob.
+(08:10) So I'm going to import upload from versal blob and make sure you do client also. So now we have this upload method available. I'm going to call this upload method right over here. Now this expect you to pass a few argument. Now in the first one you need to specify the path name and here you can pass stuff like this. For example, let's say project.
+(08:38) Then let's say here goes your project ID and then here it could be the name of the file that you're trying to upload and you can access the name of the file by doing something like file name over here. In the second argument you need to pass the file that user is trying to upload and then in the third option which is going to be an object you are going to configure some of the things related with the versal blob for this particular file.
+(09:07) The first one is going to be access whether this is going to be a private file or public. The second is handle upload URL. What is going to happen here is that whenever this form gets submitted, we are going to call this upload method. It is going to make a request to this handle upload URL and get the token because if we do not have the token, we cannot upload the file to versel blob.
+(09:33) Now within this object we also have this method available which is called on upload progress. As the name suggests this is going to give you access to the progress of the upload. This is going to be progress event and then here what I'll do I'll simply call set progress and within this one I'm going to say progress event dot percentage. Perfect.
+(09:54) Now what is going to happen is once this upload process finish, it is also going to give you access to a blob URL which you can use to render the uploaded image within your application. I'm going to create another state variable. Let's call this blob URL. Set blob URL. This is also going to be a state variable.
+(10:17) Let's keep this null for now. And here once the upload process completes, we're just going to update the set blob URL to the blob URL that we got from the versal blob. And it's also a good idea that we specify a type over here in case of set blob URL. So I'm going to say that this is going to be either null or it is going to be of type put blob result that we got from vers.
+(10:45) Make sure we import the type of put blob result over here. and then it could also be null. So at this point what we have done is whenever the form gets submitted setting the progress to zero we are preventing the default behavior. We're checking if the user has selected any file we're getting that file we are trying to call the upload method which is going to first make a request to this API upload to get the token.
+(11:09) If we have the token it is going to upload the file and then it is also going to update the progress in real time. If there's any error, we are logging the error. And then when the file upload is complete, we are setting the blob URL to this state variable. And then finally, we are setting that we are not uploading file anymore.
+(11:28) Now there's just few more things we need to do on this page. We need to show these values somehow in the page. So for that what I'm going to do, I'm going to paste entire JSX that I have written previously like this. Now let me show you what we're doing over here. So first of all we have this form and then we have this input.
+(11:51) We have specified the ref. This is going to be the ref HTML input ref. So I'm going to make sure we pass the correct value over here. And then we also need to listen for this onchange event. We're going to be creating this in a little bit of time. Let's move forward. Here we have added this label and we are specifying the selected file name.
+(12:15) So once we do this handle file change we are going to be creating the state variable also. And then we have added this uploading section which is going to show a progress bar representing the progress of the file upload. Here we have this button. This is going to be disabled when we are uploading or if we do not have any selected files at this moment.
+(12:35) And then here what we're doing is if we have the blob we are saying upload is successful and then we are printing the URL over here. So once the user clicks on this URL they'll be able to view the uploaded image in this case and let's actually call this blob only the state variable that we have created.
+(12:56) So I'm going to go right over here instead of this blob URL let's call this blob which is because this is just going to be an object set blob here also and then here I'm going to say set blob okay now we need to create this handle file change method and then we also need to create this state variable selected file name okay let's do this so inside of here I'm going to create selected file name set selected Ed file name this is again going to be null in the beginning and also I can specify that this can either be a string or null. So I can say this
+(13:36) could be a string or null. Just before this handle form submit method I'll simply add my method handle file change. Let me quickly fix the HTML input reference like this. Now this is going to be handy in those scenarios like when the user has selected a file and then they decided to switch to another file without actually uploading the file that they have first selected.
+(14:01) So in that case we're just setting these value to null. Now at this point if I just come here and reload this page I can click on this and then I can choose my image. I can click on upload file. You'll see that nothing really happens. It's because we are getting this error fail to retrieve the client token. That actually makes sense.
+(14:25) So the last step is we need to create an API endpoint which is going to be responsible for generating a token for file upload. So inside of this app directory, let's create a new folder. Let's call this API. Inside of this, let's create a new folder. Let's call this upload. And then within this upload, let's create this new file route. TS. Okay.
+(14:46) Okay, now in this one, let me quickly copy paste the code to save myself some time. Here's what I'm doing in this one. First of all, the only method that we are interested in is this post method. We are getting the request. We're getting the body and then we are calling this handle upload method that we have imported from versal blob client.
+(15:06) If we have any error while calling this handle upload, we are sending this very generic response. Otherwise, we are sending this successful response. Now here what we are doing is inside of this handle upload, we're passing the body that we got from the client, we are passing the request and then we have this very important function on before generate token.
+(15:32) Now this is going to be a very important function. So let me explain all of these options one by one. Now allowed content types. You can see that we have specified that only images are allowed. Now what this means is that your versel blob is not going to accept any file other than these file. Okay, especially for the token that we generated in this particular request.
+(15:57) And the way this is going to be working is so let's say here you have specified that only images are allowed and let's say for some reason on the client side these things can be manipulated. So let's say somebody comes and then they just change this accept attribute to upload videos also. You can obviously implement some basic validation on the client side.
+(16:19) But what is going to happen is it is going to upload the entire video file and then in the end when it checks the type of this file it is going to reject that. Yeah. So it is not going to work. So it is our way of making sure that only image gets uploaded. Then allow override. So this is a very interesting option.
+(16:42) So a lot of the time what happens is within your application. So let's say you are creating an Nexus application where user can create multiple of these chat bots. Now each of these chat bots can have let's say hero image. So generally what happens is the structure for those URL remains consistent. So you want the user to be able to change the image that gets uploaded for their chatbot.
+(17:06) But you do not want to change the backend URL. In that case simply providing this option is going to enable you to do that. If you do not provide this option, if you set this to false, it is always going to generate a new URL every single time whenever you upload a file. And what it is going to do is let's say if you are trying to upload a file that a user has already uploaded, it is going to throw an error.
+(17:36) So you can allow override on that case. Then we have this token payload information. Now what this means is when the file upload is successful versus blob is going to send an event which is going to be captured by this call back on upload complete and here you have this option of sending some of the payload and then you can get access to the payload right over here and you can use this payload to store the information inside of your database like which user has uploaded the file the project ID user ID things like that you get the idea basically now do keep
+(18:08) in mind that when I'm showing these things locally it is not going to work because virtual block cannot make a request to my local host instance. It is not going to work unless I use some sort of a tunneling thing like narrow. Okay, let me quickly explain one more time what we're doing. So once the user chooses a file from here, we call this handle form submit method.
+(18:30) Here we are going to call this upload method that we have imported from versal blob client. Okay. And then this is going to make a request to the API upload that we have just created which is this one here. We'll get the request. We'll try to generate a token and then it is going to just send that response back.
+(18:53) The client will get the token and then it will try to upload the file to the virtual blob. Once the file upload is complete, we'll get the blob URL. We'll add this to blob right over here. And then we are going to render the blob on the page like this. So this is just going to render the blob URL.
+(19:13) And when when we click on that it is going to show us the image that the user has uploaded. So let's see if this works or not. So I'm going to come here reload this page. I'm going to click on this one. Choose my file. I'm going to click upload file. Okay. So this worked. You can see upload successful. But we didn't see the progress bar.
+(19:34) I'll take a look at that in a little bit of time. But let's first see if we are able to see this file or not. So if I click on this, it opens this new tab. And you can see we are able to access our file. So this is good. Now let's try to understand why the upload progress is not showing. I probably have missed something. Yeah, it's probably because I also need to set uploading to true whenever the form gets submitted like this. Yep.
+(20:05) Let's try this again. Let me reload this one. I'm going to choose the file again. Going to click on upload file. And now you can see the progress right over here. Okay, it looks like the file has uploaded. Let me click on this. This is the file. Perfect. You can also come to the blob storage inside of your versal account and then you can browse the file.
+(20:28) Now one thing to keep in mind is that here you'll notice that we have this folder present called projects which contains this project ID and then we have this image that we have uploaded. So this is an interesting thing. This is coming from here inside of the client side when we are calling this upload method in the first argument we are specifying the name of the file.
+(20:49) And here I have specified the name of the file like this. Once you do something like this, it is going to create different folders. This could be a good thing for organizational stuff. That means at this point we are able to upload the files from our Nexus application to Versel blob. Let me quickly show you how you can read files from versel blob.
+(21:12) So let's say if you want to get a list of all of the files that is present inside of your vers blob and then render them probably in a gallery or something especially in this case I'm simply going to create a new folder inside of this app directory. Let's call this gallery. One second. Yeah. And then within this one let's create a new file page.tsx.
+(21:39) I'm simply add my code right over here. Now let me show you what I'm doing in this one. First of all, this is a server component. I'm importing the list method from versal blob. Okay. And here I'm just calling the list method which is going to give me access to all of the blobs that are present inside of my vers blob.
+(21:58) Then I'm rendering these images right over here. If we do not have any images, I'll say no images found. Otherwise, I'm rendering this gallery over here. So if I just go to the gallery, you'll see that I'm getting this error invalid src prop. And this actually makes sense because next year is complaining to me that your next application is trying to load an image file from this particular domain.
+(22:24) And the reason why this gives you this error because every image that gets loaded within your NexJS application is optimized within your server to increase the performance. So for the time being I'm just going to copy this. I'll come to my next application. Go to next.config.ts and inside of this I'll probably tell cloud add this to remote patterns. This will do the job. Okay.
+(22:53) I'm going to save this. Now this has already detected the configuration change. It already restarted the server. So that's a good thing. Now if I just come here, reload this page, you'll see that we are able to see all of the images that we have uploaded. Let me try uploading another image. I'll choose this one. Click on upload file.
+(23:16) Okay, so this is also uploaded. Let's go to gallery. And now we are able to see this image also. Perfect. Okay, that's it for this video. If you found this video valuable, do like and subscribe to my channel. I'll catch you in the next one. 
+
+
+

@@ -1,6 +1,7 @@
 import {
   LayoutDashboard,
   Sparkle,
+  FileText,
   Coins,
   User,
   CreditCard,
@@ -36,15 +37,15 @@ const suggestionItems = [
     url: '/dashboard',
     icon: LayoutDashboard,
   },
-  // {
-  //   title: 'Ask AI',
-  //   url: '/ai-assistant',
-  //   icon: Sparkle,
-  // },
   {
     title: 'Investments',
     url: '/investments',
     icon: Coins,
+  },
+  {
+    title: 'Documents',
+    url: '/upload',
+    icon: FileText,
   },
 ];
 
@@ -92,7 +93,7 @@ const AppSidebar = async () => {
               >
                 <div className='w-full max-w-[200px] aspect-square relative group-data-[collapsible=icon]:w-8 group-data-[collapsible=icon]:h-8'>
                   <Image
-                    src='/logo/Colour-Logo_noBackground.webp'
+                    src='/logo/colour-logo_no-background.webp'
                     alt='logo'
                     fill
                     className='object-contain'
