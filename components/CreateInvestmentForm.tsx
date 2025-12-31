@@ -41,7 +41,7 @@ import { useRouter } from 'next/navigation';
 import BackButton from './BackButton';
 import { createInvestment } from '@/app/actions/investmentActions';
 import { useState } from 'react';
-import { ExpirationStatus } from '@/prisma/generated/prisma/enums.js';
+import { ExpirationStatus } from '@/prisma/generated/prisma/enums';
 
 export default function CreateInvestmentForm() {
   const { toast } = useToast();

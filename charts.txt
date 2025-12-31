@@ -1,0 +1,55 @@
+what about https://www.binance.com/en/binance-api - would I be able to fetch the hourly data for free ?
+
+Using the Binance API is a popular alternative, but there is one major catch for your specific "EUR/USD" request: Binance is a crypto exchange, not a traditional forex broker.
+
+Here is how it works for your Next.js app:
+
+1. Is it Free?
+Yes. Binance's market data endpoints (Klines/Candlesticks) are public and free. You do not even need an API key to fetch historical price data for charting.
+
+Endpoint: GET /api/v3/klines
+
+Data: It provides Open, High, Low, Close (OHLC) and volume data.
+
+Granularity: You can choose 1h (hourly) easily.
+
+2. The "EUR/USD" Problem
+Binance does not have a direct EUR/USD pair because they do not trade traditional "Fiat vs Fiat" pairs. They trade "Crypto vs Fiat" or "Crypto vs Stablecoin."
+
+The closest alternative: EUR/USDT (Euro vs Tether stablecoin).
+
+Since USDT (Tether) is usually pegged 1:1 to the USD, the EURUSDT chart is 99.9% identical to a EUR/USD forex chart.
+
+Symbol to use: EURUSDT
+
+3. Fetching Hourly Data (Code Example)
+To fetch the last 100 hours of data for your TradingView chart:
+
+JavaScript
+// URL for 1-hour candles for EUR/USDT
+const url = "https://api.binance.com/api/v3/klines?symbol=EURUSDT&interval=1h&limit=100";
+
+const fetchBinanceData = async () => {
+  const response = await fetch(url);
+  const data = await response.json();
+
+  // Binance returns an array of arrays. Map it to Lightweight Charts format:
+  return data.map(candle => ({
+    time: candle[0] / 1000, // Convert ms to seconds
+    open: parseFloat(candle[1]),
+    high: parseFloat(candle[2]),
+    low: parseFloat(candle[3]),
+    close: parseFloat(candle[4]),
+  }));
+};
+4. Comparison: ExchangeRate-API vs. Binance
+Feature	ExchangeRate-API (v6)	Binance API
+Asset Type	Real Forex (EUR/USD)	Crypto/Stablecoin (EUR/USDT)
+Cost	Paid for Hourly/History	Free
+Setup	Requires API Key	No Key Required for public data
+Data Format	Simple Rates	Full Candlestick (OHLC)
+Speed	Fast	Extremely Fast (WebSockets available)
+Summary Recommendation
+If you need "Real" Forex accuracy: Stick with a Forex provider like ExchangeRate-API (Paid), OANDA, or Polygon.io (limited free tiers).
+
+If you want a free, high-performance chart for a hobby/dev project: Use Binance EURUSDT. It is free, supports hourly (and even 1-minute) data, and works perfectly with TradingView Lightweight Charts because it provides the Open, High, Low, Close values needed for professional-looking candlestick charts.

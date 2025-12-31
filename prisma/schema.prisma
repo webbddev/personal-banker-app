@@ -6,6 +6,9 @@ generator client {
   provider = "prisma-client"
   // 2. Output path is now mandatory in Prisma 7
   output   = "./generated/prisma"
+
+  generatedFileExtension = "ts"
+  importFileExtension    = "ts"
 }
 
 datasource db {

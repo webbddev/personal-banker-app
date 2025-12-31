@@ -4,9 +4,9 @@ import {
   investmentValidationRules,
 } from '@/utils/investment-constants';
 import { SUPPORTED_CURRENCY_LABELS } from '@/utils/currency-formatter';
-import { Investment } from '@/prisma/generated/prisma/client.js';
+import { Investment } from '@/prisma/generated/prisma/client';
 // ✅ Import from Prisma's generated enums instead of custom file
-import { ExpirationStatus } from '@/prisma/generated/prisma/enums.js';
+import { ExpirationStatus } from '@/prisma/generated/prisma/enums';
 
 // Use Prisma's generated Investment type as the main type
 export type FinancialInstrument = Investment;

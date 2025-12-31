@@ -16,6 +16,7 @@ import {
 } from '@/utils/investment-calculations';
 import { getLatestRates } from '@/utils/exchange-rate-service';
 import { ExchangeRatesDisplay } from '@/components/ExchangeRatesDisplay';
+import DynamicEurUsdChart from '@/components/DynamicEurUsdChart';
 
 export default async function InvestmentsPage() {
   const investments = await getAllInvestments();
@@ -36,6 +37,10 @@ export default async function InvestmentsPage() {
             <div className='mb-6'>
               <h2 className='text-xl font-semibold mb-2'>Monthly Returns</h2>
               <MonthlyReturnsDisplay totals={monthlyReturns} />
+            </div>
+
+            <div className='mb-6'>
+              <DynamicEurUsdChart />
             </div>
 
             {/* Data table displaying investment details */}

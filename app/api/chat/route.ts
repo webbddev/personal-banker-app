@@ -2,8 +2,8 @@ import { UIMessage, convertToModelMessages, stepCountIs, streamText } from 'ai';
 import { experimental_createMCPClient as createMCPClient } from '@ai-sdk/mcp';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import { NextRequest, NextResponse } from 'next/server.js';
-import { checkUser } from '@/lib/checkUser.js';
-import { prisma } from '@/lib/prisma.js';
+import { checkUser } from '@/lib/checkUser';
+import { prisma } from '@/lib/prisma';
 
 export const maxDuration = 30;
 

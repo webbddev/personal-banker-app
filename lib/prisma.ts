@@ -1,7 +1,7 @@
 // lib/prisma.ts (or wherever your singleton is located)
 
 // 1. IMPORT CHANGE: Import from the new generated path, not '@prisma/client'
-import { PrismaClient } from '@/prisma/generated/prisma/client.js';
+import { PrismaClient } from '@/prisma/generated/prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
 
