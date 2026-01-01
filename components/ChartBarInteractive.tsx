@@ -22,6 +22,7 @@ import {
 import { Item, ItemContent, ItemMedia, ItemTitle } from '@/components/ui/item';
 import { calculateDaysUntilExpiration } from '@/utils/investment-calculations';
 import { formatAmount } from '@/utils/currency-formatter';
+import { ExportButton } from './ExportButton';
 
 export const description = 'An interactive bar chart of investments';
 
@@ -94,12 +95,17 @@ export function ChartBarInteractive({ data }: { data: Investment[] }) {
   return (
     <Card className='h-full'>
       <CardHeader>
-        <CardTitle className='text-xl lg:text-2xl'>
-          Investment Portfolio Overview
-        </CardTitle>
-        <CardDescription className='lg:text-base'>
-          Each bar represents an investment, ordered by expiration date
-        </CardDescription>
+        <div className='flex justify-between items-start'>
+          <div>
+            <CardTitle className='text-xl lg:text-2xl'>
+              Investment Portfolio Overview
+            </CardTitle>
+            <CardDescription className='lg:text-base'>
+              Each bar represents an investment, ordered by expiration date
+            </CardDescription>
+          </div>
+          <ExportButton investments={data} filename='investment-portfolio' />
+        </div>
       </CardHeader>
       <CardContent>
         <ChartContainer

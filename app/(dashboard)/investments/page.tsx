@@ -38,11 +38,14 @@ export default async function InvestmentsPage() {
               <MonthlyReturnsDisplay totals={monthlyReturns} />
             </div>
 
-            
-
-            {/* Data table displaying investment details */}
+            {/* Data table displaying investment details with export functionality */}
             <div className='w-full'>
-              <InvestmentsTable columns={columns} data={investments} />
+              <InvestmentsTable
+                columns={columns}
+                data={investments}
+                currencyTotals={currencyTotals}
+                monthlyReturns={monthlyReturns}
+              />
             </div>
 
             {/* Currency Totals Display */}

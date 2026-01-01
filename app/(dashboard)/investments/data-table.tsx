@@ -35,17 +35,23 @@ import {
 import { DataTablePagination } from '@/components/ui/data-table-pagination';
 import { FinancialInstrument } from '@/types/investment-schema';
 import Link from 'next/link';
+import { ExportButton } from '@/components/ExportButton';
+import { CurrencyTotals } from '@/utils/investment-calculations';
 
 // Define the props interface for the DataTable component
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  currencyTotals?: CurrencyTotals;
+  monthlyReturns?: CurrencyTotals;
 }
 
 // Define the InvestmentsTable component, which is a DataTable with specific columns and data
 export function InvestmentsTable<TData, TValue>({
   columns,
   data,
+  currencyTotals,
+  monthlyReturns,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -59,7 +65,7 @@ export function InvestmentsTable<TData, TValue>({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(), // Enable pagination
+    getPaginationRowModel: getPaginationRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
     onColumnFiltersChange: setColumnFilters,
@@ -77,8 +83,12 @@ export function InvestmentsTable<TData, TValue>({
       },
     },
     manualPagination: false,
-    // enableRowSelection: true,
   });
+
+  // Get filtered investments for export (respects current filters)
+  const filteredInvestments = table
+    .getFilteredRowModel()
+    .rows.map((row) => row.original) as FinancialInstrument[];
 
   // Render the table with the provided columns and data
   return (
@@ -129,10 +139,18 @@ export function InvestmentsTable<TData, TValue>({
           </DropdownMenu>
         </div>
 
-        {/* Right Section: Create Investment Button */}
-        <Link href={'/create-financial-instrument'}>
-          <Button>Create Investment</Button>
-        </Link>
+        {/* Right Section: Export and Create Investment Buttons */}
+        <div className='flex items-center space-x-2'>
+          <ExportButton
+            investments={filteredInvestments}
+            currencyTotals={currencyTotals}
+            monthlyReturns={monthlyReturns}
+            filename='investments-export'
+          />
+          <Link href={'/create-financial-instrument'}>
+            <Button>Create Investment</Button>
+          </Link>
+        </div>
       </div>
 
       {/* Table with columns and data */}
@@ -187,32 +205,6 @@ export function InvestmentsTable<TData, TValue>({
         </Table>
       </div>
       <DataTablePagination table={table} />
-
-      {/* <div className='flex items-center justify-between py-4'>
-        <div className='text-sm'>
-          Page {table.getState().pagination.pageIndex + 1} of{' '}
-          {table.getPageCount()}
-        </div>
-        <div className='flex items-center space-x-2'>
-          <Button
-            variant='outline'
-            size='sm'
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            Previous
-          </Button>
-          <Button
-            variant='outline'
-            size='sm'
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
-            Next
-          </Button>
-        </div>
-      </div> */}
-      {/* <p>Total deposited amount: {totalAmount}</p> */}
     </div>
   );
 }

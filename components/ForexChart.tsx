@@ -44,7 +44,7 @@ export default function ForexChart({ symbol, interval }: ForexChartProps) {
 
     const chart = createChart(chartContainerRef.current, {
       width: chartContainerRef.current.clientWidth,
-      height: window.innerWidth < 640 ? 300 : 450,
+      height: window.innerWidth < 640 ? 300 : 550,
       layout: {
         background: { type: ColorType.Solid, color: '#131722' },
         textColor: '#d1d4dc',
