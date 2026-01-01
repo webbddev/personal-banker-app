@@ -9,26 +9,31 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import EurUsdChart from './EurUsdChart';
+import ForexChartContainer from './ForexChartContainer';
 
-const currencyInfo: Record<string, { name: string; flag: string }> = {
-  MDL: { name: 'Moldovan Leu', flag: '/flags/md.svg' },
-  USD: { name: 'US Dollar', flag: '/flags/us.svg' },
-  EUR: { name: 'Euro', flag: '/flags/eu.svg' },
-  GBP: { name: 'British Pound', flag: '/flags/gb.svg' },
+// Метаданные для отображения валют
+const currencyInfo: Record<
+  string,
+  { name: string; flag: string; symbol: string }
+> = {
+  MDL: { name: 'Moldovan leu', flag: '/flags/md.svg', symbol: 'MDL' },
+  USD: { name: 'USD Dollar', flag: '/flags/us.svg', symbol: 'USD/MDL' },
+  EUR: { name: 'Euro', flag: '/flags/eu.svg', symbol: 'EUR/USD' },
+  GBP: { name: 'British pound', flag: '/flags/gb.svg', symbol: 'GBP/USD' },
 };
 
-export function ExchangeRatesList({
-  rates,
-}: {
+interface ExchangeRatesListProps {
   rates: Record<string, number>;
-}) {
+}
+
+export function ExchangeRatesList({ rates }: ExchangeRatesListProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCurrency, setSelectedCurrency] = useState<string | null>(null);
 
+  // Обработка клика по валюте
   const handleCurrencyClick = (currency: string) => {
-    // Current logic restricted to EUR for the Binance Chart
-    if (currency === 'EUR') {
+    // Разрешаем открытие чарта только для EUR и GBP (Forex пары в Twelve Data)
+    if (currency === 'EUR' || currency === 'GBP') {
       setSelectedCurrency(currency);
       setIsModalOpen(true);
     }
@@ -39,9 +44,11 @@ export function ExchangeRatesList({
       <CardContent className='flex-grow'>
         <div className='w-full max-w-xl grid gap-3 mx-auto'>
           {Object.entries(rates).map(([currency, rate]) => {
+            // Пропускаем базовую валюту MDL в списке, если нужно
             if (currency === 'MDL') return null;
+
             const info = currencyInfo[currency];
-            const isClickable = currency === 'EUR';
+            const isClickable = currency === 'EUR' || currency === 'GBP';
 
             return (
               <div
@@ -68,7 +75,7 @@ export function ExchangeRatesList({
                   <div className='min-w-0'>
                     <p className='font-bold text-md truncate'>{currency}</p>
                     <p className='text-sm text-muted-foreground truncate'>
-                      {info?.name}
+                      {info?.name || currency}
                     </p>
                   </div>
                 </div>
@@ -83,15 +90,27 @@ export function ExchangeRatesList({
       </CardContent>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        {/* w-[95vw] — обеспечивает отступы по бокам на мобилках.
+          max-h-[90vh] — чтобы модалка не уходила за пределы экрана.
+          flex-col — для правильного распределения заголовка и графика.
+        */}
         <DialogContent className='w-[95vw] sm:max-w-4xl lg:max-w-5xl bg-[#131722] border-gray-800 p-0 overflow-hidden rounded-2xl sm:rounded-xl outline-none max-h-[90vh] flex flex-col'>
           <DialogHeader className='p-4 sm:p-6 pb-2 shrink-0'>
             <DialogTitle className='text-white text-sm sm:text-xl pr-8 truncate'>
-              {selectedCurrency}/USDT Real-time Market View
+              {selectedCurrency === 'EUR' ? 'EUR / USD' : 'GBP / USD'} — Live
+              Forex Market
             </DialogTitle>
           </DialogHeader>
 
           <div className='flex-grow overflow-y-auto p-2 sm:p-6 pt-0'>
-            {isModalOpen && <EurUsdChart />}
+            {/* Рендерим чарт только когда модалка открыта. 
+               Передаем символ в формате Twelve Data (EUR/USD или GBP/USD).
+            */}
+            {isModalOpen && selectedCurrency && (
+              <ForexChartContainer
+                symbol={selectedCurrency === 'EUR' ? 'EUR/USD' : 'GBP/USD'}
+              />
+            )}
           </div>
         </DialogContent>
       </Dialog>
