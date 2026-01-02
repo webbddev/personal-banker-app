@@ -95,16 +95,25 @@ export function ExportButton({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant='outline' disabled={isExporting}>
+        {/* Added 'w-full' and 'h-10' to ensure it fills the flex-1 container 
+            on mobile and aligns vertically with the 'Create' button.
+        */}
+        <Button
+          variant='outline'
+          disabled={isExporting}
+          className='w-full sm:max-w-full h-10'
+        >
           {isExporting ? (
             <>
-              <Loader2 className='h-4 w-4 animate-spin' />
-              Exporting...
+              <Loader2 className='h-4 w-4 animate-spin mr-2' />
+              <span>Exporting...</span>
             </>
           ) : (
             <>
-              <Download className='h-4 w-4' />
-              Export Data
+              <Download className='h-4 w-4 mr-2' />
+              <span>
+                Export Data
+              </span>
             </>
           )}
         </Button>
@@ -124,4 +133,3 @@ export function ExportButton({
     </DropdownMenu>
   );
 }
-    

@@ -16,6 +16,7 @@ import {
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { SlidersHorizontal, Plus } from 'lucide-react';
 
 import {
   DropdownMenu,
@@ -38,7 +39,6 @@ import Link from 'next/link';
 import { ExportButton } from '@/components/ExportButton';
 import { CurrencyTotals } from '@/utils/investment-calculations';
 
-// Define the props interface for the DataTable component
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
@@ -46,7 +46,6 @@ interface DataTableProps<TData, TValue> {
   monthlyReturns?: CurrencyTotals;
 }
 
-// Define the InvestmentsTable component, which is a DataTable with specific columns and data
 export function InvestmentsTable<TData, TValue>({
   columns,
   data,
@@ -60,7 +59,6 @@ export function InvestmentsTable<TData, TValue>({
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
 
-  // Use the useReactTable hook to create a table instance with the provided columns and data
   const table = useReactTable({
     data,
     columns,
@@ -85,20 +83,19 @@ export function InvestmentsTable<TData, TValue>({
     manualPagination: false,
   });
 
-  // Get filtered investments for export (respects current filters)
   const filteredInvestments = table
     .getFilteredRowModel()
     .rows.map((row) => row.original) as FinancialInstrument[];
 
-  // Render the table with the provided columns and data
   return (
-    <div className='space-y-4'>
-      {/* Header Row */}
-      <div className='flex justify-between items-center py-4'>
-        {/* Left Section: Input and Dropdown */}
-        <div className='flex items-center space-x-2'>
+    /* min-w-0 is critical on flex children to prevent them from pushing parents beyond 100% width */
+    <div className='space-y-4 w-full max-w-full overflow-hidden min-w-0'>
+      {/* Header Row: Responsive Layout */}
+      <div className='flex flex-col md:flex-row md:items-center justify-between gap-4 py-4 w-full min-w-0'>
+        {/* Left: Search & Columns */}
+        <div className='flex items-center space-x-2 w-full md:flex-1 md:max-w-md min-w-0'>
           <Input
-            placeholder='Filter organisations by the name...'
+            placeholder='Filter organisations...'
             value={
               (table
                 .getColumn('organisationName')
@@ -109,11 +106,14 @@ export function InvestmentsTable<TData, TValue>({
                 .getColumn('organisationName')
                 ?.setFilterValue(event.target.value)
             }
-            className='w-full md:w-72'
+            className='w-full h-10'
           />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant='outline'>Columns</Button>
+              <Button variant='outline' className='shrink-0 h-10 px-3 md:px-4'>
+                <SlidersHorizontal className='h-4 w-4 md:mr-2' />
+                <span className='hidden md:inline'>Columns</span>
+              </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align='end'>
               {table
@@ -128,40 +128,46 @@ export function InvestmentsTable<TData, TValue>({
                       column.toggleVisibility(!!value)
                     }
                   >
-                    {column.id
-                      .replace(/([A-Z])/g, ' $1')
-                      .split(/(?=[A-Z])/)
-                      .join(' ')
-                      .toLowerCase()}
+                    {column.id.replace(/([A-Z])/g, ' $1').trim()}
                   </DropdownMenuCheckboxItem>
                 ))}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
 
-        {/* Right Section: Export and Create Investment Buttons */}
-        <div className='flex items-center space-x-2'>
-          <ExportButton
-            investments={filteredInvestments}
-            currencyTotals={currencyTotals}
-            monthlyReturns={monthlyReturns}
-            filename='investments-export'
-          />
-          <Link href={'/create-financial-instrument'}>
-            <Button>Create Investment</Button>
+        {/* Right: Export & Create Button */}
+        <div className='flex items-center space-x-2 w-full md:w-auto shrink-0 min-w-0'>
+          <div className='flex-1 md:flex-none'>
+            <ExportButton
+              investments={filteredInvestments}
+              currencyTotals={currencyTotals}
+              monthlyReturns={monthlyReturns}
+              filename='investments-export'
+            />
+          </div>
+          <Link
+            href={'/create-financial-instrument'}
+            className='flex-1 md:flex-none'
+          >
+            <Button className='w-full h-10'>
+              <Plus className='mr-2 h-4 w-4' />
+              <span className='whitespace-nowrap'>
+                Create <span className='hidden sm:inline'>Investment</span>
+              </span>
+            </Button>
           </Link>
         </div>
       </div>
 
-      {/* Table with columns and data */}
-      <div className='rounded-md border w-full'>
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id}>
+      {/* Table Section: Isolated scroll */}
+      <div className='rounded-md border bg-card overflow-hidden w-full'>
+        <div className='overflow-x-auto w-full'>
+          <Table>
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => (
+                    <TableHead key={header.id} className='whitespace-nowrap'>
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -169,40 +175,40 @@ export function InvestmentsTable<TData, TValue>({
                             header.getContext()
                           )}
                     </TableHead>
-                  );
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && 'selected'}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
                   ))}
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className='h-24 text-center'
-                >
-                  No results.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && 'selected'}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id} className='whitespace-nowrap'>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className='h-24 text-center'
+                  >
+                    No results.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </div>
       <DataTablePagination table={table} />
     </div>

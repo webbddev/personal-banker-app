@@ -2,9 +2,7 @@
 
 import * as React from 'react';
 import { Bar, BarChart, CartesianGrid, Cell, XAxis, YAxis } from 'recharts';
-// import { Investment } from '@prisma/client';
 import { Investment } from '@/prisma/generated/prisma/client';
-
 
 import {
   Card,
@@ -32,19 +30,19 @@ export function ChartBarInteractive({ data }: { data: Investment[] }) {
   const chartConfig = {
     investmentAmount: {
       label: 'Active Investment',
-      color: '#40C1AC', // Teal/Cyan - matches the primary investment color
+      color: '#40C1AC',
     },
     expiringSoon: {
       label: 'Expiring Soon',
-      color: '#16a34a', // green-600 (light mode) / green-400 (dark mode) - Investments expiring in 30 days
+      color: '#16a34a',
     },
     expiringIn7Days: {
       label: 'Expiring in 7 Days',
-      color: '#eab308', // yellow-500 (light mode) / yellow-400 (dark mode) - Investments expiring in 7 days
+      color: '#eab308',
     },
     expired: {
       label: 'Expired',
-      color: '#ef4444', // red-500 - Expired investments
+      color: '#ef4444',
     },
   } satisfies ChartConfig;
 
@@ -78,7 +76,6 @@ export function ChartBarInteractive({ data }: { data: Investment[] }) {
     };
   });
 
-  // Determine which legend items to display based on data
   const hasExpired = chartData.some(
     (item) => item.fill === 'var(--color-expired)'
   );
@@ -95,7 +92,8 @@ export function ChartBarInteractive({ data }: { data: Investment[] }) {
   return (
     <Card className='h-full'>
       <CardHeader>
-        <div className='flex justify-between items-start'>
+        {/* Changed from flex justify-between to flex-col to stack vertically */}
+        <div className='flex flex-col gap-4'>
           <div>
             <CardTitle className='text-xl lg:text-2xl'>
               Investment Portfolio Overview
@@ -104,7 +102,12 @@ export function ChartBarInteractive({ data }: { data: Investment[] }) {
               Each bar represents an investment, ordered by expiration date
             </CardDescription>
           </div>
-          <ExportButton investments={data} filename='investment-portfolio' />
+
+          {/* Export Button container placed under description */}
+          {/* w-full for mobile, sm:w-fit for desktop to avoid over-stretching */}
+          <div className='w-full sm:w-fit'>
+            <ExportButton investments={data} filename='investment-portfolio' />
+          </div>
         </div>
       </CardHeader>
       <CardContent>
@@ -185,8 +188,7 @@ export function ChartBarInteractive({ data }: { data: Investment[] }) {
             </Bar>
           </BarChart>
         </ChartContainer>
-        {/* Legend */}
-        {/* <div className='mx-auto mt-6 grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 w-fit gap-4'> */}
+
         <div className='mx-auto mt-2 flex justify-center flex-wrap gap-y-0'>
           {hasExpired && (
             <Item variant='default' size='xs'>
