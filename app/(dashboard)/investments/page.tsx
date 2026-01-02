@@ -9,6 +9,7 @@ import {
   countAllInvestments,
   getAllInvestments,
 } from '@/app/actions/investmentActions';
+import { getUserInfo } from '@/app/actions/userActions';
 import {
   calculateCurrencyTotals,
   calculateMonthlyReturns,
@@ -21,6 +22,7 @@ export default async function InvestmentsPage() {
   const investments = await getAllInvestments();
   const exchangeRates = await getLatestRates();
   const instrumentsCount = await countAllInvestments();
+  const userInfo = await getUserInfo();
 
   // Compute totals on the server
   const currencyTotals: CurrencyTotals = calculateCurrencyTotals(investments);
@@ -45,6 +47,7 @@ export default async function InvestmentsPage() {
                 data={investments}
                 currencyTotals={currencyTotals}
                 monthlyReturns={monthlyReturns}
+                investorName={userInfo?.name}
               />
             </div>
 

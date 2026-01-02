@@ -44,6 +44,7 @@ interface DataTableProps<TData, TValue> {
   data: TData[];
   currencyTotals?: CurrencyTotals;
   monthlyReturns?: CurrencyTotals;
+  investorName?: string;
 }
 
 export function InvestmentsTable<TData, TValue>({
@@ -51,6 +52,7 @@ export function InvestmentsTable<TData, TValue>({
   data,
   currencyTotals,
   monthlyReturns,
+  investorName,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -142,6 +144,7 @@ export function InvestmentsTable<TData, TValue>({
               investments={filteredInvestments}
               currencyTotals={currencyTotals}
               monthlyReturns={monthlyReturns}
+              investorName={investorName}
               filename='investments-export'
             />
           </div>

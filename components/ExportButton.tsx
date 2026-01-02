@@ -20,6 +20,7 @@ interface ExportButtonProps {
   investments: FinancialInstrument[];
   currencyTotals?: CurrencyTotals;
   monthlyReturns?: CurrencyTotals;
+  investorName?: string;
   filename?: string;
 }
 
@@ -27,6 +28,7 @@ export function ExportButton({
   investments,
   currencyTotals,
   monthlyReturns,
+  investorName,
   filename = 'investments-export',
 }: ExportButtonProps) {
   const [isExporting, setIsExporting] = useState(false);
@@ -44,7 +46,13 @@ export function ExportButton({
 
     setIsExporting(true);
     try {
-      exportToExcel(investments, currencyTotals, monthlyReturns, filename);
+      exportToExcel(
+        investments,
+        currencyTotals,
+        monthlyReturns,
+        investorName,
+        filename
+      );
       toast({
         title: 'Export Successful',
         description: `Exported ${investments.length} investment(s) to Excel.`,
@@ -74,7 +82,13 @@ export function ExportButton({
 
     setIsExporting(true);
     try {
-      exportToPDF(investments, currencyTotals, monthlyReturns, filename);
+      exportToPDF(
+        investments,
+        currencyTotals,
+        monthlyReturns,
+        investorName,
+        filename
+      );
       toast({
         title: 'Export Successful',
         description: `Exported ${investments.length} investment(s) to PDF.`,
@@ -95,9 +109,6 @@ export function ExportButton({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        {/* Added 'w-full' and 'h-10' to ensure it fills the flex-1 container 
-            on mobile and aligns vertically with the 'Create' button.
-        */}
         <Button
           variant='outline'
           disabled={isExporting}
@@ -111,9 +122,7 @@ export function ExportButton({
           ) : (
             <>
               <Download className='h-4 w-4 mr-2' />
-              <span>
-                Export Data
-              </span>
+              <span>Export Data</span>
             </>
           )}
         </Button>
