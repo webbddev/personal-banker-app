@@ -17,6 +17,7 @@ import {
   calculateMonthlyReturnsByInvestmentType,
   calculateTotalMonthlyRevenueInMDL,
   getExpiredInvestments,
+  calculateCurrencyTotals,
 } from '@/utils/investment-calculations';
 import { getLatestRates } from '@/utils/exchange-rate-service';
 import { ChartPieLabel } from '@/components/ChartPieLabel';
@@ -30,6 +31,8 @@ export default async function DashboardPage() {
   const investmentsByType = await getInvestmentsByType();
   const investmentsByCurrency = await getInvestmentsByCurrency();
   const monthlyReturns = calculateMonthlyReturns(allInvestments);
+  const currencyTotals = calculateCurrencyTotals(allInvestments);
+
   const monthlyReturnsByType =
     calculateMonthlyReturnsByInvestmentType(allInvestments);
   const exchangeRates = await getLatestRates();
@@ -66,7 +69,11 @@ export default async function DashboardPage() {
             <div className='w-full grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4'>
               {/* Bar Chart - Investment Portfolio Overview */}
               <div className='lg:col-span-1 xl:col-span-2'>
-                <ChartBarInteractive data={investments} />
+                <ChartBarInteractive
+                  data={investments}
+                  currencyTotals={currencyTotals}
+                  monthlyReturns={monthlyReturns}
+                />{' '}
               </div>
 
               {/* Pie Chart Label - Investments by Type */}

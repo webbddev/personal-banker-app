@@ -18,13 +18,26 @@ import {
   ChartTooltipContent,
 } from '@/components/ui/chart';
 import { Item, ItemContent, ItemMedia, ItemTitle } from '@/components/ui/item';
-import { calculateDaysUntilExpiration } from '@/utils/investment-calculations';
+import {
+  calculateDaysUntilExpiration,
+  CurrencyTotals,
+} from '@/utils/investment-calculations';
 import { formatAmount } from '@/utils/currency-formatter';
 import { ExportButton } from './ExportButton';
 
 export const description = 'An interactive bar chart of investments';
 
-export function ChartBarInteractive({ data }: { data: Investment[] }) {
+interface ChartBarInteractiveProps {
+  data: Investment[];
+  currencyTotals?: CurrencyTotals;
+  monthlyReturns?: CurrencyTotals;
+}
+
+export function ChartBarInteractive({
+  data,
+  currencyTotals,
+  monthlyReturns,
+}: ChartBarInteractiveProps) {
   const [activeIndex, setActiveIndex] = React.useState<number | null>(null);
 
   const chartConfig = {
@@ -106,7 +119,12 @@ export function ChartBarInteractive({ data }: { data: Investment[] }) {
           {/* Export Button container placed under description */}
           {/* w-full for mobile, sm:w-fit for desktop to avoid over-stretching */}
           <div className='w-full sm:w-fit'>
-            <ExportButton investments={data} filename='investment-portfolio' />
+            <ExportButton
+              investments={data}
+              currencyTotals={currencyTotals}
+              monthlyReturns={monthlyReturns}
+              filename='investment-portfolio'
+            />
           </div>
         </div>
       </CardHeader>
