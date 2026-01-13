@@ -61,6 +61,11 @@ export function InvestmentsTable<TData, TValue>({
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
 
+  // Debug logging
+  React.useEffect(() => {
+    console.log('InvestmentsTable received investor name:', investorName);
+  }, [investorName]);
+
   const table = useReactTable({
     data,
     columns,

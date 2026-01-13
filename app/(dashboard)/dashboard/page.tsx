@@ -22,7 +22,6 @@ import {
 import { getLatestRates } from '@/utils/exchange-rate-service';
 import { ChartPieLabel } from '@/components/ChartPieLabel';
 import { ChartPieInteractive } from '@/components/ChartPieInteractive';
-import { InvestmentExpirationCalendar } from '@/components/InvestmentExpirationCalendar';
 import { ExchangeRatesDisplay } from '@/components/ExchangeRatesDisplay';
 
 export default async function DashboardPage() {

@@ -24,6 +24,10 @@ export default async function InvestmentsPage() {
   const instrumentsCount = await countAllInvestments();
   const userInfo = await getUserInfo();
 
+  // Log for debugging
+  console.log('User info in InvestmentsPage:', userInfo);
+  console.log('User name being passed:', userInfo?.name);
+
   // Compute totals on the server
   const currencyTotals: CurrencyTotals = calculateCurrencyTotals(investments);
   const monthlyReturns: CurrencyTotals = calculateMonthlyReturns(investments);
@@ -34,6 +38,15 @@ export default async function InvestmentsPage() {
       <div className='flex flex-1 flex-col w-full min-w-0'>
         <div className='flex flex-1 flex-col gap-2 w-full'>
           <div className='flex flex-col gap-4 py-4 md:gap-6 md:py-6 w-full px-4 lg:px-6'>
+            {/* Debug info - remove after testing */}
+            {/* {process.env.NODE_ENV === 'development' && (
+              <div className='p-4 bg-yellow-100 border border-yellow-400 rounded'>
+                <p className='font-bold'>Debug Info:</p>
+                <p>User Info: {JSON.stringify(userInfo)}</p>
+                <p>Investor Name: {userInfo?.name || 'UNDEFINED'}</p>
+              </div>
+            )} */}
+
             {/* Monthly Returns Display */}
             <div className='mb-6'>
               <h2 className='text-xl font-semibold mb-2'>Monthly Returns</h2>
@@ -47,7 +60,7 @@ export default async function InvestmentsPage() {
                 data={investments}
                 currencyTotals={currencyTotals}
                 monthlyReturns={monthlyReturns}
-                investorName={userInfo?.name}
+                investorName={userInfo?.name || undefined}
               />
             </div>
 

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -33,6 +34,13 @@ export function ExportButton({
 }: ExportButtonProps) {
   const [isExporting, setIsExporting] = useState(false);
   const { toast } = useToast();
+
+  // Debug logging
+  React.useEffect(() => {
+    console.log('ExportButton received investor name:', investorName);
+    console.log('Type of investorName:', typeof investorName);
+    console.log('Is investorName truthy?', !!investorName);
+  }, [investorName]);
 
   const handleExportExcel = async () => {
     if (investments.length === 0) {
@@ -82,6 +90,10 @@ export function ExportButton({
 
     setIsExporting(true);
     try {
+      console.log('Starting PDF export with investor name:', investorName);
+      console.log('Investor name type:', typeof investorName);
+      console.log('Investor name value:', JSON.stringify(investorName));
+
       exportToPDF(
         investments,
         currencyTotals,
