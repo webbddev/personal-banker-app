@@ -25,8 +25,8 @@ export default async function InvestmentsPage() {
   const userInfo = await getUserInfo();
 
   // Log for debugging
-  console.log('User info in InvestmentsPage:', userInfo);
-  console.log('User name being passed:', userInfo?.name);
+  // console.log('User info in InvestmentsPage:', userInfo);
+  // console.log('User name being passed:', userInfo?.name);
 
   // Compute totals on the server
   const currencyTotals: CurrencyTotals = calculateCurrencyTotals(investments);

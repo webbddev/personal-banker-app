@@ -30,12 +30,12 @@ export async function getUserInfo() {
       };
     }
 
-    console.log('Clerk user data:', {
-      firstName: clerkUser.firstName,
-      lastName: clerkUser.lastName,
-      username: clerkUser.username,
-      email: clerkUser.emailAddresses?.[0]?.emailAddress,
-    });
+    // console.log('Clerk user data:', {
+    //   firstName: clerkUser.firstName,
+    //   lastName: clerkUser.lastName,
+    //   username: clerkUser.username,
+    //   email: clerkUser.emailAddresses?.[0]?.emailAddress,
+    // });
 
     // Construct full name from available data
     const firstName = clerkUser.firstName || '';
@@ -52,7 +52,7 @@ export async function getUserInfo() {
         'Investment Portfolio User',
     };
 
-    console.log('Returning user info:', result);
+    // console.log('Returning user info:', result);
 
     return result;
   } catch (error) {

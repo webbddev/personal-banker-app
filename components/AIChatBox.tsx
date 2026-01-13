@@ -213,7 +213,10 @@ export function AIChatBox({ open, onClose }: AIChatBoxProps) {
                     message.parts.some((p) => p.type === 'source-url') && (
                       <Sources>
                         <SourcesTrigger
-                          count={message.parts.filter((p) => p.type === 'source-url').length}
+                          count={
+                            message.parts.filter((p) => p.type === 'source-url')
+                              .length
+                          }
                         />
                         {message.parts
                           .filter((part) => part.type === 'source-url')
@@ -234,7 +237,9 @@ export function AIChatBox({ open, onClose }: AIChatBoxProps) {
                             <Message
                               from={message.role}
                               displayName={
-                                message.role === 'assistant' ? 'Personal Banker' : firstName || 'You'
+                                message.role === 'assistant'
+                                  ? 'Personal Banker'
+                                  : firstName || 'You'
                               }
                             >
                               <MessageContent>
@@ -246,18 +251,35 @@ export function AIChatBox({ open, onClose }: AIChatBoxProps) {
                               i === message.parts.length - 1 &&
                               message.id === messages.at(-1)?.id && (
                                 <Actions>
-                                  <Action onClick={() => regenerate()} label='Retry'>
+                                  <Action
+                                    onClick={() => regenerate()}
+                                    label='Retry'
+                                  >
                                     <RefreshCcwIcon className='size-3' />
                                   </Action>
                                   <Action
                                     onClick={() => {
                                       navigator.clipboard.writeText(part.text);
-                                      setIsCopied((prev) => ({ ...prev, [partId]: true }));
-                                      setTimeout(() => setIsCopied((prev) => ({ ...prev, [partId]: false })), 2000);
+                                      setIsCopied((prev) => ({
+                                        ...prev,
+                                        [partId]: true,
+                                      }));
+                                      setTimeout(
+                                        () =>
+                                          setIsCopied((prev) => ({
+                                            ...prev,
+                                            [partId]: false,
+                                          })),
+                                        2000
+                                      );
                                     }}
                                     label={isCopied[partId] ? 'Copied' : 'Copy'}
                                   >
-                                    {isCopied[partId] ? <span className='text-xs'>Copied</span> : <CopyIcon className='size-3' />}
+                                    {isCopied[partId] ? (
+                                      <span className='text-xs'>Copied</span>
+                                    ) : (
+                                      <CopyIcon className='size-3' />
+                                    )}
                                   </Action>
                                 </Actions>
                               )}
@@ -265,14 +287,27 @@ export function AIChatBox({ open, onClose }: AIChatBoxProps) {
                         );
                       case 'reasoning':
                         return (
-                          <Reasoning key={partId} className='w-full' isStreaming={status === 'streaming'}>
+                          <Reasoning
+                            key={partId}
+                            className='w-full'
+                            isStreaming={status === 'streaming'}
+                          >
                             <ReasoningTrigger />
                             <ReasoningContent>{part.text}</ReasoningContent>
                           </Reasoning>
                         );
                       case 'file':
                         if (part.mediaType?.startsWith('image/')) {
-                          return <Image key={partId} src={part.url} alt="upload" width={500} height={500} className="rounded-lg my-2" />;
+                          return (
+                            <Image
+                              key={partId}
+                              src={part.url}
+                              alt='upload'
+                              width={500}
+                              height={500}
+                              className='rounded-lg my-2'
+                            />
+                          );
                         }
                       default:
                         return null;
@@ -291,7 +326,7 @@ export function AIChatBox({ open, onClose }: AIChatBoxProps) {
       <div className='border-t p-3'>
         {['submitted', 'streaming'].includes(status) && (
           <div className='flex justify-center items-center pb-3'>
-            <Button variant='secondary' size="sm" onClick={stop}>
+            <Button variant='secondary' size='sm' onClick={stop}>
               <SquareIcon className='mr-2 size-3' /> Stop generating
             </Button>
           </div>
@@ -305,7 +340,7 @@ export function AIChatBox({ open, onClose }: AIChatBoxProps) {
             <PromptInputTextarea
               onChange={(e) => setPrompt(e.target.value)}
               value={prompt}
-              placeholder="Ask your banker anything..."
+              placeholder='Ask your banker anything...'
             />
           </PromptInputBody>
           <PromptInputToolbar>
@@ -316,7 +351,7 @@ export function AIChatBox({ open, onClose }: AIChatBoxProps) {
                   <PromptInputActionAddAttachments />
                 </PromptInputActionMenuContent>
               </PromptInputActionMenu>
-              
+
               <PromptInputButton
                 variant={webSearch ? 'default' : 'ghost'}
                 onClick={() => setWebSearch(!webSearch)}
@@ -342,7 +377,11 @@ export function AIChatBox({ open, onClose }: AIChatBoxProps) {
                 </SelectTrigger>
                 <SelectContent>
                   {models.map((m) => (
-                    <SelectItem key={m.value} value={m.value} className='cursor-pointer'>
+                    <SelectItem
+                      key={m.value}
+                      value={m.value}
+                      className='cursor-pointer'
+                    >
                       <div className='flex items-center gap-2'>
                         <m.Icon size={16} />
                         <span>{m.name}</span>

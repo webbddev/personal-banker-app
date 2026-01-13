@@ -1,0 +1,144 @@
+Это отличная новость! Поскольку вы — создатель, нам не нужно «красть» куки. Мы сделаем надежный и профессиональный способ общения между n8n и вашим приложением через API Route.
+
+Для того чтобы я написал для вас готовый код, мне нужно понимать структуру вашего проекта.
+
+Что мне нужно от вас:
+Технологический стек: Вы используете Next.js (App Router или Pages Router)? Судя по Vercel и Clerk, скорее всего, это App Router.
+
+Источник данных: Где лежат данные об инвестициях? (Например: база данных Prisma/PostgreSQL, массив в коде или внешнее API?).
+
+Пример данных: Скиньте структуру данных (интерфейс или пример JSON), которую вы хотите видеть в n8n.
+
+Файл Middleware: Скиньте содержание вашего файла middleware.ts, чтобы мы правильно прописали исключение для API.
+
+Как это будет работать (План):
+Мы создадим защищенный эндпоинт, например: https://your-app.com/api/v1/investments.
+
+Создадим API Key: Сгенерируем секретную строку (например, в .env).
+
+Защита: В коде API мы пропишем проверку: если в заголовке запроса есть ваш X-API-KEY, мы отдаем данные. Если нет — доступ закрыт.
+
+Доступ для n8n: n8n будет стучаться по этому адресу, передавая ключ, и получать чистый JSON без всяких HTML-таблиц.
+
+С чего начнем?
+Если у вас открыт VS Code, пришлите:
+
+Файл, где сейчас отображаются данные (например, app/investments/page.tsx).
+
+Ваш middleware.ts.
+
+Я на основе этих файлов соберу для вас файл route.ts, который вы просто скопируете в проект, и он сразу заработает с n8n.
+
+Отлично, у вас полный стек: Next.js (App Router), Prisma и Clerk. Это позволяет сделать интеграцию с n8n максимально чистой.
+
+Чтобы n8n мог забирать данные, мы создадим специальный API Route. Он будет работать в обход интерфейса Clerk (через секретный ключ), но при этом обращаться к той же базе данных Prisma.
+
+Вот пошаговый план:
+
+1. Добавьте секретный ключ в .env
+Придумайте длинный случайный пароль для n8n и добавьте его в ваш файл .env (и в настройки Vercel):
+
+Code snippet
+
+N8N_API_KEY=my_super_secret_key_123
+2. Создайте API Route
+Создайте новый файл по пути app/api/v1/investments/route.ts. Этот эндпоинт будет отдавать все инвестиции в формате JSON, если предоставлен правильный ключ.
+
+TypeScript
+
+import { NextResponse } from 'next/server';
+import { PrismaClient } from './generated/prisma'; // путь к вашему сгенерированному клиенту
+
+const prisma = new PrismaClient();
+
+export async function GET(request: Request) {
+  // 1. Проверяем API ключ из заголовков
+  const { searchParams } = new URL(request.url);
+  const apiKey = request.headers.get('x-api-key');
+
+  if (apiKey !== process.env.N8N_API_KEY) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  try {
+    // 2. Получаем данные из Prisma
+    // Если нужно получить инвестиции конкретного пользователя, 
+    // можно передать email в параметрах: ?email=test@test.com
+    const email = searchParams.get('email');
+    
+    const investments = await prisma.investment.findMany({
+      where: email ? { user: { email: email } } : {},
+      include: {
+        user: {
+          select: { name: true, email: true }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    return NextResponse.json(investments);
+  } catch (error) {
+    return NextResponse.json({ error: 'Database error' }, { status: 500 });
+  }
+}
+3. Настройте middleware.ts
+Ваш текущий middleware защищает всё, что начинается на /api. Нам нужно сделать исключение для нашего нового эндпоинта, чтобы Clerk не блокировал запрос от n8n до того, как мы проверим наш X-API-KEY.
+
+Обновите ваш middleware.ts:
+
+TypeScript
+
+import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+
+// Добавляем наш API в список публичных (мы защитим его внутри самого роута)
+const isProtectedRoute = createRouteMatcher(['/dashboard(.*)', '/investments(.*)']);
+const isPublicApiRoute = createRouteMatcher(['/api/v1/investments(.*)']);
+
+export default clerkMiddleware(async (auth, req) => {
+  // Если это защищенный маршрут и НЕ наш публичный API эндпоинт — требуем логин
+  if (isProtectedRoute(req) && !isPublicApiRoute(req)) {
+    await auth.protect();
+  }
+});
+
+export const config = {
+  matcher: [
+    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
+    '/(api|trpc)(.*)',
+  ],
+};
+4. Настройка в n8n
+Теперь в n8n настройка станет очень простой:
+
+Добавьте ноду HTTP Request.
+
+Method: GET.
+
+URL: https://personal-banker-niko.vercel.app/api/v1/investments.
+
+Headers:
+
+Name: x-api-key
+
+Value: my_super_secret_key_123 (тот самый из .env).
+
+Нажмите Execute.
+
+Что вы получите в n8n?
+Вместо того чтобы парсить HTML-код «псевдо-экселя» от BNM, вы получите чистый массив объектов:
+
+JSON
+
+[
+  {
+    "id": "clm123...",
+    "organisationName": "MAIB",
+    "investmentAmount": 50000,
+    "currency": "MDL",
+    "interestRate": 7.5,
+    "user": { "name": "Niko", "email": "..." }
+  }
+]
+Эти данные в n8n обрабатывать в 100 раз проще (через ноды Set, Filter или Google Sheets).
+
+Нужно ли мне уточнить, как именно в Prisma 7 импортировать клиент, если у вас возникли сложности с путем generated/prisma?

@@ -72,7 +72,7 @@ export default async function DashboardPage() {
                   data={investments}
                   currencyTotals={currencyTotals}
                   monthlyReturns={monthlyReturns}
-                />{' '}
+                />
               </div>
 
               {/* Pie Chart Label - Investments by Type */}
