@@ -239,6 +239,43 @@ export function calculateMonthlyReturnsByInvestmentType(
   }, {} as MonthlyReturnsByInvestmentType);
 }
 
+// Average interest rates by investment type and currency
+export type AverageInterestRatesByType = Record<string, Record<string, number>>;
+
+/**
+ * Calculate average interest rates by investment type and currency
+ * Returns the average interest rate for each type and currency that has investments
+ */
+export function calculateAverageInterestRatesByType(
+  investments: FinancialInstrument[]
+): AverageInterestRatesByType {
+  type GroupData = { totalRate: number; count: number };
+  const typeGroups: Record<string, Record<string, GroupData>> = {};
+
+  investments.forEach((investment) => {
+    const { investmentType, currency, interestRate } = investment;
+    if (!typeGroups[investmentType]) {
+      typeGroups[investmentType] = {};
+    }
+    if (!typeGroups[investmentType][currency]) {
+      typeGroups[investmentType][currency] = { totalRate: 0, count: 0 };
+    }
+    typeGroups[investmentType][currency].totalRate += Number(interestRate);
+    typeGroups[investmentType][currency].count += 1;
+  });
+
+  const result: AverageInterestRatesByType = {};
+  Object.entries(typeGroups).forEach(([type, currencies]) => {
+    result[type] = {};
+    Object.entries(currencies).forEach(([currency, data]) => {
+      result[type][currency] = data.totalRate / data.count;
+    });
+  });
+
+  return result;
+}
+
+// Calculate total monthly revenue in MDL
 export function calculateTotalMonthlyRevenueInMDL(
   monthlyReturns: CurrencyTotals,
   exchangeRates: ExchangeRates

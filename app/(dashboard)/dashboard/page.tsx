@@ -18,6 +18,7 @@ import {
   calculateTotalMonthlyRevenueInMDL,
   getExpiredInvestments,
   calculateCurrencyTotals,
+  calculateAverageInterestRatesByType,
 } from '@/utils/investment-calculations';
 import { getLatestRates } from '@/utils/exchange-rate-service';
 import { ChartPieLabel } from '@/components/ChartPieLabel';
@@ -43,6 +44,8 @@ export default async function DashboardPage() {
   const expiringIn7Days = getInvestmentsExpiringIn7Days(allInvestments);
   const expiringIn30Days = getInvestmentsExpiringIn30Days(allInvestments);
   const expiredInvestments = getExpiredInvestments(allInvestments);
+  const averageInterestRatesByType =
+    calculateAverageInterestRatesByType(allInvestments);
 
   return (
     <SidebarInset className='w-full'>
@@ -61,6 +64,7 @@ export default async function DashboardPage() {
                 monthlyReturnsByType={monthlyReturnsByType}
                 expiredInvestments={expiredInvestments}
                 allInvestments={allInvestments}
+                averageInterestRatesByType={averageInterestRatesByType}
               />
             </div>
 

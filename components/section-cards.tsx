@@ -25,6 +25,7 @@ import {
 import {
   CurrencyTotals,
   MonthlyReturnsByInvestmentType,
+  AverageInterestRatesByType,
 } from '@/utils/investment-calculations';
 import { formatAmount } from '@/utils/currency-formatter';
 // import { Investment } from '@prisma/client';
@@ -42,6 +43,7 @@ interface SectionCardsProps {
   monthlyReturnsByType: MonthlyReturnsByInvestmentType;
   expiredInvestments: Investment[];
   allInvestments?: Investment[];
+  averageInterestRatesByType: AverageInterestRatesByType;
 }
 
 const getInvestmentTypeLabel = (typeValue: string) => {
@@ -58,6 +60,7 @@ export function SectionCards({
   monthlyReturnsByType,
   expiredInvestments,
   allInvestments = [],
+  averageInterestRatesByType,
 }: SectionCardsProps) {
   const cardClassName =
     'group relative overflow-hidden hover:shadow-lg transition-shadow duration-300';
@@ -322,10 +325,10 @@ export function SectionCards({
         </CardHeader>
         <CardContent>
           {Object.keys(monthlyReturnsByType).length > 0 ? (
-            <div className='flex flex-col divide-y divide-gray-200 dark:divide-gray-800'>
+            <div className='flex flex-col space-y-4'>
               {Object.entries(monthlyReturnsByType).map(([type, returns]) => (
-                <div key={type} className='py-3 first:pt-0 last:pb-0'>
-                  <h3 className='text-sm lg:text-base font-semibold text-gray-400 mb-2'>
+                <div key={type} className='space-y-2'>
+                  <h3 className='text-sm lg:text-base font-semibold text-gray-400'>
                     {getInvestmentTypeLabel(type)}
                   </h3>
                   <Table>
@@ -333,9 +336,23 @@ export function SectionCards({
                       {Object.entries(returns)
                         .filter(([, amount]) => amount > 0)
                         .map(([currency, amount]) => (
-                          <TableRow key={currency} className='border-b-0'>
+                          <TableRow
+                            key={currency}
+                            className='border-b-0 hover:bg-transparent'
+                          >
                             <TableCell className='text-xs lg:text-sm text-gray-500 py-1 px-0'>
-                              {`Returns in ${currency}`}
+                              <div className='flex items-center gap-2'>
+                                <span>{`Returns in ${currency}`}</span>
+                                {averageInterestRatesByType[type]?.[currency] !==
+                                  undefined && (
+                                  <span className='inline-flex items-center px-1.5 py-0.5 rounded-md bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 text-[12px] font-medium'>
+                                    avg. {averageInterestRatesByType[type][
+                                      currency
+                                    ].toFixed(2)}
+                                    %
+                                  </span>
+                                )}
+                              </div>
                             </TableCell>
                             <TableCell className='text-xs lg:text-sm font-medium text-green-400 py-1 px-0 text-right'>
                               + {formatAmount(amount, currency)}
