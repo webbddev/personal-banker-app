@@ -1,7 +1,9 @@
 'use client';
 
 import * as React from 'react';
+import { cn } from '@/lib/utils';
 import { Bar, BarChart, CartesianGrid, Cell, XAxis, YAxis } from 'recharts';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Investment } from '@/prisma/generated/prisma/client';
 
 import {
@@ -24,6 +26,7 @@ import {
 } from '@/utils/investment-calculations';
 import { formatAmount } from '@/utils/currency-formatter';
 import { ExportButton } from './ExportButton';
+import { Button } from '@/components/ui/button';
 
 export const description = 'An interactive bar chart of investments';
 
@@ -39,6 +42,18 @@ export function ChartBarInteractive({
   monthlyReturns,
 }: ChartBarInteractiveProps) {
   const [activeIndex, setActiveIndex] = React.useState<number | null>(null);
+
+  const handleNext = () => {
+    setActiveIndex((prev) =>
+      prev === null || prev === chartData.length - 1 ? 0 : prev + 1
+    );
+  };
+
+  const handleBack = () => {
+    setActiveIndex((prev) =>
+      prev === null || prev === 0 ? chartData.length - 1 : prev - 1
+    );
+  };
 
   const chartConfig = {
     investmentAmount: {
@@ -206,6 +221,73 @@ export function ChartBarInteractive({
             </Bar>
           </BarChart>
         </ChartContainer>
+
+        {/* Mobile-friendly Navigation Arrows - Positioned right under the chart */}
+        <div className='flex justify-center items-center gap-6 mt-4 mb-2'>
+          <Button
+            variant='outline'
+            size='icon'
+            onClick={handleBack}
+            className='h-10 w-10 sm:h-12 sm:w-12 rounded-full shadow-md hover:shadow-lg transition-all active:scale-90'
+            aria-label='Previous investment'
+          >
+            <ChevronLeft className='h-6 w-6' />
+          </Button>
+          <div className='flex flex-col items-center min-w-[80px]'>
+             <span className='text-xs font-medium text-muted-foreground uppercase tracking-widest'>Navigation</span>
+             <span className='text-sm font-bold'>
+                {activeIndex !== null ? `${activeIndex + 1} / ${chartData.length}` : '- / -'}
+             </span>
+          </div>
+          <Button
+            variant='outline'
+            size='icon'
+            onClick={handleNext}
+            className='h-10 w-10 sm:h-12 sm:w-12 rounded-full shadow-md hover:shadow-lg transition-all active:scale-90'
+            aria-label='Next investment'
+          >
+            <ChevronRight className='h-6 w-6' />
+          </Button>
+        </div>
+
+        {/* Selected Investment Detail Card - Programmatic highlight/tooltip replacement */}
+        <div 
+          className={cn(
+            'mt-4 rounded-lg border bg-card p-4 transition-all duration-300',
+            activeIndex !== null ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 pointer-events-none h-0 p-0 overflow-hidden'
+          )}
+        >
+          {activeIndex !== null && chartData[activeIndex] && (
+            <div className='flex flex-col gap-1'>
+              <div className='flex items-center justify-between'>
+                <span className='text-sm font-medium text-muted-foreground'>Selected Investment</span>
+                <span className='text-xs font-mono bg-muted px-2 py-0.5 rounded'>
+                  {activeIndex + 1} / {chartData.length}
+                </span>
+              </div>
+              <p className='text-lg font-bold text-foreground'>
+                {chartData[activeIndex].organisationName}
+              </p>
+              <div className='grid grid-cols-2 gap-4 mt-2'>
+                <div>
+                  <p className='text-xs text-muted-foreground uppercase tracking-wider'>Amount</p>
+                  <p className='text-base font-semibold'>
+                    {formatAmount(
+                      Number(chartData[activeIndex].investmentAmount),
+                      chartData[activeIndex].currency as string
+                    )}
+                  </p>
+                </div>
+                <div>
+                  <p className='text-xs text-muted-foreground uppercase tracking-wider'>Expiration Date</p>
+                  <p className='text-base font-semibold'>
+                    {chartData[activeIndex].expirationDateFormatted}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
 
         <div className='mx-auto mt-2 flex justify-center flex-wrap gap-y-0'>
           {hasExpired && (
