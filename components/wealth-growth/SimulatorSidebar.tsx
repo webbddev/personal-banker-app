@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
 import {
   Settings2,
   TrendingUp,
@@ -16,6 +17,8 @@ import {
   Percent,
   Calendar,
   Zap,
+  Plus,
+  Minus,
 } from 'lucide-react';
 import { SimulationParams } from '@/utils/simulator-calculations';
 import {
@@ -211,21 +214,39 @@ export function SimulatorSidebar({
               {params.annualReturnRate}%
             </span>
           </div>
-          <input
-            id='annualReturnRate'
-            type='range'
-            min='0'
-            max='30'
-            step='0.1'
-            className='w-full h-1.5 bg-secondary rounded-lg appearance-none cursor-pointer accent-primary'
-            value={params.annualReturnRate}
-            onChange={(e) =>
-              setParams({
-                ...params,
-                annualReturnRate: parseFloat(e.target.value),
-              })
-            }
-          />
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-7 w-7 shrink-0 md:hidden"
+              onClick={() => setParams({ ...params, annualReturnRate: Math.max(0, Number((params.annualReturnRate - 0.1).toFixed(1))) })}
+            >
+              <Minus className="h-3 w-3" />
+            </Button>
+            <input
+              id='annualReturnRate'
+              type='range'
+              min='0'
+              max='30'
+              step='0.1'
+              className='w-full h-1.5 bg-secondary rounded-lg appearance-none cursor-pointer accent-primary'
+              value={params.annualReturnRate}
+              onChange={(e) =>
+                setParams({
+                  ...params,
+                  annualReturnRate: parseFloat(e.target.value),
+                })
+              }
+            />
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-7 w-7 shrink-0 md:hidden"
+              onClick={() => setParams({ ...params, annualReturnRate: Math.min(30, Number((params.annualReturnRate + 0.1).toFixed(1))) })}
+            >
+              <Plus className="h-3 w-3" />
+            </Button>
+          </div>
         </div>
 
         {/* Inflation Rate */}
@@ -239,18 +260,36 @@ export function SimulatorSidebar({
               {params.inflationRate}%
             </span>
           </div>
-          <input
-            id='inflationRate'
-            type='range'
-            min='0'
-            max='20'
-            step='0.1'
-            className='w-full h-1.5 bg-secondary rounded-lg appearance-none cursor-pointer accent-orange-500'
-            value={params.inflationRate}
-            onChange={(e) =>
-              setParams({ ...params, inflationRate: parseFloat(e.target.value) })
-            }
-          />
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-7 w-7 shrink-0 md:hidden"
+              onClick={() => setParams({ ...params, inflationRate: Math.max(0, Number((params.inflationRate - 0.1).toFixed(1))) })}
+            >
+              <Minus className="h-3 w-3" />
+            </Button>
+            <input
+              id='inflationRate'
+              type='range'
+              min='0'
+              max='20'
+              step='0.1'
+              className='w-full h-1.5 bg-secondary rounded-lg appearance-none cursor-pointer accent-orange-500'
+              value={params.inflationRate}
+              onChange={(e) =>
+                setParams({ ...params, inflationRate: parseFloat(e.target.value) })
+              }
+            />
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-7 w-7 shrink-0 md:hidden"
+              onClick={() => setParams({ ...params, inflationRate: Math.min(20, Number((params.inflationRate + 0.1).toFixed(1))) })}
+            >
+              <Plus className="h-3 w-3" />
+            </Button>
+          </div>
         </div>
 
         {/* Years */}
@@ -264,16 +303,34 @@ export function SimulatorSidebar({
               {params.years} Yrs
             </span>
           </div>
-          <input
-            id='years'
-            type='range'
-            min='1'
-            max='50'
-            step='1'
-            className='w-full h-1.5 bg-secondary rounded-lg appearance-none cursor-pointer accent-blue-500'
-            value={params.years}
-            onChange={(e) => setParams({ ...params, years: parseInt(e.target.value) })}
-          />
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-7 w-7 shrink-0 md:hidden"
+              onClick={() => setParams({ ...params, years: Math.max(1, params.years - 1) })}
+            >
+              <Minus className="h-3 w-3" />
+            </Button>
+            <input
+              id='years'
+              type='range'
+              min='1'
+              max='50'
+              step='1'
+              className='w-full h-1.5 bg-secondary rounded-lg appearance-none cursor-pointer accent-blue-500'
+              value={params.years}
+              onChange={(e) => setParams({ ...params, years: parseInt(e.target.value) })}
+            />
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-7 w-7 shrink-0 md:hidden"
+              onClick={() => setParams({ ...params, years: Math.min(50, params.years + 1) })}
+            >
+              <Plus className="h-3 w-3" />
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>
