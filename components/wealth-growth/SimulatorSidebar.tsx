@@ -1,3 +1,6 @@
+'use client';
+
+import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -27,6 +30,7 @@ interface SimulatorSidebarProps {
   isSyncEnabled: boolean;
   setIsSyncEnabled: (enabled: boolean) => void;
   dbCapital: number;
+  currentMonthlyReturns: number;
   displayCurrency: SupportedCurrencyCode;
   setDisplayCurrency: (currency: SupportedCurrencyCode) => void;
   exchangeRates: ExchangeRates;
@@ -38,10 +42,13 @@ export function SimulatorSidebar({
   isSyncEnabled,
   setIsSyncEnabled,
   dbCapital,
+  currentMonthlyReturns,
   displayCurrency,
   setDisplayCurrency,
   exchangeRates,
 }: SimulatorSidebarProps) {
+  const [isIncomeSyncEnabled, setIsIncomeSyncEnabled] = useState(true);
+
   const handleChange = (key: keyof SimulationParams, displayValue: number) => {
     // Convert the value entered in displayCurrency BACK to MDL for internal storage
     const mdlValue = convertCurrency(
@@ -60,6 +67,13 @@ export function SimulatorSidebar({
     }
   };
 
+  const handleIncomeSyncToggle = (checked: boolean) => {
+    setIsIncomeSyncEnabled(checked);
+    if (checked) {
+      setParams({ ...params, monthlyIncome: currentMonthlyReturns });
+    }
+  };
+
   // Helper to convert internal MDL to display currency for the input field
   const toDisplay = (mdlValue: number) => {
     return Number(
@@ -70,22 +84,30 @@ export function SimulatorSidebar({
   };
 
   return (
-    <Card className='h-fit border-primary/20 shadow-md transition-all duration-300 hover:shadow-lg'>
-      <CardHeader className="pb-4">
-        <CardTitle className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Settings2 className="w-5 h-5 text-primary" />
-            <span className="text-lg">Parameters</span>
+    <Card className='h-full border-primary/20 shadow-md transition-all duration-300 hover:shadow-lg'>
+      <CardHeader className='pb-4'>
+        <CardTitle className='flex items-center justify-between'>
+          <div className='flex items-center gap-2'>
+            <Settings2 className='w-5 h-5 text-primary' />
+            <span className='text-lg'>Parameters</span>
           </div>
           <Tabs
             value={displayCurrency}
             onValueChange={(v) => setDisplayCurrency(v as SupportedCurrencyCode)}
           >
             <TabsList className='h-8 bg-muted/50'>
-              <TabsTrigger value='MDL' className='text-[10px] px-2'>MDL</TabsTrigger>
-              <TabsTrigger value='USD' className='text-[10px] px-2'>USD</TabsTrigger>
-              <TabsTrigger value='EUR' className='text-[10px] px-2'>EUR</TabsTrigger>
-              <TabsTrigger value='GBP' className='text-[10px] px-2'>GBP</TabsTrigger>
+              <TabsTrigger value='MDL' className='text-[10px] px-2'>
+                MDL
+              </TabsTrigger>
+              <TabsTrigger value='USD' className='text-[10px] px-2'>
+                USD
+              </TabsTrigger>
+              <TabsTrigger value='EUR' className='text-[10px] px-2'>
+                EUR
+              </TabsTrigger>
+              <TabsTrigger value='GBP' className='text-[10px] px-2'>
+                GBP
+              </TabsTrigger>
             </TabsList>
           </Tabs>
         </CardTitle>
@@ -94,8 +116,8 @@ export function SimulatorSidebar({
         {/* Starting Capital */}
         <div className='space-y-2'>
           <div className='flex items-center justify-between'>
-            <Label htmlFor='startingCapital' className="flex items-center gap-2">
-              <Banknote className="w-3.5 h-3.5 text-muted-foreground" />
+            <Label htmlFor='startingCapital' className='flex items-center gap-2'>
+              <Banknote className='w-3.5 h-3.5 text-muted-foreground' />
               Starting Capital
             </Label>
             <div className='flex items-center space-x-2'>
@@ -108,7 +130,7 @@ export function SimulatorSidebar({
                 htmlFor='sync-db'
                 className='text-xs text-muted-foreground cursor-pointer flex items-center gap-1 font-normal'
               >
-                <Zap className="w-3 h-3" />
+                <Zap className='w-3 h-3' />
                 Sync
               </Label>
             </div>
@@ -117,7 +139,7 @@ export function SimulatorSidebar({
             id='startingCapital'
             type='number'
             disabled={isSyncEnabled}
-            className="focus-visible:ring-primary/30"
+            className='focus-visible:ring-primary/30'
             value={toDisplay(params.startingCapital)}
             onChange={(e) =>
               handleChange('startingCapital', parseFloat(e.target.value) || 0)
@@ -127,14 +149,31 @@ export function SimulatorSidebar({
 
         {/* Monthly Income */}
         <div className='space-y-2'>
-          <Label htmlFor='monthlyIncome' className="flex items-center gap-2">
-            <Coins className="w-3.5 h-3.5 text-muted-foreground" />
-            Monthly Income
-          </Label>
+          <div className='flex items-center justify-between'>
+            <Label htmlFor='monthlyIncome' className='flex items-center gap-2'>
+              <Coins className='w-3.5 h-3.5 text-muted-foreground' />
+              Monthly Income
+            </Label>
+            <div className='flex items-center space-x-2'>
+              <Checkbox
+                id='sync-income'
+                checked={isIncomeSyncEnabled}
+                onCheckedChange={handleIncomeSyncToggle}
+              />
+              <Label
+                htmlFor='sync-income'
+                className='text-xs text-muted-foreground cursor-pointer flex items-center gap-1 font-normal'
+              >
+                <Zap className='w-3 h-3' />
+                Sync
+              </Label>
+            </div>
+          </div>
           <Input
             id='monthlyIncome'
             type='number'
-            className="focus-visible:ring-primary/30"
+            disabled={isIncomeSyncEnabled}
+            className='focus-visible:ring-primary/30'
             value={toDisplay(params.monthlyIncome)}
             onChange={(e) =>
               handleChange('monthlyIncome', parseFloat(e.target.value) || 0)
