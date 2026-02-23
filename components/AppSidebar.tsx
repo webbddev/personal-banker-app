@@ -47,6 +47,11 @@ const suggestionItems = [
     url: '/upload',
     icon: FileText,
   },
+  {
+    title: 'Wealth Growth',
+    url: '/wealth-growth',
+    icon: Sparkle,
+  },
 ];
 
 // Settings section items

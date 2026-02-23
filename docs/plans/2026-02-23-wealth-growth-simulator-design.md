@@ -12,16 +12,17 @@ The Wealth Growth Simulator is an interactive dashboard within the Personal Bank
 - **Dynamic Simulation:** Real-time updates to charts and tables as inputs change.
 - **Financial Metrics:** Track "Passive Income vs Expenses" crossover points.
 - **Inflation Adjustment:** Visualize both nominal and real (purchasing power) growth.
-
+- **Currency selection:** Allow users to select their currency (e.g., USD, EUR, GBP) and convert all values to that currency.
 
 ## 3. UI/UX Design
 
 ### Dashboard Components
 1. **Parameter Sidebar:**
    - **Starting Capital:** Numeric input with a "Sync with DB" toggle.
-   - **Monthly Contribution:** How much is added each month.
+   - **Monthly Income:** Current monthly earnings.
+   - **Monthly Expenses:** Current monthly spending.
    - **Annual Return (%):** Expected growth rate.
-   - **Inflation Rate (%):** Annual discount factor.
+   - **Inflation Rate (%):** Annual discount factor (also increases expenses).
    - **Investment Horizon:** Slider/Number for years (1 to 50).
    - **Monthly Expenses:** To calculate the financial freedom threshold.
 

@@ -1,18 +1,16 @@
-import {  SignUpButton } from '@clerk/nextjs';
+import { SignUpButton } from '@clerk/nextjs';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
-import Logo from '../assets/Colour-Logo_noBackground.svg';
 import LandingImg from '../assets/main.svg';
-import Link from 'next/link';
-
 import { LandingLamp } from '@/components/LandingLamp';
+import { ShineBorder } from '@/components/ui/shine-border';
 
 export default function Home() {
   return (
     <main className='relative min-h-screen overflow-hidden'>
       <LandingLamp />
       
-      <section className='max-w-7xl mx-auto mt-48 sm:mt-24 px-4 h-screen grid lg:grid-cols-[1fr,640px] lg:items-center relative z-10'>
+      <section className='max-w-7xl mx-auto mt-48 sm:mt-24 px-4 lg:px-10 h-screen grid lg:grid-cols-[1fr,540px] xl:grid-cols-[1fr,640px] lg:items-center relative z-10'>
         <div>
           <h1 className='capitalize text-4xl md:text-7xl xl:text-8xl font-bold -ml-2'>
             personal <span className='text-teal-500'>banker</span> app
@@ -23,11 +21,20 @@ export default function Home() {
             grow, and secure your wealth effortlessly with Personal Banker –
             where financial empowerment meets simplicity
           </p>
-          <Button asChild className='mt-8 h-12 px-8 text-lg rounded-full hover:scale-105 transition-transform'>
-            <SignUpButton >
-              Get Started
-            </SignUpButton>
-          </Button>
+          
+          <ShineBorder
+            className="mt-8 p-0 min-h-0 min-w-0 bg-transparent hover:scale-105 transition-transform duration-300"
+            borderRadius={40}
+            borderWidth={2}
+            color={["#14b8a6", "#ffffff", "#14b8a6"]}
+            duration={10}
+          >
+            <Button asChild className='h-12 px-8 text-lg rounded-full bg-teal-600 hover:bg-teal-500 text-white border-none shadow-none'>
+              <SignUpButton >
+                Get Started
+              </SignUpButton>
+            </Button>
+          </ShineBorder>
         </div>
         <div className='relative'>
             <Image

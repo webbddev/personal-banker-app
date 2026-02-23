@@ -65,6 +65,16 @@ export default {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
   			sm: 'calc(var(--radius) - 4px)'
+  		},
+  		keyframes: {
+  			shine: {
+  				'0%': { 'background-position': '0% 0%' },
+  				'50%': { 'background-position': '100% 100%' },
+  				'100%': { 'background-position': '0% 0%' }
+  			}
+  		},
+  		animation: {
+  			shine: 'shine var(--duration) infinite linear'
   		}
   	}
   },
