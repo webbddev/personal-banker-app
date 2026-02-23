@@ -608,3 +608,35 @@ export function exportToPDF(
     throw new Error('Failed to export to PDF. Please try again.');
   }
 }
+
+/**
+ * Exports investments to CSV format
+ */
+export function exportToCSV(
+  investments: FinancialInstrument[],
+  filename: string = 'investments-export'
+): void {
+  try {
+    if (investments.length === 0) return;
+
+    // Format the data for CSV
+    const formattedData = investments.map(formatInvestmentForExport);
+
+    // Create a worksheet
+    const ws = XLSX.utils.json_to_sheet(formattedData);
+
+    // Create a workbook and append the sheet
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Investments');
+
+    // Generate file with timestamp
+    const fileTimestamp = new Date().toISOString().split('T')[0];
+    XLSX.writeFile(wb, `${filename}-${fileTimestamp}.csv`, { bookType: 'csv' });
+
+    return;
+  } catch (error) {
+    console.error('Error exporting to CSV:', error);
+    throw new Error('Failed to export to CSV. Please try again.');
+  }
+}
+

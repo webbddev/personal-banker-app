@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Download, FileSpreadsheet, FileText, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { exportToExcel, exportToPDF } from '@/utils/export-utils';
+import { exportToExcel, exportToPDF, exportToCSV } from '@/utils/export-utils';
 import { FinancialInstrument } from '@/types/investment-schema';
 import { CurrencyTotals } from '@/utils/investment-calculations';
 
@@ -117,6 +117,36 @@ export function ExportButton({
       setIsExporting(false);
     }
   };
+  
+  const handleExportCSV = async () => {
+    if (investments.length === 0) {
+      toast({
+        title: 'No data to export',
+        description: 'There are no investments to export.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setIsExporting(true);
+    try {
+      exportToCSV(investments, filename);
+      toast({
+        title: 'Export Successful',
+        description: `Exported ${investments.length} investment(s) to CSV.`,
+      });
+    } catch (error) {
+      console.error('CSV export error:', error);
+      toast({
+        title: 'Export Failed',
+        description:
+          error instanceof Error ? error.message : 'Failed to export to CSV',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   return (
     <DropdownMenu>
@@ -149,6 +179,10 @@ export function ExportButton({
         <DropdownMenuItem onClick={handleExportPDF} disabled={isExporting}>
           <FileText className='mr-2 h-4 w-4' />
           <span>Export as PDF</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={handleExportCSV} disabled={isExporting}>
+          <FileText className='mr-2 h-4 w-4' />
+          <span>Export as CSV</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
