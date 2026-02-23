@@ -25,10 +25,10 @@ import {
   SidebarSeparator,
 } from './ui/sidebar';
 import Image from 'next/image';
-import { SignedIn, UserButton } from '@clerk/nextjs';
 import { currentUser } from '@clerk/nextjs/server';
 import { ModeToggle } from './ModeToggle';
 import { SidebarLink } from './SidebarLink';
+import { NavUser } from './NavUser';
 
 // Suggestions section items
 const suggestionItems = [
@@ -78,9 +78,6 @@ const settingsItems = [
 ];
 
 const AppSidebar = async () => {
-  const user = await currentUser();
-  const userName = user?.firstName;
-
   return (
     <Sidebar collapsible='icon'>
       <SidebarHeader className='py-4'>
@@ -91,12 +88,12 @@ const AppSidebar = async () => {
                 href='/dashboard'
                 className='flex items-center justify-center w-full'
               >
-                <div className='w-full max-w-[200px] aspect-square relative group-data-[collapsible=icon]:w-8 group-data-[collapsible=icon]:h-8'>
+                <div className='w-full max-w-[200px] aspect-square relative group-data-[collapsible=icon]:w-8 group-data-[collapsible=icon]:h-8 rounded-full overflow-hidden bg-sidebar-accent/50 p-1'>
                   <Image
                     src='/logo/colour-logo_no-background.webp'
                     alt='logo'
                     fill
-                    className='object-contain'
+                    className='object-contain p-2'
                   />
                 </div>
               </SidebarLink>
@@ -191,35 +188,18 @@ const AppSidebar = async () => {
       {/* User Section */}
       <SidebarFooter>
         <SidebarMenu>
-          {/* Theme Toggle */}
           <SidebarMenuItem>
-            <div className='flex items-center justify-start w-full py-2 rounded-md hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors group-data-[collapsible=icon]:justify-center'>
-              <ModeToggle />
-              <span className='group-data-[collapsible=icon]:hidden ml-2 text-sm lg:text-base'>
-                Switch Theme
-              </span>
-            </div>
+            <SidebarMenuButton size='lg' asChild>
+              <ModeToggle showLabel />
+            </SidebarMenuButton>
           </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SignedIn>
-              <div className='flex items-center justify-center w-full gap-2 p-0 rounded-md hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors group-data-[collapsible=icon]:justify-center'>
-                <UserButton />
-                <div className='flex-1 min-w-0 group-data-[collapsible=icon]:hidden'>
-                  <div className='flex items-center justify-between'>
-                    <span className='truncate text-sm lg:text-base'>
-                      Welcome, {userName || 'User'}
-                    </span>
-                    <ChevronUp className='w-4 h-4 flex-shrink-0 opacity-60' />
-                  </div>
-                </div>
-              </div>
-            </SignedIn>
-          </SidebarMenuItem>
+          <NavUser />
         </SidebarMenu>
       </SidebarFooter>
     </Sidebar>
   );
 };
+
 
 export default AppSidebar;
 

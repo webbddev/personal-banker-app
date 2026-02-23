@@ -3,47 +3,76 @@
 import * as React from 'react';
 import { Moon, Sun } from 'lucide-react';
 import { useTheme } from 'next-themes';
-import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
-export function ModeToggle() {
-  const commonClasses = 'h-7 w-7 rounded-3xl';
+interface ModeToggleProps extends React.HTMLAttributes<HTMLDivElement> {
+  showLabel?: boolean;
+}
 
+export function ModeToggle({
+  showLabel = false,
+  className,
+  ...props
+}: ModeToggleProps) {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = React.useState(false);
 
-  // Only show the toggle after mounting to avoid hydration mismatch
   React.useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Don't render anything until mounted to avoid hydration mismatch
   if (!mounted) {
-    // Render a placeholder to prevent layout shift.
-    // Use a div to avoid rendering an interactive element.
-    return <div className={commonClasses} />;
+    return <div className='h-8 w-8 rounded-full' />;
   }
 
+  const toggleTheme = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setTheme(theme === 'light' ? 'dark' : 'light');
+  };
+
   return (
-    <Button
-      onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-      className={`relative border bg-teal-600 border-teal-400 dark:border-teal-500 p-1 hover:bg-teal-500 dark:hover:bg-teal-500 ${commonClasses}`}
-      variant='outline'
+    <div
+      onClick={toggleTheme}
+      className={cn(
+        'group flex-1 flex items-center justify-start gap-2 outline-none px-2 h-12',
+        className
+      )}
+      {...props}
     >
-      <Moon
-        className={`absolute h-[0.9rem] w-[0.9rem] transition-all ${
-          theme === 'light'
-            ? 'opacity-100 rotate-0 scale-100'
-            : 'opacity-0 rotate-90 scale-0'
-        } text-teal-200`}
-      />
-      <Sun
-        className={`absolute h-[0.9rem] w-[0.9rem] transition-all ${
-          theme === 'dark'
-            ? 'opacity-100 rotate-0 scale-100'
-            : 'opacity-0 rotate-90 scale-0'
-        } text-gray-200`}
-      />
-      <span className='sr-only'>Toggle theme</span>
-    </Button>
+      <div
+        className={cn(
+          'relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full border bg-teal-600 border-teal-400 dark:border-teal-500 transition-colors group-hover:bg-teal-500 shadow-sm'
+        )}
+      >
+        <Moon
+          className={cn(
+            'absolute h-4 w-4 transition-all text-teal-200',
+            theme === 'light'
+              ? 'opacity-100 rotate-0 scale-100'
+              : 'opacity-0 rotate-90 scale-0'
+          )}
+        />
+        <Sun
+          className={cn(
+            'absolute h-4 w-4 transition-all text-gray-200',
+            theme === 'dark'
+              ? 'opacity-100 rotate-0 scale-100'
+              : 'opacity-0 rotate-90 scale-0'
+          )}
+        />
+        <span className='sr-only'>Toggle theme</span>
+      </div>
+      {showLabel && (
+        <div className='grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden'>
+          <span className='truncate font-semibold text-sidebar-foreground'>
+            Switch Theme
+          </span>
+          <span className='truncate text-xs text-muted-foreground'>
+            Toggle Dark/Light Mode
+          </span>
+        </div>
+      )}
+    </div>
   );
 }
