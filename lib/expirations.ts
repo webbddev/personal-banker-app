@@ -8,33 +8,44 @@ import {
   endOfMonth,
 } from 'date-fns';
 
-/** Investments expiring in exactly 30 days */
+/** Investments expiring in the next 30 days */
 export async function findInvestmentsFor30DayNotification() {
   const now = new Date();
-
-  // 1. Target date is 30 days from now
-  const targetDate = addDays(now, 30);
-
-  // 2. Create a 48-hour search window (Yesterday + Target Day)
-  // We use date-fns to cleanly calculate the start of "yesterday" relative to the target.
-  // This ensures we catch investments regardless of timezone shifts in the DB.
-  const start = startOfDay(subDays(targetDate, 1));
-  const end = endOfDay(targetDate);
+  const thirtyDaysFromNow = addDays(now, 30);
 
   console.log(
-    `Checking for investments between ${start.toISOString()} and ${end.toISOString()}`
+    `Checking for investments expiring between ${now.toISOString()} and ${thirtyDaysFromNow.toISOString()}`
   );
 
   return prisma.investment.findMany({
     where: {
       expirationDate: {
-        gte: start,
-        lte: end,
+        gte: startOfDay(now),
+        lte: endOfDay(thirtyDaysFromNow),
       },
     },
     include: { user: true },
+    orderBy: { expirationDate: 'asc' },
   });
 }
+
+/** Investments expiring in a specific range of days from now */
+export async function findInvestmentsExpiringInRange(days: number) {
+  const now = new Date();
+  const targetDate = addDays(now, days);
+
+  return prisma.investment.findMany({
+    where: {
+      expirationDate: {
+        gte: startOfDay(now),
+        lte: endOfDay(targetDate),
+      },
+    },
+    include: { user: true },
+    orderBy: { expirationDate: 'asc' },
+  });
+}
+
 
 /** Investments expiring in the current month */
 export async function findInvestmentsForMonthlyNotification() {
