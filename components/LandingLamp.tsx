@@ -23,7 +23,7 @@ export function LandingLamp() {
         // Mobile: far right
         'right-[2.5rem] top-[-2.75rem] sm:top-2 sm:right-4',
         // Tablet (iPad Mini/Pro): push to more empty space on the right to avoid title overlap
-        'md:right-[3.5rem] lg:right-auto lg:left-[52%] xl:left-[48%]'
+        'md:right-[3.5rem] lg:right-auto lg:left-[47%] lg:top-[17%] xl:left-[52%] xl:top-[12%] 2xl:left-[52%] 2xl:top-[10%]'
     )}>
       {/* Wire - Using vh units to remain synced with vertically centered hero content */}
       <div className={cn(
