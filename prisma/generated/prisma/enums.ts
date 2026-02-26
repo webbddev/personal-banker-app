@@ -9,11 +9,19 @@
 * 🟢 You can import this file directly.
 */
 
+export const MarketIndicatorName = {
+  BASE_RATE: 'BASE_RATE',
+  INFLATION: 'INFLATION'
+} as const
+
+export type MarketIndicatorName = (typeof MarketIndicatorName)[keyof typeof MarketIndicatorName]
+
+
 export const ExpirationStatus = {
-  ACTIVE: 'ACTIVE',
   EXPIRING_LESS_THAN_3_MONTHS: 'EXPIRING_LESS_THAN_3_MONTHS',
   EXPIRING_IN_A_MONTH: 'EXPIRING_IN_A_MONTH',
-  EXPIRED: 'EXPIRED'
+  EXPIRED: 'EXPIRED',
+  ACTIVE: 'ACTIVE'
 } as const
 
 export type ExpirationStatus = (typeof ExpirationStatus)[keyof typeof ExpirationStatus]

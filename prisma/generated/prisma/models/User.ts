@@ -198,8 +198,8 @@ export type UserWhereInput = {
   imageUrl?: Prisma.StringNullableFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
-  investments?: Prisma.InvestmentListRelationFilter
   documents?: Prisma.DocumentListRelationFilter
+  investments?: Prisma.InvestmentListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -210,8 +210,8 @@ export type UserOrderByWithRelationInput = {
   imageUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-  investments?: Prisma.InvestmentOrderByRelationAggregateInput
   documents?: Prisma.DocumentOrderByRelationAggregateInput
+  investments?: Prisma.InvestmentOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -225,8 +225,8 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   imageUrl?: Prisma.StringNullableFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
-  investments?: Prisma.InvestmentListRelationFilter
   documents?: Prisma.DocumentListRelationFilter
+  investments?: Prisma.InvestmentListRelationFilter
 }, "id" | "clerkUserId" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -263,8 +263,8 @@ export type UserCreateInput = {
   imageUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  investments?: Prisma.InvestmentCreateNestedManyWithoutUserInput
   documents?: Prisma.DocumentCreateNestedManyWithoutUserInput
+  investments?: Prisma.InvestmentCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -275,8 +275,8 @@ export type UserUncheckedCreateInput = {
   imageUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  investments?: Prisma.InvestmentUncheckedCreateNestedManyWithoutUserInput
   documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserInput
+  investments?: Prisma.InvestmentUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -287,8 +287,8 @@ export type UserUpdateInput = {
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  investments?: Prisma.InvestmentUpdateManyWithoutUserNestedInput
   documents?: Prisma.DocumentUpdateManyWithoutUserNestedInput
+  investments?: Prisma.InvestmentUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -299,8 +299,8 @@ export type UserUncheckedUpdateInput = {
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  investments?: Prisma.InvestmentUncheckedUpdateManyWithoutUserNestedInput
   documents?: Prisma.DocumentUncheckedUpdateManyWithoutUserNestedInput
+  investments?: Prisma.InvestmentUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -534,13 +534,13 @@ export type UserUncheckedUpdateWithoutInvestmentsInput = {
  */
 
 export type UserCountOutputType = {
-  investments: number
   documents: number
+  investments: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  investments?: boolean | UserCountOutputTypeCountInvestmentsArgs
   documents?: boolean | UserCountOutputTypeCountDocumentsArgs
+  investments?: boolean | UserCountOutputTypeCountInvestmentsArgs
 }
 
 /**
@@ -556,15 +556,15 @@ export type UserCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensi
 /**
  * UserCountOutputType without action
  */
-export type UserCountOutputTypeCountInvestmentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.InvestmentWhereInput
+export type UserCountOutputTypeCountDocumentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DocumentWhereInput
 }
 
 /**
  * UserCountOutputType without action
  */
-export type UserCountOutputTypeCountDocumentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.DocumentWhereInput
+export type UserCountOutputTypeCountInvestmentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.InvestmentWhereInput
 }
 
 
@@ -576,8 +576,8 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   imageUrl?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  investments?: boolean | Prisma.User$investmentsArgs<ExtArgs>
   documents?: boolean | Prisma.User$documentsArgs<ExtArgs>
+  investments?: boolean | Prisma.User$investmentsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -613,8 +613,8 @@ export type UserSelectScalar = {
 
 export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "clerkUserId" | "email" | "name" | "imageUrl" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  investments?: boolean | Prisma.User$investmentsArgs<ExtArgs>
   documents?: boolean | Prisma.User$documentsArgs<ExtArgs>
+  investments?: boolean | Prisma.User$investmentsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -623,8 +623,8 @@ export type UserIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
 export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "User"
   objects: {
-    investments: Prisma.$InvestmentPayload<ExtArgs>[]
     documents: Prisma.$DocumentPayload<ExtArgs>[]
+    investments: Prisma.$InvestmentPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1028,8 +1028,8 @@ readonly fields: UserFieldRefs;
  */
 export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  investments<T extends Prisma.User$investmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$investmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InvestmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   documents<T extends Prisma.User$documentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$documentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  investments<T extends Prisma.User$investmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$investmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InvestmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1454,30 +1454,6 @@ export type UserDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Internal
 }
 
 /**
- * User.investments
- */
-export type User$investmentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the Investment
-   */
-  select?: Prisma.InvestmentSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the Investment
-   */
-  omit?: Prisma.InvestmentOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.InvestmentInclude<ExtArgs> | null
-  where?: Prisma.InvestmentWhereInput
-  orderBy?: Prisma.InvestmentOrderByWithRelationInput | Prisma.InvestmentOrderByWithRelationInput[]
-  cursor?: Prisma.InvestmentWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.InvestmentScalarFieldEnum | Prisma.InvestmentScalarFieldEnum[]
-}
-
-/**
  * User.documents
  */
 export type User$documentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1499,6 +1475,30 @@ export type User$documentsArgs<ExtArgs extends runtime.Types.Extensions.Internal
   take?: number
   skip?: number
   distinct?: Prisma.DocumentScalarFieldEnum | Prisma.DocumentScalarFieldEnum[]
+}
+
+/**
+ * User.investments
+ */
+export type User$investmentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Investment
+   */
+  select?: Prisma.InvestmentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Investment
+   */
+  omit?: Prisma.InvestmentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.InvestmentInclude<ExtArgs> | null
+  where?: Prisma.InvestmentWhereInput
+  orderBy?: Prisma.InvestmentOrderByWithRelationInput | Prisma.InvestmentOrderByWithRelationInput[]
+  cursor?: Prisma.InvestmentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.InvestmentScalarFieldEnum | Prisma.InvestmentScalarFieldEnum[]
 }
 
 /**

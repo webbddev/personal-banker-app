@@ -1,4 +1,3 @@
-import { ChartAreaInteractive } from '@/components/chart-area-interactive';
 import { SectionCards } from '@/components/section-cards';
 import { SiteHeader } from '@/components/site-header';
 import { SidebarInset } from '@/components/ui/sidebar';
@@ -24,6 +23,8 @@ import { getLatestRates } from '@/utils/exchange-rate-service';
 import { ChartPieLabel } from '@/components/ChartPieLabel';
 import { ChartPieInteractive } from '@/components/ChartPieInteractive';
 import { ExchangeRatesDisplay } from '@/components/ExchangeRatesDisplay';
+import { MarketIntelligenceChart } from '@/components/MarketIntelligenceChart';
+import { getMarketIntelligenceData } from '@/app/actions/marketIntelligenceActions';
 
 export default async function DashboardPage() {
   const investments = await getAllInvestmentsSortedByExpiration();
@@ -38,7 +39,7 @@ export default async function DashboardPage() {
   const exchangeRates = await getLatestRates();
   const totalMonthlyRevenue = calculateTotalMonthlyRevenueInMDL(
     monthlyReturns,
-    exchangeRates
+    exchangeRates,
   );
   const totalInvestments = allInvestments.length;
   const expiringIn7Days = getInvestmentsExpiringIn7Days(allInvestments);
@@ -46,6 +47,7 @@ export default async function DashboardPage() {
   const expiredInvestments = getExpiredInvestments(allInvestments);
   const averageInterestRatesByType =
     calculateAverageInterestRatesByType(allInvestments);
+  const marketData = await getMarketIntelligenceData();
 
   return (
     <SidebarInset className='w-full'>
@@ -94,34 +96,9 @@ export default async function DashboardPage() {
                 <ExchangeRatesDisplay />
               </div>
 
-              {/* Additional Chart Area - Full width on large screens */}
+              {/* Market Intelligence Chart - Full width */}
               <div className='lg:col-span-2 xl:col-span-4'>
-                <ChartAreaInteractive />
-              </div>
-
-              {/* Optional: Additional smaller charts or components */}
-              <div className='bg-primary-foreground p-4 rounded-lg lg:col-span-1 xl:col-span-1'>
-                <div className='h-full flex items-center justify-center'>
-                  <p className='text-muted-foreground'>Additional Metric</p>
-                </div>
-              </div>
-
-              <div className='bg-primary-foreground p-4 rounded-lg lg:col-span-1 xl:col-span-1'>
-                <div className='h-full flex items-center justify-center'>
-                  <p className='text-muted-foreground'>Additional Metric</p>
-                </div>
-              </div>
-
-              <div className='bg-primary-foreground p-4 rounded-lg lg:col-span-1 xl:col-span-1'>
-                <div className='h-full flex items-center justify-center'>
-                  <p className='text-muted-foreground'>Additional Metric</p>
-                </div>
-              </div>
-
-              <div className='bg-primary-foreground p-4 rounded-lg lg:col-span-1 xl:col-span-1'>
-                <div className='h-full flex items-center justify-center'>
-                  <p className='text-muted-foreground'>Additional Metric</p>
-                </div>
+                <MarketIntelligenceChart data={marketData} />
               </div>
             </div>
           </div>

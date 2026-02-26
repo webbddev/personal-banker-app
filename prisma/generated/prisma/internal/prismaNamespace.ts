@@ -386,7 +386,9 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 export const ModelName = {
   User: 'User',
   Document: 'Document',
-  Investment: 'Investment'
+  Investment: 'Investment',
+  BnmBaseRate: 'BnmBaseRate',
+  MarketIndicator: 'MarketIndicator'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -402,7 +404,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "document" | "investment"
+    modelProps: "user" | "document" | "investment" | "bnmBaseRate" | "marketIndicator"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -628,6 +630,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    BnmBaseRate: {
+      payload: Prisma.$BnmBaseRatePayload<ExtArgs>
+      fields: Prisma.BnmBaseRateFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.BnmBaseRateFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BnmBaseRatePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.BnmBaseRateFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BnmBaseRatePayload>
+        }
+        findFirst: {
+          args: Prisma.BnmBaseRateFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BnmBaseRatePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.BnmBaseRateFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BnmBaseRatePayload>
+        }
+        findMany: {
+          args: Prisma.BnmBaseRateFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BnmBaseRatePayload>[]
+        }
+        create: {
+          args: Prisma.BnmBaseRateCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BnmBaseRatePayload>
+        }
+        createMany: {
+          args: Prisma.BnmBaseRateCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.BnmBaseRateCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BnmBaseRatePayload>[]
+        }
+        delete: {
+          args: Prisma.BnmBaseRateDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BnmBaseRatePayload>
+        }
+        update: {
+          args: Prisma.BnmBaseRateUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BnmBaseRatePayload>
+        }
+        deleteMany: {
+          args: Prisma.BnmBaseRateDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.BnmBaseRateUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.BnmBaseRateUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BnmBaseRatePayload>[]
+        }
+        upsert: {
+          args: Prisma.BnmBaseRateUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BnmBaseRatePayload>
+        }
+        aggregate: {
+          args: Prisma.BnmBaseRateAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateBnmBaseRate>
+        }
+        groupBy: {
+          args: Prisma.BnmBaseRateGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BnmBaseRateGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.BnmBaseRateCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BnmBaseRateCountAggregateOutputType> | number
+        }
+      }
+    }
+    MarketIndicator: {
+      payload: Prisma.$MarketIndicatorPayload<ExtArgs>
+      fields: Prisma.MarketIndicatorFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.MarketIndicatorFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MarketIndicatorPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.MarketIndicatorFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MarketIndicatorPayload>
+        }
+        findFirst: {
+          args: Prisma.MarketIndicatorFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MarketIndicatorPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.MarketIndicatorFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MarketIndicatorPayload>
+        }
+        findMany: {
+          args: Prisma.MarketIndicatorFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MarketIndicatorPayload>[]
+        }
+        create: {
+          args: Prisma.MarketIndicatorCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MarketIndicatorPayload>
+        }
+        createMany: {
+          args: Prisma.MarketIndicatorCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.MarketIndicatorCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MarketIndicatorPayload>[]
+        }
+        delete: {
+          args: Prisma.MarketIndicatorDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MarketIndicatorPayload>
+        }
+        update: {
+          args: Prisma.MarketIndicatorUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MarketIndicatorPayload>
+        }
+        deleteMany: {
+          args: Prisma.MarketIndicatorDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.MarketIndicatorUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.MarketIndicatorUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MarketIndicatorPayload>[]
+        }
+        upsert: {
+          args: Prisma.MarketIndicatorUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MarketIndicatorPayload>
+        }
+        aggregate: {
+          args: Prisma.MarketIndicatorAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMarketIndicator>
+        }
+        groupBy: {
+          args: Prisma.MarketIndicatorGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MarketIndicatorGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.MarketIndicatorCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MarketIndicatorCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -710,6 +860,26 @@ export const InvestmentScalarFieldEnum = {
 } as const
 
 export type InvestmentScalarFieldEnum = (typeof InvestmentScalarFieldEnum)[keyof typeof InvestmentScalarFieldEnum]
+
+
+export const BnmBaseRateScalarFieldEnum = {
+  id: 'id',
+  rate: 'rate',
+  createdAt: 'createdAt'
+} as const
+
+export type BnmBaseRateScalarFieldEnum = (typeof BnmBaseRateScalarFieldEnum)[keyof typeof BnmBaseRateScalarFieldEnum]
+
+
+export const MarketIndicatorScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  value: 'value',
+  date: 'date',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MarketIndicatorScalarFieldEnum = (typeof MarketIndicatorScalarFieldEnum)[keyof typeof MarketIndicatorScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -811,6 +981,20 @@ export type EnumExpirationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<
 export type ListEnumExpirationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ExpirationStatus[]'>
     
 
+
+/**
+ * Reference to a field of type 'MarketIndicatorName'
+ */
+export type EnumMarketIndicatorNameFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MarketIndicatorName'>
+    
+
+
+/**
+ * Reference to a field of type 'MarketIndicatorName[]'
+ */
+export type ListEnumMarketIndicatorNameFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MarketIndicatorName[]'>
+    
+
 /**
  * Batch Payload for updateMany & deleteMany & createMany
  */
@@ -909,6 +1093,8 @@ export type GlobalOmitConfig = {
   user?: Prisma.UserOmit
   document?: Prisma.DocumentOmit
   investment?: Prisma.InvestmentOmit
+  bnmBaseRate?: Prisma.BnmBaseRateOmit
+  marketIndicator?: Prisma.MarketIndicatorOmit
 }
 
 /* Types for Logging */

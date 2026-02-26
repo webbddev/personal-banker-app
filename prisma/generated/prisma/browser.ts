@@ -32,3 +32,13 @@ export type Document = Prisma.DocumentModel
  * 
  */
 export type Investment = Prisma.InvestmentModel
+/**
+ * Model BnmBaseRate
+ * 
+ */
+export type BnmBaseRate = Prisma.BnmBaseRateModel
+/**
+ * Model MarketIndicator
+ * 
+ */
+export type MarketIndicator = Prisma.MarketIndicatorModel

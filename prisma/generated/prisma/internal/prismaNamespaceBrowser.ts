@@ -53,7 +53,9 @@ export const AnyNull = runtime.AnyNull
 export const ModelName = {
   User: 'User',
   Document: 'Document',
-  Investment: 'Investment'
+  Investment: 'Investment',
+  BnmBaseRate: 'BnmBaseRate',
+  MarketIndicator: 'MarketIndicator'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -115,6 +117,26 @@ export const InvestmentScalarFieldEnum = {
 } as const
 
 export type InvestmentScalarFieldEnum = (typeof InvestmentScalarFieldEnum)[keyof typeof InvestmentScalarFieldEnum]
+
+
+export const BnmBaseRateScalarFieldEnum = {
+  id: 'id',
+  rate: 'rate',
+  createdAt: 'createdAt'
+} as const
+
+export type BnmBaseRateScalarFieldEnum = (typeof BnmBaseRateScalarFieldEnum)[keyof typeof BnmBaseRateScalarFieldEnum]
+
+
+export const MarketIndicatorScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  value: 'value',
+  date: 'date',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MarketIndicatorScalarFieldEnum = (typeof MarketIndicatorScalarFieldEnum)[keyof typeof MarketIndicatorScalarFieldEnum]
 
 
 export const SortOrder = {

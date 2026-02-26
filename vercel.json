@@ -7,6 +7,14 @@
     {
       "path": "/api/notifications/monthly",
       "schedule": "0 9 1 * *"
+    },
+    {
+      "path": "/api/cron/bnm-base-rate",
+      "schedule": "30 9 * * *"
+    },
+    {
+      "path": "/api/cron/sync-market-data",
+      "schedule": "0 10 * * 1"
     }
   ]
 }

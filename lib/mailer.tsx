@@ -15,7 +15,7 @@ const appBaseUrl = process.env.APP_BASE_URL || 'http://localhost:3000';
 
 if (!fromEmail) {
   console.error(
-    'EMAIL_FROM environment variable is not set. Emails will not be sent.'
+    'EMAIL_FROM environment variable is not set. Emails will not be sent.',
   );
 }
 
@@ -55,7 +55,7 @@ async function sendEmail({
 }
 
 export async function sendDailyReminder(
-  investment: InvestmentWithUser
+  investment: InvestmentWithUser,
 ): Promise<boolean> {
   if (!investment.user.email) {
     console.error(`User ${investment.user.id} does not have an email address.`);
@@ -78,7 +78,7 @@ export async function sendDailyReminder(
 
 export async function sendMonthlyDigest(
   user: User,
-  investments: Investment[]
+  investments: Investment[],
 ): Promise<boolean> {
   if (!user.email || investments.length === 0) {
     console.error(`Skipping monthly digest for ${user.id}`);
@@ -101,7 +101,7 @@ export async function sendMonthlyDigest(
 
 export async function sendThirtyDayReminder(
   user: User,
-  investments: Investment[]
+  investments: Investment[],
 ): Promise<boolean> {
   if (!user.email || investments.length === 0) {
     console.error(`Skipping 30-day reminder for ${user.id}`);
@@ -117,6 +117,45 @@ export async function sendThirtyDayReminder(
         investments={investments.map(formatInvestment)}
         appBaseUrl={appBaseUrl}
       />
+    ),
+  });
+}
+
+export async function sendBaseRateChangeEmail(
+  to: string,
+  oldRate: number | null,
+  newRate: number,
+): Promise<boolean> {
+  const diff = oldRate !== null ? newRate - oldRate : 0;
+  const oldRateText = oldRate !== null ? `${oldRate.toFixed(2)}%` : 'unknown';
+  const newRateText = `${newRate.toFixed(2)}%`;
+
+  return sendEmail({
+    to,
+    subject: `⚠️ BNM Base Rate Changed to ${newRateText}`,
+    // Simple inline HTML component since no complex Email template is provided
+    component: (
+      <div style={{ fontFamily: 'sans-serif', padding: '20px' }}>
+        <h2>National Bank of Moldova - Base Rate Update</h2>
+        <p>The base rate has been updated.</p>
+        <ul>
+          <li>
+            <strong>Previous Rate:</strong> {oldRateText}
+          </li>
+          <li>
+            <strong>New Rate:</strong> {newRateText}
+          </li>
+        </ul>
+        <p>This may affect various interest rates in the economy.</p>
+        <p>
+          <a
+            href='https://bnm.md/'
+            style={{ color: '#0066cc', textDecoration: 'none' }}
+          >
+            Visit BNM for official details &rarr;
+          </a>
+        </p>
+      </div>
     ),
   });
 }

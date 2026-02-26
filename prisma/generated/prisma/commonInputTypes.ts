@@ -181,6 +181,23 @@ export type EnumExpirationStatusWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedEnumExpirationStatusFilter<$PrismaModel>
 }
 
+export type EnumMarketIndicatorNameFilter<$PrismaModel = never> = {
+  equals?: $Enums.MarketIndicatorName | Prisma.EnumMarketIndicatorNameFieldRefInput<$PrismaModel>
+  in?: $Enums.MarketIndicatorName[] | Prisma.ListEnumMarketIndicatorNameFieldRefInput<$PrismaModel>
+  notIn?: $Enums.MarketIndicatorName[] | Prisma.ListEnumMarketIndicatorNameFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumMarketIndicatorNameFilter<$PrismaModel> | $Enums.MarketIndicatorName
+}
+
+export type EnumMarketIndicatorNameWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.MarketIndicatorName | Prisma.EnumMarketIndicatorNameFieldRefInput<$PrismaModel>
+  in?: $Enums.MarketIndicatorName[] | Prisma.ListEnumMarketIndicatorNameFieldRefInput<$PrismaModel>
+  notIn?: $Enums.MarketIndicatorName[] | Prisma.ListEnumMarketIndicatorNameFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumMarketIndicatorNameWithAggregatesFilter<$PrismaModel> | $Enums.MarketIndicatorName
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumMarketIndicatorNameFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumMarketIndicatorNameFilter<$PrismaModel>
+}
+
 export type NestedStringFilter<$PrismaModel = never> = {
   equals?: string | Prisma.StringFieldRefInput<$PrismaModel>
   in?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
@@ -348,6 +365,23 @@ export type NestedEnumExpirationStatusWithAggregatesFilter<$PrismaModel = never>
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumExpirationStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumExpirationStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumMarketIndicatorNameFilter<$PrismaModel = never> = {
+  equals?: $Enums.MarketIndicatorName | Prisma.EnumMarketIndicatorNameFieldRefInput<$PrismaModel>
+  in?: $Enums.MarketIndicatorName[] | Prisma.ListEnumMarketIndicatorNameFieldRefInput<$PrismaModel>
+  notIn?: $Enums.MarketIndicatorName[] | Prisma.ListEnumMarketIndicatorNameFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumMarketIndicatorNameFilter<$PrismaModel> | $Enums.MarketIndicatorName
+}
+
+export type NestedEnumMarketIndicatorNameWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.MarketIndicatorName | Prisma.EnumMarketIndicatorNameFieldRefInput<$PrismaModel>
+  in?: $Enums.MarketIndicatorName[] | Prisma.ListEnumMarketIndicatorNameFieldRefInput<$PrismaModel>
+  notIn?: $Enums.MarketIndicatorName[] | Prisma.ListEnumMarketIndicatorNameFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumMarketIndicatorNameWithAggregatesFilter<$PrismaModel> | $Enums.MarketIndicatorName
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumMarketIndicatorNameFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumMarketIndicatorNameFilter<$PrismaModel>
 }
 
 
