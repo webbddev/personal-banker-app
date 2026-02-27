@@ -179,9 +179,11 @@ type InvestmentState = {
   // UI State - only keep what's needed for UI interactions
   selectedInvestment: FinancialInstrument | null;
   openDialog: boolean;
+  openEditDialog: boolean;
 
   // Actions
   setOpenDialog: (open: boolean) => void;
+  setOpenEditDialog: (open: boolean) => void;
   setSelectedInvestment: (investment: FinancialInstrument | null) => void;
   reset: () => void;
 };
@@ -189,6 +191,7 @@ type InvestmentState = {
 const initialState = {
   selectedInvestment: null,
   openDialog: false,
+  openEditDialog: false,
 };
 
 // Simplified store - only for UI state management
@@ -200,6 +203,8 @@ export const useInvestmentStore = create<InvestmentState>()(
 
       setOpenDialog: (open) => set({ openDialog: open }),
 
+      setOpenEditDialog: (open) => set({ openEditDialog: open }),
+
       setSelectedInvestment: (investment) =>
         set({ selectedInvestment: investment }),
 
@@ -207,6 +212,6 @@ export const useInvestmentStore = create<InvestmentState>()(
     }),
     {
       name: 'investment-ui-store', // Renamed to reflect its purpose
-    }
-  )
+    },
+  ),
 );

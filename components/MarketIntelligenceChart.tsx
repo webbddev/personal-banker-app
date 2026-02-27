@@ -601,17 +601,21 @@ export function MarketIntelligenceChart({
                           x={selectedPoint.date}
                           y={selectedPoint[line.key] as number}
                           stroke='none'
-                          label={{
-                            position: 'center',
-                            content: (
+                          label={(props: any) => {
+                            const { x, y } = props;
+                            if (typeof x !== 'number' || typeof y !== 'number')
+                              return <g />;
+                            return (
                               <circle
+                                cx={x}
+                                cy={y}
                                 r={4}
                                 fill={line.color}
                                 stroke='white'
                                 strokeWidth={2}
-                                className='animate-bounce'
+                                className='shadow-sm transition-all duration-300'
                               />
-                            ),
+                            );
                           }}
                         />
                       );
@@ -666,8 +670,8 @@ export function MarketIntelligenceChart({
         </div>
       </CardContent>
 
-      <CardFooter className='px-0 pt-8 pb-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-border/40'>
-        <div className='flex items-center gap-2'>
+      <CardFooter className='px-6 pt-8 pb-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-border/40'>
+        <div className='flex items-center gap-2 ml-1'>
           <div className='h-1.5 w-1.5 rounded-full bg-emerald-500 animate-ping' />
           <p className='text-[11px] font-bold text-muted-foreground uppercase tracking-wider'>
             Live Market Updates: Synchronized

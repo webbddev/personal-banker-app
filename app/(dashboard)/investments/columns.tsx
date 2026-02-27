@@ -13,7 +13,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import Link from 'next/link';
 import { FinancialInstrument } from '@/types/investment-schema';
 import {
   investmentTypeOptions,
@@ -66,7 +65,7 @@ export const columns: ColumnDef<FinancialInstrument>[] = [
         (opt) =>
           opt.value === investmentType ||
           opt.value ===
-            INVESTMENT_TYPES[investmentType as keyof typeof INVESTMENT_TYPES]
+            INVESTMENT_TYPES[investmentType as keyof typeof INVESTMENT_TYPES],
       );
       return (
         <div className='text-center'>{option?.label || investmentType}</div>
@@ -200,7 +199,7 @@ export const columns: ColumnDef<FinancialInstrument>[] = [
       const monthlyReturn = calculateMonthlyReturn(
         investmentAmount,
         interestRate,
-        incomeTax
+        incomeTax,
       );
 
       // Format and display the calculated monthly return
@@ -264,7 +263,7 @@ export const columns: ColumnDef<FinancialInstrument>[] = [
         isExpired &&
           'bg-red-300 dark:bg-red-400 dark:text-red-800 text-red-600',
         isNearExpiration && 'bg-yellow-100 dark:bg-yellow-600 text-yellow-800',
-        isInGreenRange && 'bg-green-100 dark:bg-green-600 text-green-800'
+        isInGreenRange && 'bg-green-100 dark:bg-green-600 text-green-800',
       );
 
       return (
@@ -284,7 +283,8 @@ export const columns: ColumnDef<FinancialInstrument>[] = [
     id: 'actions',
     cell: ({ row }) => {
       const investment = row.original;
-      const { setSelectedInvestment, setOpenDialog } = useInvestmentStore();
+      const { setSelectedInvestment, setOpenDialog, setOpenEditDialog } =
+        useInvestmentStore();
 
       return (
         <DropdownMenu>
@@ -302,11 +302,14 @@ export const columns: ColumnDef<FinancialInstrument>[] = [
             >
               Copy instrument ID
             </DropdownMenuItem>
-            <Link href={`/investments/edit/${investment.id}`}>
-              <DropdownMenuItem asChild>
-                <span>Edit Details</span>
-              </DropdownMenuItem>
-            </Link>
+            <DropdownMenuItem
+              onClick={() => {
+                setSelectedInvestment(investment);
+                setOpenEditDialog(true);
+              }}
+            >
+              Edit Details
+            </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => {
                 setSelectedInvestment(investment);

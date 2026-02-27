@@ -62,6 +62,23 @@ export function SectionCards({
   allInvestments = [],
   averageInterestRatesByType,
 }: SectionCardsProps) {
+  // Sort investments chronologically (nearest maturity first)
+  const sortedExpired = [...expiredInvestments].sort(
+    (a, b) =>
+      new Date(a.expirationDate).getTime() -
+      new Date(b.expirationDate).getTime(),
+  );
+  const sorted7Days = [...expiringIn7Days].sort(
+    (a, b) =>
+      new Date(a.expirationDate).getTime() -
+      new Date(b.expirationDate).getTime(),
+  );
+  const sorted30Days = [...expiringIn30Days].sort(
+    (a, b) =>
+      new Date(a.expirationDate).getTime() -
+      new Date(b.expirationDate).getTime(),
+  );
+
   const cardClassName =
     'group relative overflow-hidden hover:shadow-lg transition-shadow duration-300';
   const hoverEffect =
@@ -163,7 +180,7 @@ export function SectionCards({
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {expiredInvestments.map((investment) => (
+                      {sortedExpired.map((investment) => (
                         <TableRow
                           key={investment.id}
                           className='border-b border-gray-800/50'
@@ -174,12 +191,12 @@ export function SectionCards({
                           <TableCell className='text-xs lg:text-sm py-2'>
                             {formatAmount(
                               investment.investmentAmount,
-                              investment.currency
+                              investment.currency,
                             )}
                           </TableCell>
                           <TableCell className='text-xs lg:text-sm text-muted-foreground py-2'>
                             {new Date(
-                              investment.expirationDate
+                              investment.expirationDate,
                             ).toLocaleDateString('en-GB')}
                           </TableCell>
                         </TableRow>
@@ -215,7 +232,7 @@ export function SectionCards({
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {expiringIn7Days.map((investment) => (
+                      {sorted7Days.map((investment) => (
                         <TableRow
                           key={investment.id}
                           className='border-b border-gray-800/50'
@@ -226,12 +243,12 @@ export function SectionCards({
                           <TableCell className='text-xs lg:text-sm py-2'>
                             {formatAmount(
                               investment.investmentAmount,
-                              investment.currency
+                              investment.currency,
                             )}
                           </TableCell>
                           <TableCell className='text-xs lg:text-sm text-muted-foreground py-2'>
                             {new Date(
-                              investment.expirationDate
+                              investment.expirationDate,
                             ).toLocaleDateString('en-GB')}
                           </TableCell>
                         </TableRow>
@@ -267,7 +284,7 @@ export function SectionCards({
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {expiringIn30Days.map((investment) => (
+                      {sorted30Days.map((investment) => (
                         <TableRow
                           key={investment.id}
                           className='border-b border-gray-800/50'
@@ -278,12 +295,12 @@ export function SectionCards({
                           <TableCell className='text-xs lg:text-sm py-2'>
                             {formatAmount(
                               investment.investmentAmount,
-                              investment.currency
+                              investment.currency,
                             )}
                           </TableCell>
                           <TableCell className='text-xs lg:text-sm text-muted-foreground py-2'>
                             {new Date(
-                              investment.expirationDate
+                              investment.expirationDate,
                             ).toLocaleDateString('en-GB')}
                           </TableCell>
                         </TableRow>
@@ -343,10 +360,12 @@ export function SectionCards({
                             <TableCell className='text-xs lg:text-sm text-gray-500 py-1 px-0'>
                               <div className='flex items-center gap-2'>
                                 <span>{`Returns in ${currency}`}</span>
-                                {averageInterestRatesByType[type]?.[currency] !==
-                                  undefined && (
+                                {averageInterestRatesByType[type]?.[
+                                  currency
+                                ] !== undefined && (
                                   <span className='inline-flex items-center px-1.5 py-0.5 rounded-md bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 text-[12px] font-medium'>
-                                    avg. {averageInterestRatesByType[type][
+                                    avg.{' '}
+                                    {averageInterestRatesByType[type][
                                       currency
                                     ].toFixed(2)}
                                     %
