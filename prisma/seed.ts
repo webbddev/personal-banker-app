@@ -40,7 +40,7 @@ function parseInflationDate(dateStr: string): Date | null {
 
   // Assume 2000+ for years
   const year = yearShort < 100 ? 2000 + yearShort : yearShort;
-  return new Date(year, month - 1, 1); // First day of the month
+  return new Date(Date.UTC(year, month - 1, 1)); // First day of the month in UTC
 }
 
 /**
@@ -76,8 +76,10 @@ async function seedBaseRates() {
     const date = excelSerialToDate(dateVal);
     if (isNaN(date.getTime())) continue;
 
-    // Normalize to the first of the month for consistent grouping
-    const normalizedDate = new Date(date.getFullYear(), date.getMonth(), 1);
+    // Normalize to the first of the month for consistent grouping (UTC)
+    const normalizedDate = new Date(
+      Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1),
+    );
 
     await prisma.marketIndicator.upsert({
       where: {

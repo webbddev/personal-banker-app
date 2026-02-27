@@ -108,7 +108,7 @@ export async function getMarketIntelligenceData(): Promise<
 
     // Get current month/year to prevent "future" inflation fill
     const now = new Date();
-    const currentMonthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    const currentMonthKey = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}`;
 
     for (const key of sortedKeys) {
       const entry = dateMap.get(key)!;
@@ -132,11 +132,12 @@ export async function getMarketIntelligenceData(): Promise<
     const result: MarketIntelligenceDataPoint[] = sortedKeys.map((key) => {
       const entry = dateMap.get(key)!;
       const [year, month] = key.split('-').map(Number);
-      const date = new Date(year, month - 1, 1);
+      const date = new Date(Date.UTC(year, month - 1, 1));
 
       const monthLabel = date.toLocaleDateString('en-US', {
         month: 'short',
         year: 'numeric',
+        timeZone: 'UTC', // Ensure label generation also uses UTC
       });
 
       const govBondAvg =
@@ -171,8 +172,7 @@ export async function getMarketIntelligenceData(): Promise<
 }
 
 function getMonthKey(date: Date): string {
-  const d = new Date(date);
-  const year = d.getFullYear();
-  const month = (d.getMonth() + 1).toString().padStart(2, '0');
+  const year = date.getUTCFullYear();
+  const month = (date.getUTCMonth() + 1).toString().padStart(2, '0');
   return `${year}-${month}`;
 }
