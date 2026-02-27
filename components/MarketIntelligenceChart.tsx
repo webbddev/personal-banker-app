@@ -640,9 +640,9 @@ export function MarketIntelligenceChart({
               <ChevronLeft className='h-8 w-8' />
             </Button>
 
-            <div className='flex flex-col items-center min-w-[120px]'>
-              <span className='text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-1'>
-                Time Traveler
+            <div className='flex flex-col items-center min-w-[150px]'>
+              <span className='text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-[0.2em] mb-1'>
+                {selectedDateLabel}
               </span>
               <div className='flex items-baseline gap-1'>
                 <span className='text-2xl font-black text-emerald-500'>
@@ -671,7 +671,7 @@ export function MarketIntelligenceChart({
       </CardContent>
 
       <CardFooter className='px-6 pt-8 pb-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-border/40'>
-        <div className='flex items-center gap-2 ml-1'>
+        <div className='flex items-center gap-2 ml-2'>
           <div className='h-1.5 w-1.5 rounded-full bg-emerald-500 animate-ping' />
           <p className='text-[11px] font-bold text-muted-foreground uppercase tracking-wider'>
             Live Market Updates: Synchronized

@@ -24,3 +24,6 @@
 
 # Prisma
 /lib/generated/prisma
+
+# Agentic Skills
+/.agent
