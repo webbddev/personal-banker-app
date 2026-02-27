@@ -101,8 +101,33 @@ export async function getMarketIntelligenceData(): Promise<
       }
     }
 
-    // 5. Convert map to sorted array
+    // 5. Forward-fill logic
     const sortedKeys = Array.from(dateMap.keys()).sort();
+    let lastBaseRate: number | null = null;
+    let lastInflation: number | null = null;
+
+    // Get current month/year to prevent "future" inflation fill
+    const now = new Date();
+    const currentMonthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+    for (const key of sortedKeys) {
+      const entry = dateMap.get(key)!;
+
+      // Base Rate: Always forward-fill as it's a persistent policy benchmark
+      if (entry.baseRate !== null) {
+        lastBaseRate = entry.baseRate;
+      } else if (lastBaseRate !== null) {
+        entry.baseRate = lastBaseRate;
+      }
+
+      // Inflation: Forward-fill ONLY up to the month PREVIOUS to current
+      // (as current month data is typically released in the next month)
+      if (entry.inflation !== null) {
+        lastInflation = entry.inflation;
+      } else if (lastInflation !== null && key < currentMonthKey) {
+        entry.inflation = lastInflation;
+      }
+    }
 
     const result: MarketIntelligenceDataPoint[] = sortedKeys.map((key) => {
       const entry = dateMap.get(key)!;

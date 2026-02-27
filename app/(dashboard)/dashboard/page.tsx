@@ -97,7 +97,7 @@ export default async function DashboardPage() {
               </div>
 
               {/* Market Intelligence Chart - Full width */}
-              <div className='lg:col-span-2 xl:col-span-4'>
+              <div className='md:col-span-2 lg:col-span-2 xl:col-span-4'>
                 <MarketIntelligenceChart data={marketData} />
               </div>
             </div>

@@ -43,18 +43,6 @@ export function ChartBarInteractive({
 }: ChartBarInteractiveProps) {
   const [activeIndex, setActiveIndex] = React.useState<number | null>(null);
 
-  const handleNext = () => {
-    setActiveIndex((prev) =>
-      prev === null || prev === chartData.length - 1 ? 0 : prev + 1
-    );
-  };
-
-  const handleBack = () => {
-    setActiveIndex((prev) =>
-      prev === null || prev === 0 ? chartData.length - 1 : prev - 1
-    );
-  };
-
   const chartConfig = {
     investmentAmount: {
       label: 'Active Investment',
@@ -105,17 +93,51 @@ export function ChartBarInteractive({
   });
 
   const hasExpired = chartData.some(
-    (item) => item.fill === 'var(--color-expired)'
+    (item) => item.fill === 'var(--color-expired)',
   );
   const isExpiringIn7Days = chartData.some(
-    (item) => item.fill === 'var(--color-expiringIn7Days)'
+    (item) => item.fill === 'var(--color-expiringIn7Days)',
   );
   const isExpiringSoon = chartData.some(
-    (item) => item.fill === 'var(--color-expiringSoon)'
+    (item) => item.fill === 'var(--color-expiringSoon)',
   );
   const isActiveInvestment = chartData.some(
-    (item) => item.fill === 'var(--color-investmentAmount)'
+    (item) => item.fill === 'var(--color-investmentAmount)',
   );
+
+  const handleNext = () => {
+    setActiveIndex((prev) =>
+      prev === null || prev === chartData.length - 1 ? 0 : prev + 1,
+    );
+  };
+
+  const handleBack = () => {
+    setActiveIndex((prev) =>
+      prev === null || prev === 0 ? chartData.length - 1 : prev - 1,
+    );
+  };
+
+  // ─── Keyboard Navigation ──────────────────────────────────────────
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Only navigate if an input element is not focused
+      if (
+        document.activeElement?.tagName === 'INPUT' ||
+        document.activeElement?.tagName === 'TEXTAREA'
+      ) {
+        return;
+      }
+
+      if (e.key === 'ArrowLeft') {
+        handleBack();
+      } else if (e.key === 'ArrowRight') {
+        handleNext();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeIndex, chartData.length]);
 
   return (
     <Card className='h-full'>
@@ -193,7 +215,7 @@ export function ChartBarInteractive({
                         Amount:{' '}
                         {formatAmount(
                           Number(value),
-                          props.payload.currency as string
+                          props.payload.currency as string,
                         )}
                       </span>
                       <span>
@@ -234,10 +256,14 @@ export function ChartBarInteractive({
             <ChevronLeft className='h-6 w-6' />
           </Button>
           <div className='flex flex-col items-center min-w-[80px]'>
-             <span className='text-xs font-medium text-muted-foreground uppercase tracking-widest'>Navigation</span>
-             <span className='text-sm font-bold'>
-                {activeIndex !== null ? `${activeIndex + 1} / ${chartData.length}` : '- / -'}
-             </span>
+            <span className='text-xs font-medium text-muted-foreground uppercase tracking-widest'>
+              Navigation
+            </span>
+            <span className='text-sm font-bold'>
+              {activeIndex !== null
+                ? `${activeIndex + 1} / ${chartData.length}`
+                : '- / -'}
+            </span>
           </div>
           <Button
             variant='outline'
@@ -251,16 +277,20 @@ export function ChartBarInteractive({
         </div>
 
         {/* Selected Investment Detail Card - Programmatic highlight/tooltip replacement */}
-        <div 
+        <div
           className={cn(
             'mt-4 rounded-lg border bg-card p-4 transition-all duration-300',
-            activeIndex !== null ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 pointer-events-none h-0 p-0 overflow-hidden'
+            activeIndex !== null
+              ? 'opacity-100 translate-y-0'
+              : 'opacity-0 translate-y-2 pointer-events-none h-0 p-0 overflow-hidden',
           )}
         >
           {activeIndex !== null && chartData[activeIndex] && (
             <div className='flex flex-col gap-1'>
               <div className='flex items-center justify-between'>
-                <span className='text-sm font-medium text-muted-foreground'>Selected Investment</span>
+                <span className='text-sm font-medium text-muted-foreground'>
+                  Selected Investment
+                </span>
                 <span className='text-xs font-mono bg-muted px-2 py-0.5 rounded'>
                   {activeIndex + 1} / {chartData.length}
                 </span>
@@ -270,16 +300,20 @@ export function ChartBarInteractive({
               </p>
               <div className='grid grid-cols-2 gap-4 mt-2'>
                 <div>
-                  <p className='text-xs text-muted-foreground uppercase tracking-wider'>Amount</p>
+                  <p className='text-xs text-muted-foreground uppercase tracking-wider'>
+                    Amount
+                  </p>
                   <p className='text-base font-semibold'>
                     {formatAmount(
                       Number(chartData[activeIndex].investmentAmount),
-                      chartData[activeIndex].currency as string
+                      chartData[activeIndex].currency as string,
                     )}
                   </p>
                 </div>
                 <div>
-                  <p className='text-xs text-muted-foreground uppercase tracking-wider'>Expiration Date</p>
+                  <p className='text-xs text-muted-foreground uppercase tracking-wider'>
+                    Expiration Date
+                  </p>
                   <p className='text-base font-semibold'>
                     {chartData[activeIndex].expirationDateFormatted}
                   </p>
