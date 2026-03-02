@@ -38,6 +38,7 @@ import { FinancialInstrument } from '@/types/investment-schema';
 import Link from 'next/link';
 import { ExportButton } from '@/components/ExportButton';
 import { CurrencyTotals } from '@/utils/investment-calculations';
+import { useInvestmentStore } from '@/store/financialInvestmentsStore';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -54,9 +55,10 @@ export function InvestmentsTable<TData, TValue>({
   monthlyReturns,
   investorName,
 }: DataTableProps<TData, TValue>) {
+  const { setOpenCreateDialog } = useInvestmentStore();
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
+    [],
   );
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
@@ -153,17 +155,15 @@ export function InvestmentsTable<TData, TValue>({
               filename='investments-export'
             />
           </div>
-          <Link
-            href={'/create-financial-instrument'}
-            className='flex-1 md:flex-none'
+          <Button
+            className='flex-1 md:flex-none h-10'
+            onClick={() => setOpenCreateDialog(true)}
           >
-            <Button className='w-full h-10'>
-              <Plus className='mr-2 h-4 w-4' />
-              <span className='whitespace-nowrap'>
-                Create <span className='hidden sm:inline'>Investment</span>
-              </span>
-            </Button>
-          </Link>
+            <Plus className='mr-2 h-4 w-4' />
+            <span className='whitespace-nowrap'>
+              Create <span className='hidden sm:inline'>Investment</span>
+            </span>
+          </Button>
         </div>
       </div>
 
@@ -180,7 +180,7 @@ export function InvestmentsTable<TData, TValue>({
                         ? null
                         : flexRender(
                             header.column.columnDef.header,
-                            header.getContext()
+                            header.getContext(),
                           )}
                     </TableHead>
                   ))}
@@ -198,7 +198,7 @@ export function InvestmentsTable<TData, TValue>({
                       <TableCell key={cell.id} className='whitespace-nowrap'>
                         {flexRender(
                           cell.column.columnDef.cell,
-                          cell.getContext()
+                          cell.getContext(),
                         )}
                       </TableCell>
                     ))}

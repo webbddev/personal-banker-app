@@ -19,6 +19,7 @@ import { getLatestRates } from '@/utils/exchange-rate-service';
 import { ExchangeRatesDisplay } from '@/components/ExchangeRatesDisplay';
 import { PageContentWrapper } from '@/components/PageContentWrapper';
 import { EditInvestmentDialog } from '@/components/EditInvestmentDialog';
+import { CreateInvestmentDialog } from '@/components/CreateInvestmentDialog';
 
 export default async function InvestmentsPage() {
   const investments = await getAllInvestments();
@@ -91,6 +92,7 @@ export default async function InvestmentsPage() {
       {/* Dialogs */}
       <DeleteDialog />
       <EditInvestmentDialog />
+      <CreateInvestmentDialog />
     </SidebarInset>
   );
 }

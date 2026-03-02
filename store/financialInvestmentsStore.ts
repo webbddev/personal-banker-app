@@ -180,10 +180,12 @@ type InvestmentState = {
   selectedInvestment: FinancialInstrument | null;
   openDialog: boolean;
   openEditDialog: boolean;
+  openCreateDialog: boolean;
 
   // Actions
   setOpenDialog: (open: boolean) => void;
   setOpenEditDialog: (open: boolean) => void;
+  setOpenCreateDialog: (open: boolean) => void;
   setSelectedInvestment: (investment: FinancialInstrument | null) => void;
   reset: () => void;
 };
@@ -192,6 +194,7 @@ const initialState = {
   selectedInvestment: null,
   openDialog: false,
   openEditDialog: false,
+  openCreateDialog: false,
 };
 
 // Simplified store - only for UI state management
@@ -204,6 +207,8 @@ export const useInvestmentStore = create<InvestmentState>()(
       setOpenDialog: (open) => set({ openDialog: open }),
 
       setOpenEditDialog: (open) => set({ openEditDialog: open }),
+
+      setOpenCreateDialog: (open) => set({ openCreateDialog: open }),
 
       setSelectedInvestment: (investment) =>
         set({ selectedInvestment: investment }),
