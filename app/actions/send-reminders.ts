@@ -90,13 +90,13 @@ export async function sendDailyReminders() {
   try {
     const investments = await findInvestmentsFor30DayNotification();
     console.log(
-      `Found ${investments.length} total investments expiring in the next 30 days.`
+      `Found ${investments.length} investment(s) expiring in exactly 30 days.`,
     );
 
     if (investments.length === 0) {
       return {
         success: true,
-        message: 'No investments are expiring in the next 30 days.',
+        message: 'No investments are expiring in exactly 30 days from today.',
         found: 0,
       };
     }
@@ -106,7 +106,7 @@ export async function sendDailyReminders() {
 
     const users = Object.keys(investmentsByUser);
     console.log(
-      `Found ${users.length} unique users with expiring investments.`
+      `Found ${users.length} unique users with expiring investments.`,
     );
 
     // Send a digest email to each user
@@ -116,14 +116,14 @@ export async function sendDailyReminders() {
         // The user object is included in each investment from findInvestmentsFor30DayNotification
         const user = userInvestments[0].user;
         return sendThirtyDayReminder(user, userInvestments);
-      })
+      }),
     );
 
     const successfulSends = results.filter(Boolean).length;
     const failedSends = users.length - successfulSends;
 
     console.log(
-      `Daily reminder job completed. Successful: ${successfulSends}, Failed: ${failedSends}.`
+      `Daily reminder job completed. Successful: ${successfulSends}, Failed: ${failedSends}.`,
     );
 
     return {
@@ -136,10 +136,12 @@ export async function sendDailyReminders() {
     };
   } catch (error) {
     console.error('Error in daily reminder job:', error);
-    return { success: false, message: 'An error occurred during the daily job.' };
+    return {
+      success: false,
+      message: 'An error occurred during the daily job.',
+    };
   }
 }
-
 
 /**
  * Fetches all investments expiring in the current month, groups them by user,
@@ -156,7 +158,7 @@ export async function sendMonthlyDigests() {
 
     const users = Object.keys(investmentsByUser);
     console.log(
-      `Found ${users.length} users with expiring investments this month.`
+      `Found ${users.length} users with expiring investments this month.`,
     );
 
     // We use Promise.all to send emails in parallel.
@@ -166,14 +168,14 @@ export async function sendMonthlyDigests() {
         // The user object is attached to each investment, so we can grab it from the first one.
         const user = userInvestments[0].user;
         return sendMonthlyDigest(user, userInvestments);
-      })
+      }),
     );
 
     const successfulSends = results.filter(Boolean).length;
     const failedSends = users.length - successfulSends;
 
     console.log(
-      `Monthly digest job completed. Successful: ${successfulSends}, Failed: ${failedSends}.`
+      `Monthly digest job completed. Successful: ${successfulSends}, Failed: ${failedSends}.`,
     );
     return {
       success: true,
