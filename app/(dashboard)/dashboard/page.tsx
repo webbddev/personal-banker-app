@@ -13,11 +13,13 @@ import {
   calculateMonthlyReturns,
   getInvestmentsExpiringIn30Days,
   getInvestmentsExpiringIn7Days,
+  calculateCurrencyTotals,
   calculateMonthlyReturnsByInvestmentType,
   calculateTotalMonthlyRevenueInMDL,
   getExpiredInvestments,
-  calculateCurrencyTotals,
   calculateAverageInterestRatesByType,
+  calculateTotalInvestedByInvestmentType,
+  calculateConvertedTotalsByType,
 } from '@/utils/investment-calculations';
 import { getLatestRates } from '@/utils/exchange-rate-service';
 import { ChartPieLabel } from '@/components/ChartPieLabel';
@@ -36,7 +38,26 @@ export default async function DashboardPage() {
 
   const monthlyReturnsByType =
     calculateMonthlyReturnsByInvestmentType(allInvestments);
+  const totalInvestedByType =
+    calculateTotalInvestedByInvestmentType(allInvestments);
   const exchangeRates = await getLatestRates();
+
+  // Correctly calculate totals in MDL equivalent for the pie chart proportions
+  const convertedTotalsByType = calculateConvertedTotalsByType(
+    totalInvestedByType,
+    'MDL',
+    exchangeRates,
+  );
+
+  // Transform for the chart component
+  const pieChartData = Object.entries(convertedTotalsByType).map(
+    ([type, data]) => ({
+      type,
+      total: data.total,
+      breakdown: data.breakdown,
+    }),
+  );
+
   const totalMonthlyRevenue = calculateTotalMonthlyRevenueInMDL(
     monthlyReturns,
     exchangeRates,
@@ -64,9 +85,11 @@ export default async function DashboardPage() {
                 expiringIn7Days={expiringIn7Days}
                 expiringIn30Days={expiringIn30Days}
                 monthlyReturnsByType={monthlyReturnsByType}
+                totalInvestedByType={totalInvestedByType}
                 expiredInvestments={expiredInvestments}
                 allInvestments={allInvestments}
                 averageInterestRatesByType={averageInterestRatesByType}
+                exchangeRates={exchangeRates}
               />
             </div>
 
@@ -83,12 +106,15 @@ export default async function DashboardPage() {
 
               {/* Pie Chart Label - Investments by Type */}
               <div className='lg:col-span-1 xl:col-span-2'>
-                <ChartPieLabel data={investmentsByType} />
+                <ChartPieLabel data={pieChartData as any} />
               </div>
 
               {/* Pie Chart - Currency Exposure */}
               <div className='lg:col-span-1 xl:col-span-2'>
-                <ChartPieInteractive data={investmentsByCurrency} />
+                <ChartPieInteractive
+                  data={investmentsByCurrency}
+                  exchangeRates={exchangeRates}
+                />
               </div>
 
               {/* Currency Rates */}

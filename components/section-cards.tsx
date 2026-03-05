@@ -1,3 +1,4 @@
+import React from 'react';
 import {
   Card,
   CardContent,
@@ -27,7 +28,12 @@ import {
   MonthlyReturnsByInvestmentType,
   AverageInterestRatesByType,
 } from '@/utils/investment-calculations';
-import { formatAmount } from '@/utils/currency-formatter';
+import {
+  formatAmount,
+  convertCurrency,
+  ExchangeRates,
+  SupportedCurrencyCode,
+} from '@/utils/currency-formatter';
 // import { Investment } from '@prisma/client';
 import { Investment } from '@/prisma/generated/prisma/client';
 import { investmentTypeOptions } from '@/utils/investment-constants';
@@ -42,9 +48,11 @@ interface SectionCardsProps {
   expiringIn7Days: Investment[];
   expiringIn30Days: Investment[];
   monthlyReturnsByType: MonthlyReturnsByInvestmentType;
+  totalInvestedByType: MonthlyReturnsByInvestmentType;
   expiredInvestments: Investment[];
   allInvestments?: Investment[];
   averageInterestRatesByType: AverageInterestRatesByType;
+  exchangeRates: ExchangeRates;
 }
 
 const getInvestmentTypeLabel = (typeValue: string) => {
@@ -59,9 +67,11 @@ export function SectionCards({
   expiringIn7Days,
   expiringIn30Days,
   monthlyReturnsByType,
+  totalInvestedByType,
   expiredInvestments,
   allInvestments = [],
   averageInterestRatesByType,
+  exchangeRates,
 }: SectionCardsProps) {
   // Sort investments chronologically (nearest maturity first)
   const sortedExpired = [...expiredInvestments].sort(
@@ -345,41 +355,81 @@ export function SectionCards({
         <CardContent>
           {Object.keys(monthlyReturnsByType).length > 0 ? (
             <div className='flex flex-col space-y-4'>
-              {Object.entries(monthlyReturnsByType).map(([type, returns]) => (
-                <div key={type} className='space-y-2'>
-                  <h3 className='text-sm lg:text-base font-semibold text-gray-400'>
-                    {getInvestmentTypeLabel(type)}
-                  </h3>
+              {Object.entries(totalInvestedByType).map(([type, totals]) => (
+                <div
+                  key={type}
+                  className='space-y-2 border-b border-gray-800/30 pb-4 last:border-0 last:pb-0'
+                >
+                  <div className='flex justify-between items-end'>
+                    <h3 className='text-sm lg:text-base font-semibold text-gray-400'>
+                      {getInvestmentTypeLabel(type)}
+                    </h3>
+                    <div className='text-[10px] lg:text-xs text-muted-foreground italic mb-0.5'>
+                      Total:{' '}
+                      {formatAmount(
+                        Object.entries(totals).reduce(
+                          (sum, [curr, amt]) =>
+                            sum +
+                            convertCurrency(
+                              amt,
+                              curr as SupportedCurrencyCode,
+                              'MDL',
+                              exchangeRates,
+                            ),
+                          0,
+                        ),
+                        'MDL',
+                      )}{' '}
+                      Eq.
+                    </div>
+                  </div>
                   <Table>
                     <TableBody>
-                      {Object.entries(returns)
+                      {Object.entries(totals)
                         .filter(([, amount]) => amount > 0)
-                        .map(([currency, amount]) => (
-                          <TableRow
-                            key={currency}
-                            className='border-b-0 hover:bg-transparent'
-                          >
-                            <TableCell className='text-xs lg:text-sm text-gray-500 py-1 px-0'>
-                              <div className='flex items-center gap-2'>
-                                <span>{`Returns in ${currency}`}</span>
-                                {averageInterestRatesByType[type]?.[
-                                  currency
-                                ] !== undefined && (
-                                  <span className='inline-flex items-center px-1.5 py-0.5 rounded-md bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 text-[12px] font-medium'>
-                                    avg.{' '}
-                                    {averageInterestRatesByType[type][
-                                      currency
-                                    ].toFixed(2)}
-                                    %
-                                  </span>
-                                )}
-                              </div>
-                            </TableCell>
-                            <TableCell className='text-xs lg:text-sm font-medium text-green-400 py-1 px-0 text-right'>
-                              + {formatAmount(amount, currency)}
-                            </TableCell>
-                          </TableRow>
-                        ))}
+                        .map(([currency, investedAmount]) => {
+                          const returnAmount =
+                            (monthlyReturnsByType[type] as any)?.[currency] ||
+                            0;
+                          return (
+                            <React.Fragment key={currency}>
+                              {/* Total Invested Row */}
+                              <TableRow className='border-b-0 hover:bg-transparent'>
+                                <TableCell className='text-xs lg:text-sm text-gray-500 py-1 px-0'>
+                                  Total Invested ({currency})
+                                </TableCell>
+                                <TableCell className='text-xs lg:text-sm font-bold py-1 px-0 text-right'>
+                                  {formatAmount(investedAmount, currency)}
+                                </TableCell>
+                              </TableRow>
+
+                              {/* Returns Row (if applicable) */}
+                              {returnAmount > 0 && (
+                                <TableRow className='border-b-0 hover:bg-transparent'>
+                                  <TableCell className='text-[11px] lg:text-xs text-gray-400 py-0 px-0 pl-3'>
+                                    <div className='flex items-center gap-2'>
+                                      <span>Returns</span>
+                                      {averageInterestRatesByType[type]?.[
+                                        currency
+                                      ] !== undefined && (
+                                        <span className='inline-flex items-center px-1 py-0.5 rounded bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 text-[10px] font-medium'>
+                                          avg.{' '}
+                                          {averageInterestRatesByType[type][
+                                            currency
+                                          ].toFixed(2)}
+                                          %
+                                        </span>
+                                      )}
+                                    </div>
+                                  </TableCell>
+                                  <TableCell className='text-[11px] lg:text-xs font-medium text-green-400 py-0 px-0 text-right'>
+                                    + {formatAmount(returnAmount, currency)}
+                                  </TableCell>
+                                </TableRow>
+                              )}
+                            </React.Fragment>
+                          );
+                        })}
                     </TableBody>
                   </Table>
                 </div>

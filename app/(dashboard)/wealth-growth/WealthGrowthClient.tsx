@@ -19,9 +19,7 @@ import {
   calculateProjection,
   SimulationParams,
 } from '@/utils/simulator-calculations';
-import {
-  CurrencyTotals,
-} from '@/utils/investment-calculations';
+import { CurrencyTotals } from '@/utils/investment-calculations';
 import {
   convertCurrency,
   formatAmount,
@@ -53,7 +51,10 @@ export default function WealthGrowthClient({
     monthlyExpenses: 15000,
     annualReturnRate: 8,
     inflationRate: 5,
+    incomeGrowthRate: 3,
+    taxRate: 10,
     years: 20,
+    oneTimeEvents: [],
   });
 
   const projection = useMemo(() => calculateProjection(params), [params]);
@@ -61,7 +62,12 @@ export default function WealthGrowthClient({
   const finalPoint = projection[projection.length - 1];
 
   const formatValue = (val: number) => {
-    const converted = convertCurrency(val, 'MDL', displayCurrency, exchangeRates);
+    const converted = convertCurrency(
+      val,
+      'MDL',
+      displayCurrency,
+      exchangeRates,
+    );
     return formatAmount(converted, displayCurrency);
   };
 
@@ -95,9 +101,9 @@ export default function WealthGrowthClient({
         <div className='space-y-6'>
           <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
             <div className='p-6 bg-card rounded-xl border shadow-sm relative overflow-hidden'>
-              <Wallet className="absolute right-[-10px] top-[-10px] w-16 h-16 opacity-5 text-primary" />
-              <div className="flex items-center gap-2 mb-1">
-                <Wallet className="w-4 h-4 text-primary" />
+              <Wallet className='absolute right-[-10px] top-[-10px] w-16 h-16 opacity-5 text-primary' />
+              <div className='flex items-center gap-2 mb-1'>
+                <Wallet className='w-4 h-4 text-primary' />
                 <p className='text-sm text-muted-foreground'>
                   Projected Total (Nominal)
                 </p>
@@ -107,9 +113,9 @@ export default function WealthGrowthClient({
               </p>
             </div>
             <div className='p-6 bg-card rounded-xl border shadow-sm relative overflow-hidden'>
-               <PiggyBank className="absolute right-[-10px] top-[-10px] w-16 h-16 opacity-5 text-primary" />
-               <div className="flex items-center gap-2 mb-1">
-                <PiggyBank className="w-4 h-4 text-primary" />
+              <PiggyBank className='absolute right-[-10px] top-[-10px] w-16 h-16 opacity-5 text-primary' />
+              <div className='flex items-center gap-2 mb-1'>
+                <PiggyBank className='w-4 h-4 text-primary' />
                 <p className='text-sm text-muted-foreground'>
                   Adjusted for Inflation
                 </p>
@@ -119,9 +125,9 @@ export default function WealthGrowthClient({
               </p>
             </div>
             <div className='p-6 bg-card rounded-xl border shadow-sm relative overflow-hidden'>
-              <TrendingUp className="absolute right-[-10px] top-[-10px] w-16 h-16 opacity-5 text-green-600" />
-              <div className="flex items-center gap-2 mb-1">
-                <TrendingUp className="w-4 h-4 text-green-600" />
+              <TrendingUp className='absolute right-[-10px] top-[-10px] w-16 h-16 opacity-5 text-green-600' />
+              <div className='flex items-center gap-2 mb-1'>
+                <TrendingUp className='w-4 h-4 text-green-600' />
                 <p className='text-sm text-muted-foreground'>
                   Final Monthly Passive Income
                 </p>

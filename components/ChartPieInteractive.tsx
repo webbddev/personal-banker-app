@@ -3,11 +3,11 @@
 import * as React from 'react';
 import { Label, Pie, PieChart, Sector } from 'recharts';
 import { PieSectorDataItem } from 'recharts/types/polar/Pie';
-
 import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -16,50 +16,57 @@ import {
   ChartContainer,
   ChartStyle,
   ChartTooltip,
-  ChartTooltipContent,
 } from '@/components/ui/chart';
-
-export const description = 'An interactive pie chart for currency exposure';
+import {
+  formatAmount,
+  convertCurrency,
+  ExchangeRates,
+  SupportedCurrencyCode,
+} from '@/utils/currency-formatter';
 
 interface ChartPieInteractiveProps {
   data: Record<string, number>;
+  exchangeRates: ExchangeRates;
 }
 
-export function ChartPieInteractive({ data }: ChartPieInteractiveProps) {
-  const id = 'pie-interactive';
+export function ChartPieInteractive({
+  data,
+  exchangeRates,
+}: ChartPieInteractiveProps) {
+  const id = 'pie-currency-interactive';
 
   const chartData = React.useMemo(() => {
-    return Object.entries(data).map(([currency, amount], index) => ({
-      currency,
-      amount,
-      fill: `hsl(var(--chart-${index + 1}))`,
-    }));
-  }, [data]);
+    return Object.entries(data)
+      .filter(([, amount]) => amount > 0)
+      .map(([currency, amount], index) => {
+        const valueInMDL = convertCurrency(
+          amount,
+          currency as SupportedCurrencyCode,
+          'MDL',
+          exchangeRates,
+        );
+        return {
+          currency,
+          amount,
+          valueInMDL,
+          fill: `hsl(var(--chart-${index + 1}))`,
+        };
+      })
+      .sort((a, b) => b.valueInMDL - a.valueInMDL);
+  }, [data, exchangeRates]);
 
-  const [activeCurrency, setActiveCurrency] = React.useState(
-    chartData[0]?.currency
+  const [activeIndex, setActiveIndex] = React.useState<number | undefined>(
+    undefined,
   );
 
-  React.useEffect(() => {
-    if (chartData.length > 0 && !activeCurrency) {
-      setActiveCurrency(chartData[0].currency);
-    }
-  }, [chartData, activeCurrency]);
-
-  const activeIndex = React.useMemo(
-    () => chartData.findIndex((item) => item.currency === activeCurrency),
-    [activeCurrency, chartData]
-  );
-  const currencies = React.useMemo(
-    () => chartData.map((item) => item.currency),
-    [chartData]
-  );
+  const totalMDLValue = React.useMemo(() => {
+    return chartData.reduce((sum, item) => sum + item.valueInMDL, 0);
+  }, [chartData]);
 
   const dynamicChartConfig = React.useMemo(() => {
     const config: ChartConfig = {
-      amount: {
-        label: 'Amount',
-      },
+      amount: { label: 'Original Amount' },
+      valueInMDL: { label: 'MDL Equivalent' },
     };
     chartData.forEach((item) => {
       config[item.currency] = {
@@ -70,16 +77,65 @@ export function ChartPieInteractive({ data }: ChartPieInteractiveProps) {
     return config;
   }, [chartData]);
 
+  const CustomTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      return (
+        // 1. Increased min-width to 180px to accommodate larger numbers
+        <div className='flex flex-col gap-2 rounded-lg bg-background p-3 shadow-md border text-xs lg:text-sm min-w-[180px]'>
+          <div className='flex items-center gap-2 border-b pb-2 mb-1'>
+            <div
+              className='h-2 w-2 rounded-full'
+              style={{ backgroundColor: data.fill }}
+            />
+            <span className='font-bold'>{data.currency} Exposure</span>
+          </div>
+
+          <div className='flex flex-col gap-1.5'>
+            {/* 2. Added gap-4 and w-20 for consistent label spacing */}
+            <div className='flex justify-between items-center gap-4'>
+              <span className='text-muted-foreground w-20'>Original:</span>
+              <span className='font-medium text-right flex-1'>
+                {formatAmount(data.amount, data.currency)}
+              </span>
+            </div>
+
+            <div className='flex justify-between items-center gap-4'>
+              <span className='text-muted-foreground w-20'>MDL Eq:</span>
+              <span className='font-medium text-right flex-1'>
+                {formatAmount(data.valueInMDL, 'MDL')}
+              </span>
+            </div>
+
+            <div className='h-px bg-muted my-1' />
+
+            <div className='flex justify-between items-center gap-4 text-blue-600 font-bold'>
+              <span className='w-20'>Weight:</span>
+              <span className='text-right flex-1'>
+                {((data.valueInMDL / totalMDLValue) * 100).toFixed(1)}%
+              </span>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
+
   if (chartData.length === 0) {
     return (
       <Card className='flex flex-col h-full'>
         <CardHeader className='items-start pb-0'>
-          <CardTitle>Currency Exposure</CardTitle>
-          <CardDescription>No investment data to display.</CardDescription>
+          <CardTitle className='text-xl lg:text-2xl'>
+            Currency Exposure
+          </CardTitle>
+          <CardDescription className='lg:text-base'>
+            No currency data available.
+          </CardDescription>
         </CardHeader>
-        <CardContent className='flex-1 flex items-center justify-center pb-0'>
+        <CardContent className='flex-1 flex items-center justify-center'>
           <p className='text-muted-foreground'>
-            Add investments to see currency exposure.
+            Add investments to see distribution.
           </p>
         </CardContent>
       </Card>
@@ -87,51 +143,48 @@ export function ChartPieInteractive({ data }: ChartPieInteractiveProps) {
   }
 
   return (
-    <Card data-chart={id} className='flex flex-col h-full'>
+    <Card
+      data-chart={id}
+      className='flex flex-col h-full overflow-hidden transition-all duration-300 hover:shadow-md'
+    >
       <ChartStyle id={id} config={dynamicChartConfig} />
       <CardHeader className='items-start pb-0'>
         <CardTitle className='text-xl lg:text-2xl'>Currency Exposure</CardTitle>
         <CardDescription className='lg:text-base'>
-          Distribution of investments by currency
+          Unified portfolio weight by currency
         </CardDescription>
       </CardHeader>
-      <CardContent className='flex-1 flex flex-col items-center justify-center p-4 pb-6 gap-6'>
+      <CardContent className='flex-1 pb-0 flex flex-col items-center justify-center relative min-h-[300px]'>
         <ChartContainer
           id={id}
           config={dynamicChartConfig}
-          className='mx-auto aspect-square h-[250px] md:h-[270px] lg:h-[350px] 2xl:h-[600px] w-full max-w-[600px]'
+          className='mx-auto aspect-square h-[250px] md:h-[280px] lg:h-[350px] 2xl:h-[600px] w-full max-w-[600px]'
         >
           <PieChart>
-            <ChartTooltip
-              cursor={false}
-              content={<ChartTooltipContent hideLabel />}
-            />
+            <ChartTooltip cursor={false} content={<CustomTooltip />} />
             <Pie
               data={chartData}
-              dataKey='amount'
+              dataKey='valueInMDL'
               nameKey='currency'
-              innerRadius={60}
-              strokeWidth={5}
+              innerRadius={65}
+              strokeWidth={8}
+              stroke='hsl(var(--background))'
+              paddingAngle={2}
               activeIndex={activeIndex}
+              onMouseEnter={(_, index) => setActiveIndex(index)}
+              onMouseLeave={() => setActiveIndex(undefined)}
               activeShape={({
                 outerRadius = 0,
                 ...props
               }: PieSectorDataItem) => (
                 <g>
-                  <Sector {...props} outerRadius={outerRadius + 10} />
-                  <Sector
-                    {...props}
-                    outerRadius={outerRadius + 25}
-                    innerRadius={outerRadius + 12}
-                  />
+                  <Sector {...props} outerRadius={outerRadius + 8} />
                 </g>
               )}
             >
               <Label
                 content={({ viewBox }) => {
                   if (viewBox && 'cx' in viewBox && 'cy' in viewBox) {
-                    const activeData = chartData[activeIndex];
-                    if (!activeData) return null;
                     return (
                       <text
                         x={viewBox.cx}
@@ -141,17 +194,19 @@ export function ChartPieInteractive({ data }: ChartPieInteractiveProps) {
                       >
                         <tspan
                           x={viewBox.cx}
-                          y={viewBox.cy}
-                          className='fill-foreground text-2xl md:text-3xl lg:text-4xl font-bold'
+                          y={(viewBox.cy || 0) - 5}
+                          className='fill-foreground text-xl md:text-2xl lg:text-3xl font-bold'
                         >
-                          {activeData.amount.toLocaleString()}
+                          {totalMDLValue > 1000000
+                            ? `${(totalMDLValue / 1000000).toFixed(2)}M`
+                            : totalMDLValue.toLocaleString()}
                         </tspan>
                         <tspan
                           x={viewBox.cx}
                           y={(viewBox.cy || 0) + 20}
-                          className='fill-muted-foreground text-xs md:text-sm'
+                          className='fill-muted-foreground text-xs md:text-sm font-medium'
                         >
-                          {activeData.currency}
+                          Total Wealth
                         </tspan>
                       </text>
                     );
@@ -161,40 +216,34 @@ export function ChartPieInteractive({ data }: ChartPieInteractiveProps) {
             </Pie>
           </PieChart>
         </ChartContainer>
-
-        {/* Currencies list */}
-        <div className='flex flex-row flex-wrap gap-2 justify-center w-full max-w-md'>
-          {currencies.map((key) => {
-            const config =
-              dynamicChartConfig[key as keyof typeof dynamicChartConfig];
-            if (!config) {
-              return null;
-            }
-            const isActive = activeCurrency === key;
-            return (
-              <div
-                key={key}
-                className={`flex items-center gap-2 cursor-pointer px-3 py-1.5 rounded-lg transition-colors ${
-                  isActive ? 'bg-muted' : 'hover:bg-muted/50'
-                }`}
-                onClick={() => setActiveCurrency(key)}
-              >
-                <span
-                  className='flex h-3 w-3 shrink-0 rounded-sm'
-                  style={{
-                    backgroundColor: config.color,
-                  }}
-                />
-                <div className='flex-1'>
-                  <div className='font-medium leading-none text-sm'>
-                    {config.label}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
       </CardContent>
+      <CardFooter className='pt-0'>
+        <div className='flex flex-wrap justify-center gap-2 w-full'>
+          {chartData.map((item, index) => (
+            <div
+              key={item.currency}
+              className={`flex items-center gap-1.5 px-2 py-1 rounded-md transition-all cursor-default ${
+                activeIndex === index
+                  ? 'bg-muted ring-1 ring-border'
+                  : 'opacity-80 hover:opacity-100'
+              }`}
+              onMouseEnter={() => setActiveIndex(index)}
+              onMouseLeave={() => setActiveIndex(undefined)}
+            >
+              <div
+                className='h-2 w-2 rounded-full shrink-0'
+                style={{ backgroundColor: item.fill }}
+              />
+              <span className='text-[10px] lg:text-xs font-semibold'>
+                {Math.round((item.valueInMDL / totalMDLValue) * 100)}%
+              </span>
+              <span className='text-[10px] lg:text-xs text-muted-foreground'>
+                {item.currency}
+              </span>
+            </div>
+          ))}
+        </div>
+      </CardFooter>
     </Card>
   );
 }

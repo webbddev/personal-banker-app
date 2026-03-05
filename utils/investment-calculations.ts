@@ -19,7 +19,7 @@ export type CurrencyTotals = {
  * Calculate total amounts invested in each currency
  */
 export function calculateCurrencyTotals(
-  investments: FinancialInstrument[]
+  investments: FinancialInstrument[],
 ): CurrencyTotals {
   return investments.reduce(
     (totals, investment) => {
@@ -40,7 +40,7 @@ export function calculateCurrencyTotals(
       }
       return totals;
     },
-    { MDL: 0, EUR: 0, GBP: 0, USD: 0 }
+    { MDL: 0, EUR: 0, GBP: 0, USD: 0 },
   );
 }
 // worked well
@@ -63,14 +63,14 @@ export function calculateCurrencyTotals(
 // export function calculateTotalAmount(data: FinancialInstrument[]): number {
 export function calculateTotalAmount(
   data: FinancialInstrument[],
-  exchangeRates: ExchangeRates
+  exchangeRates: ExchangeRates,
 ): number {
   return data.reduce((acc, investment) => {
     const amountInMDL = convertCurrency(
       investment.investmentAmount,
       investment.currency as SupportedCurrencyCode,
       'MDL',
-      exchangeRates
+      exchangeRates,
     );
     return acc + amountInMDL;
   }, 0);
@@ -88,13 +88,13 @@ export function calculateMonthlyReturn(
   investmentAmount: number,
   annualInterestRate: number,
   incomeTax: number,
-  date: Date = new Date()
+  date: Date = new Date(),
 ): number {
   // Get the number of days in the specified month
   const daysInMonth = new Date(
     date.getFullYear(),
     date.getMonth() + 1,
-    0
+    0,
   ).getDate();
 
   // Convert annual interest rate from percentage to decimal
@@ -146,7 +146,7 @@ export function calculateDaysUntilExpiration(expirationDate: Date): number {
  * @returns An array of investments expiring within 7 days.
  */
 export function getInvestmentsExpiringIn7Days(
-  investments: FinancialInstrument[]
+  investments: FinancialInstrument[],
 ): FinancialInstrument[] {
   return investments.filter((inv) => {
     const days = calculateDaysUntilExpiration(inv.expirationDate);
@@ -160,7 +160,7 @@ export function getInvestmentsExpiringIn7Days(
  * @returns An array of investments expiring within 30 days.
  */
 export function getInvestmentsExpiringIn30Days(
-  investments: FinancialInstrument[]
+  investments: FinancialInstrument[],
 ): FinancialInstrument[] {
   return investments.filter((inv) => {
     const days = calculateDaysUntilExpiration(inv.expirationDate);
@@ -174,7 +174,7 @@ export function getInvestmentsExpiringIn30Days(
  * @returns An array of expired investments.
  */
 export function getExpiredInvestments(
-  investments: FinancialInstrument[]
+  investments: FinancialInstrument[],
 ): FinancialInstrument[] {
   return investments.filter((inv) => {
     const days = calculateDaysUntilExpiration(inv.expirationDate);
@@ -182,17 +182,16 @@ export function getExpiredInvestments(
   });
 }
 
-
 // Calculate monthly returns by currency
 export function calculateMonthlyReturns(
-  investments: FinancialInstrument[]
+  investments: FinancialInstrument[],
 ): CurrencyTotals {
   return investments.reduce(
     (totals, investment) => {
       const monthlyReturn = calculateMonthlyReturn(
         Number(investment.investmentAmount),
         Number(investment.interestRate),
-        Number(investment.incomeTax)
+        Number(investment.incomeTax),
       );
 
       switch (investment.currency) {
@@ -211,7 +210,7 @@ export function calculateMonthlyReturns(
       }
       return totals;
     },
-    { MDL: 0, EUR: 0, GBP: 0, USD: 0 }
+    { MDL: 0, EUR: 0, GBP: 0, USD: 0 },
   );
 }
 
@@ -219,14 +218,14 @@ export function calculateMonthlyReturns(
 export type MonthlyReturnsByInvestmentType = Record<string, CurrencyTotals>;
 
 export function calculateMonthlyReturnsByInvestmentType(
-  investments: FinancialInstrument[]
+  investments: FinancialInstrument[],
 ): MonthlyReturnsByInvestmentType {
   return investments.reduce((acc, investment) => {
     const { investmentType, currency } = investment;
     const monthlyReturn = calculateMonthlyReturn(
       Number(investment.investmentAmount),
       Number(investment.interestRate),
-      Number(investment.incomeTax)
+      Number(investment.incomeTax),
     );
 
     if (!acc[investmentType]) {
@@ -239,6 +238,64 @@ export function calculateMonthlyReturnsByInvestmentType(
   }, {} as MonthlyReturnsByInvestmentType);
 }
 
+// Calculate total invested amount by investment type
+export function calculateTotalInvestedByInvestmentType(
+  investments: FinancialInstrument[],
+): MonthlyReturnsByInvestmentType {
+  return investments.reduce((acc, investment) => {
+    const { investmentType, currency, investmentAmount } = investment;
+    const amount = Number(investmentAmount);
+
+    if (!acc[investmentType]) {
+      acc[investmentType] = { MDL: 0, EUR: 0, GBP: 0, USD: 0 };
+    }
+
+    (acc[investmentType] as any)[currency as keyof CurrencyTotals] += amount;
+    return acc;
+  }, {} as MonthlyReturnsByInvestmentType);
+}
+
+/**
+ * Converts nested type/currency totals into a single base currency total per type
+ * Useful for charts that need consistent proportions
+ */
+export function calculateConvertedTotalsByType(
+  totalsByType: MonthlyReturnsByInvestmentType,
+  targetCurrency: SupportedCurrencyCode,
+  exchangeRates: ExchangeRates,
+) {
+  const result: Record<
+    string,
+    { total: number; breakdown: Record<string, number> }
+  > = {};
+
+  for (const [type, currencies] of Object.entries(totalsByType)) {
+    let typeTotalInBase = 0;
+    const breakdown: Record<string, number> = {};
+
+    for (const [currency, amount] of Object.entries(currencies)) {
+      const val = typeof amount === 'number' ? amount : 0;
+      if (val > 0) {
+        const converted = convertCurrency(
+          val,
+          currency as SupportedCurrencyCode,
+          targetCurrency,
+          exchangeRates,
+        );
+        typeTotalInBase += converted;
+        breakdown[currency] = val;
+      }
+    }
+
+    result[type] = {
+      total: typeTotalInBase,
+      breakdown,
+    };
+  }
+
+  return result;
+}
+
 // Average interest rates by investment type and currency
 export type AverageInterestRatesByType = Record<string, Record<string, number>>;
 
@@ -247,7 +304,7 @@ export type AverageInterestRatesByType = Record<string, Record<string, number>>;
  * Returns the average interest rate for each type and currency that has investments
  */
 export function calculateAverageInterestRatesByType(
-  investments: FinancialInstrument[]
+  investments: FinancialInstrument[],
 ): AverageInterestRatesByType {
   type GroupData = { totalRate: number; count: number };
   const typeGroups: Record<string, Record<string, GroupData>> = {};
@@ -278,7 +335,7 @@ export function calculateAverageInterestRatesByType(
 // Calculate total monthly revenue in MDL
 export function calculateTotalMonthlyRevenueInMDL(
   monthlyReturns: CurrencyTotals,
-  exchangeRates: ExchangeRates
+  exchangeRates: ExchangeRates,
 ): number {
   return Object.entries(monthlyReturns).reduce((total, [currency, amount]) => {
     return (
@@ -287,7 +344,7 @@ export function calculateTotalMonthlyRevenueInMDL(
         amount,
         currency as SupportedCurrencyCode,
         'MDL',
-        exchangeRates
+        exchangeRates,
       )
     );
   }, 0);
