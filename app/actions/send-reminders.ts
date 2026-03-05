@@ -2,6 +2,7 @@
 
 import { checkUser } from '@/lib/checkUser';
 import {
+  findInvestmentsExpiringOnDay,
   findInvestmentsFor30DayNotification,
   findInvestmentsForMonthlyNotification,
 } from '@/lib/expirations';
@@ -10,6 +11,7 @@ import {
   sendMonthlyDigest,
   sendThirtyDayReminder,
 } from '@/lib/mailer';
+import { sendTelegramMessage } from '@/lib/telegram';
 import { prisma } from '@/lib/prisma';
 import { groupBy } from '@/utils/group-by';
 import { addDays } from 'date-fns';
@@ -82,57 +84,92 @@ export async function sendReminderEmail() {
 }
 
 /**
- * Fetches all investments that are expiring in the next 30 days, groups them by user,
- * and sends a single reminder digest to each user. This function is intended to be called by a daily cron job.
+ * Helper to process reminders for a specific day interval.
+ */
+async function processRemindersForInterval(
+  days: number,
+  options: { sendEmail: boolean; sendTelegram: boolean },
+) {
+  const investments = await findInvestmentsExpiringOnDay(days);
+  if (investments.length === 0) return { count: 0, users: 0 };
+
+  const investmentsByUser = groupBy(investments, 'userId');
+  const users = Object.keys(investmentsByUser);
+
+  await Promise.all(
+    users.map(async (userId) => {
+      const userInvestments = (investmentsByUser as any)[userId];
+      const user = userInvestments[0].user;
+
+      // Send Email
+      if (options.sendEmail) {
+        await sendThirtyDayReminder(user, userInvestments);
+      }
+
+      // Send Telegram
+      if (options.sendTelegram) {
+        const count = userInvestments.length;
+        const mainSubject =
+          days === 1
+            ? `🚨 <b>Urgent: Investment Expiring Tomorrow!</b>`
+            : `🔔 <b>Investment Reminder: ${days} days to go</b>`;
+
+        const details = userInvestments
+          .map(
+            (inv: any) =>
+              `• <b>${inv.organisationName}</b> 💰 ${inv.currency} ${inv.investmentAmount.toLocaleString()} | 📈 ${inv.interestRate}% 📅 Expires: ${new Date(inv.expirationDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}`,
+          )
+          .join('\n');
+
+        const appUrl = 'https://personal-banker-niko.vercel.app/investments';
+
+        const message =
+          `${mainSubject}\n\n` +
+          `Hi ${user.name || 'there'},\n\n` +
+          `${count === 1 ? 'An investment is' : `${count} investments are`} ` +
+          `expiring in ${days} day${days === 1 ? '' : 's'}:\n\n` +
+          `${details}\n\n` +
+          `🔗 Check your <a href="${appUrl}">dashboard</a>`;
+
+        await sendTelegramMessage(message);
+      }
+    }),
+  );
+
+  return { count: investments.length, users: users.length };
+}
+
+/**
+ * Main cron job: runs daily to check for upcoming expirations.
  */
 export async function sendDailyReminders() {
   console.log('Running daily reminder job...');
   try {
-    const investments = await findInvestmentsFor30DayNotification();
-    console.log(
-      `Found ${investments.length} investment(s) expiring in exactly 30 days.`,
-    );
+    // 30 Days: Email Only
+    const r30 = await processRemindersForInterval(30, {
+      sendEmail: true,
+      sendTelegram: false,
+    });
 
-    if (investments.length === 0) {
-      return {
-        success: true,
-        message: 'No investments are expiring in exactly 30 days from today.',
-        found: 0,
-      };
-    }
+    // 7 Days: Email + Telegram
+    const r7 = await processRemindersForInterval(7, {
+      sendEmail: true,
+      sendTelegram: true,
+    });
 
-    // Group investments by the owner (userId)
-    const investmentsByUser = groupBy(investments, 'userId');
-
-    const users = Object.keys(investmentsByUser);
-    console.log(
-      `Found ${users.length} unique users with expiring investments.`,
-    );
-
-    // Send a digest email to each user
-    const results = await Promise.all(
-      users.map((userId) => {
-        const userInvestments = (investmentsByUser as any)[userId];
-        // The user object is included in each investment from findInvestmentsFor30DayNotification
-        const user = userInvestments[0].user;
-        return sendThirtyDayReminder(user, userInvestments);
-      }),
-    );
-
-    const successfulSends = results.filter(Boolean).length;
-    const failedSends = users.length - successfulSends;
+    // 1 Day: Email + Telegram
+    const r1 = await processRemindersForInterval(1, {
+      sendEmail: true,
+      sendTelegram: true,
+    });
 
     console.log(
-      `Daily reminder job completed. Successful: ${successfulSends}, Failed: ${failedSends}.`,
+      `Daily reminders sent: 30d(${r30.count}), 7d(${r7.count}), 1d(${r1.count})`,
     );
 
     return {
       success: true,
-      message: `Processed ${users.length} user digests. Successful: ${successfulSends}, Failed: ${failedSends}.`,
-      found: investments.length,
-      usersProcessed: users.length,
-      successfulSends,
-      failedSends,
+      stats: { r30, r7, r1 },
     };
   } catch (error) {
     console.error('Error in daily reminder job:', error);

@@ -8,23 +8,18 @@ import {
   endOfMonth,
 } from 'date-fns';
 
-/** Investments expiring on exactly the 30th day from now.
- *  This ensures each investment triggers only ONE reminder email,
- *  on the exact day it hits the 30-day-before-expiration mark.
+/** Finds investments expiring on EXACTLY the Nth day from now.
+ *  Use this to trigger one-time notifications at specific intervals (e.g., 30, 7, or 1 day).
  */
-export async function findInvestmentsFor30DayNotification() {
+export async function findInvestmentsExpiringOnDay(days: number) {
   const now = new Date();
-  const thirtyDaysFromNow = addDays(now, 30);
-
-  console.log(
-    `Checking for investments expiring on exactly ${thirtyDaysFromNow.toISOString()} (30 days from now)`,
-  );
+  const targetDate = addDays(now, days);
 
   return prisma.investment.findMany({
     where: {
       expirationDate: {
-        gte: startOfDay(thirtyDaysFromNow),
-        lte: endOfDay(thirtyDaysFromNow),
+        gte: startOfDay(targetDate),
+        lte: endOfDay(targetDate),
       },
     },
     include: { user: true },
@@ -32,21 +27,9 @@ export async function findInvestmentsFor30DayNotification() {
   });
 }
 
-/** Investments expiring in a specific range of days from now */
-export async function findInvestmentsExpiringInRange(days: number) {
-  const now = new Date();
-  const targetDate = addDays(now, days);
-
-  return prisma.investment.findMany({
-    where: {
-      expirationDate: {
-        gte: startOfDay(now),
-        lte: endOfDay(targetDate),
-      },
-    },
-    include: { user: true },
-    orderBy: { expirationDate: 'asc' },
-  });
+/** Specific helper for the 30-day cron check */
+export async function findInvestmentsFor30DayNotification() {
+  return findInvestmentsExpiringOnDay(30);
 }
 
 /** Investments expiring in the current month */
