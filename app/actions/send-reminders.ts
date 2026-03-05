@@ -84,6 +84,77 @@ export async function sendReminderEmail() {
 }
 
 /**
+ * Sends an on-demand Telegram message to the user with all investments
+ * expiring within the next 30 days.
+ */
+export async function sendTelegramReminder() {
+  try {
+    const user = await checkUser();
+
+    if (!user) {
+      return { success: false, error: 'User not authenticated' };
+    }
+
+    const now = new Date();
+    const thirtyDaysFromNow = addDays(now, 30);
+
+    const investments = await prisma.investment.findMany({
+      where: {
+        userId: user.clerkUserId,
+        expirationDate: {
+          gte: now,
+          lte: thirtyDaysFromNow,
+        },
+      },
+      orderBy: { expirationDate: 'asc' },
+    });
+
+    if (investments.length === 0) {
+      return {
+        success: true,
+        message: 'No investments are expiring in the next 30 days.',
+      };
+    }
+
+    const appUrl = 'https://personal-banker-niko.vercel.app/investments';
+
+    const details = investments
+      .map(
+        (inv) =>
+          `• <b>${inv.organisationName}</b> 💰 ${inv.currency} ${inv.investmentAmount.toLocaleString()} | 📈 ${inv.interestRate}% 📅 Expires: ${new Date(inv.expirationDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}`,
+      )
+      .join('\n');
+
+    const message =
+      `📋 <b>Upcoming Maturities (next 30 days)</b>\n\n` +
+      `Hi ${user.name || 'there'},\n\n` +
+      `You have ${investments.length} investment${investments.length === 1 ? '' : 's'} expiring soon:\n\n` +
+      `${details}\n\n` +
+      `🔗 Check your <a href="${appUrl}">dashboard</a>`;
+
+    const sent = await sendTelegramMessage(message);
+
+    if (sent) {
+      return {
+        success: true,
+        message: `Telegram reminder sent with ${investments.length} investment(s)`,
+      };
+    } else {
+      return {
+        success: false,
+        error: 'Failed to send Telegram message. Check bot configuration.',
+      };
+    }
+  } catch (error) {
+    console.error('Error sending Telegram reminder:', error);
+    return {
+      success: false,
+      error: 'An error occurred while sending the Telegram reminder',
+    };
+  }
+}
+
+/**
  * Helper to process reminders for a specific day interval.
  */
 async function processRemindersForInterval(

@@ -33,6 +33,7 @@ import { Investment } from '@/prisma/generated/prisma/client';
 import { investmentTypeOptions } from '@/utils/investment-constants';
 import { InvestmentExpirationCalendar } from './InvestmentExpirationCalendar';
 import { SendEmailReminderButton } from './SendEmailReminderButton';
+import { SendTelegramReminderButton } from './SendTelegramReminderButton';
 
 interface SectionCardsProps {
   monthlyReturns: CurrencyTotals;
@@ -320,8 +321,9 @@ export function SectionCards({
 
           {/* Button at the bottom */}
           {(expiringIn7Days.length > 0 || expiringIn30Days.length > 0) && (
-            <div className='pt-4 mt-auto border-t border-gray-200 dark:border-gray-800'>
+            <div className='pt-4 mt-auto border-t border-gray-200 dark:border-gray-800 flex flex-col sm:flex-row gap-2'>
               <SendEmailReminderButton />
+              <SendTelegramReminderButton />
             </div>
           )}
         </CardContent>
