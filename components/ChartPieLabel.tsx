@@ -1,8 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Label, Pie, PieChart, Sector } from 'recharts';
-import { PieSectorDataItem } from 'recharts/types/polar/Pie';
+import { Pie, PieChart } from 'recharts';
 import {
   Card,
   CardContent,
@@ -17,7 +16,6 @@ import {
   ChartStyle,
   ChartTooltip,
 } from '@/components/ui/chart';
-import { Item, ItemContent, ItemMedia, ItemTitle } from '@/components/ui/item';
 import { formatAmount } from '@/utils/currency-formatter';
 
 // Helper function to add spaces between camelCase words
@@ -76,21 +74,13 @@ const CustomTooltip = ({ active, payload }: any) => {
 export function ChartPieLabel({ data }: { data: ConvertedTypeData[] }) {
   const id = 'pie-types-interactive';
 
-  const totalValue = React.useMemo(() => {
-    return data.reduce((sum, item) => sum + item.total, 0);
-  }, [data]);
-
-  const [activeIndex, setActiveIndex] = React.useState<number | undefined>(
-    undefined,
-  );
-
   const chartData = React.useMemo(() => {
     return data
       .filter((item) => item.total > 0)
       .map((item, index) => ({
         ...item,
         name: formatInvestmentType(item.type),
-        value: item.total, // Using converted total for proportions
+        value: item.total,
         fill: `hsl(var(--chart-${index + 1}))`,
       }));
   }, [data]);
@@ -112,33 +102,22 @@ export function ChartPieLabel({ data }: { data: ConvertedTypeData[] }) {
     return (
       <Card className='flex flex-col h-full'>
         <CardHeader className='items-start pb-0'>
-          <CardTitle className='text-xl lg:text-2xl'>
-            Investments by Type
-          </CardTitle>
-          <CardDescription className='lg:text-base'>
-            No investment data available.
-          </CardDescription>
+          <CardTitle>Investments by Type</CardTitle>
+          <CardDescription>Portfolio distribution in MDL</CardDescription>
         </CardHeader>
-        <CardContent className='flex-1 flex items-center justify-center'>
-          <p className='text-muted-foreground'>
-            Add investments to see distribution.
-          </p>
+        <CardContent className='flex-1 flex items-center justify-center p-6'>
+          <p className='text-muted-foreground'>No investment data available.</p>
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <Card
-      data-chart={id}
-      className='flex flex-col h-full overflow-hidden transition-all duration-300 hover:shadow-md'
-    >
+    <Card data-chart={id} className='flex flex-col h-full'>
       <ChartStyle id={id} config={dynamicChartConfig} />
       <CardHeader className='items-start pb-0'>
-        <CardTitle className='text-xl lg:text-2xl'>
-          Investments by Type
-        </CardTitle>
-        <CardDescription className='lg:text-base'>
+        <CardTitle>Investments by Type</CardTitle>
+        <CardDescription>
           Portfolio distribution in MDL equivalent
         </CardDescription>
       </CardHeader>
@@ -146,7 +125,7 @@ export function ChartPieLabel({ data }: { data: ConvertedTypeData[] }) {
         <ChartContainer
           id={id}
           config={dynamicChartConfig}
-          className='mx-auto aspect-square h-[250px] md:h-[280px] lg:h-[350px] 2xl:h-[600px] w-full max-w-[600px]'
+          className='mx-auto aspect-square h-[250px] md:h-[280px] lg:h-[350px] 2xl:h-[600px] w-full max-w-[500px] [&_.recharts-pie-label-text]:fill-foreground [&_.recharts-pie-label-text]:text-[10px] md:[&_.recharts-pie-label-text]:text-xs 2xl:[&_.recharts-pie-label-text]:text-sm [&_.recharts-pie-label-text]:font-medium'
         >
           <PieChart>
             <ChartTooltip cursor={false} content={<CustomTooltip />} />
@@ -154,83 +133,31 @@ export function ChartPieLabel({ data }: { data: ConvertedTypeData[] }) {
               data={chartData}
               dataKey='value'
               nameKey='name'
-              innerRadius={65}
-              strokeWidth={8}
+              label={({ name, percent }) =>
+                `${name} (${(percent * 100).toFixed(0)}%)`
+              }
+              innerRadius={0}
               stroke='hsl(var(--background))'
-              paddingAngle={2}
-              activeIndex={activeIndex}
-              onMouseEnter={(_, index) => setActiveIndex(index)}
-              onMouseLeave={() => setActiveIndex(undefined)}
-              activeShape={({
-                outerRadius = 0,
-                ...props
-              }: PieSectorDataItem) => (
-                <g>
-                  <Sector {...props} outerRadius={outerRadius + 8} />
-                  <Sector
-                    {...props}
-                    outerRadius={outerRadius + 15}
-                    innerRadius={outerRadius + 10}
-                  />
-                </g>
-              )}
-            >
-              <Label
-                content={({ viewBox }) => {
-                  if (viewBox && 'cx' in viewBox && 'cy' in viewBox) {
-                    return (
-                      <text
-                        x={viewBox.cx}
-                        y={viewBox.cy}
-                        textAnchor='middle'
-                        dominantBaseline='middle'
-                      >
-                        <tspan
-                          x={viewBox.cx}
-                          y={(viewBox.cy || 0) - 5}
-                          className='fill-foreground text-xl md:text-2xl lg:text-3xl font-bold'
-                        >
-                          {totalValue > 1000000
-                            ? `${(totalValue / 1000000).toFixed(2)}M`
-                            : totalValue.toLocaleString()}
-                        </tspan>
-                        <tspan
-                          x={viewBox.cx}
-                          y={(viewBox.cy || 0) + 20}
-                          className='fill-muted-foreground text-xs md:text-sm font-medium'
-                        >
-                          Total MDL Eq.
-                        </tspan>
-                      </text>
-                    );
-                  }
-                }}
-              />
-            </Pie>
+              strokeWidth={2}
+            />
           </PieChart>
         </ChartContainer>
       </CardContent>
-      <CardFooter className='pt-0'>
-        <div className='flex flex-wrap justify-center gap-2 w-full'>
-          {chartData.map((item, index) => (
+      <CardFooter className='flex-col gap-2 pt-4'>
+        <div className='leading-none text-muted-foreground text-xs 2xl:text-base text-center italic'>
+          Hover for currency breakdown
+        </div>
+        <div className='flex flex-wrap justify-center gap-2 w-full mt-2'>
+          {chartData.map((item) => (
             <div
               key={item.type}
-              className={`flex items-center gap-1.5 px-2 py-1 rounded-md transition-all cursor-default ${
-                activeIndex === index
-                  ? 'bg-muted ring-1 ring-border'
-                  : 'opacity-80 hover:opacity-100'
-              }`}
-              onMouseEnter={() => setActiveIndex(index)}
-              onMouseLeave={() => setActiveIndex(undefined)}
+              className='flex items-center gap-1.5 px-2 py-1'
             >
               <div
                 className='h-2 w-2 rounded-full shrink-0'
                 style={{ backgroundColor: item.fill }}
               />
-              <span className='text-[10px] lg:text-xs font-semibold'>
-                {Math.round((item.value / totalValue) * 100)}%
-              </span>
-              <span className='text-[10px] lg:text-xs text-muted-foreground'>
+              <span className='text-[10px] lg:text-xs 2xl:text-sm text-muted-foreground font-medium'>
                 {item.name}
               </span>
             </div>

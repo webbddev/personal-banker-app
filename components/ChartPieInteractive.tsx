@@ -158,7 +158,7 @@ export function ChartPieInteractive({
         <ChartContainer
           id={id}
           config={dynamicChartConfig}
-          className='mx-auto aspect-square h-[250px] md:h-[280px] lg:h-[350px] 2xl:h-[600px] w-full max-w-[600px]'
+          className='mx-auto aspect-square h-[250px] md:h-[280px] lg:h-[350px] 2xl:h-[600px] w-full max-w-[500px]'
         >
           <PieChart>
             <ChartTooltip cursor={false} content={<CustomTooltip />} />
@@ -195,7 +195,7 @@ export function ChartPieInteractive({
                         <tspan
                           x={viewBox.cx}
                           y={(viewBox.cy || 0) - 5}
-                          className='fill-foreground text-xl md:text-2xl lg:text-3xl font-bold'
+                          className='fill-foreground text-xl md:text-2xl lg:text-3xl 2xl:text-3xl font-bold'
                         >
                           {totalMDLValue > 1000000
                             ? `${(totalMDLValue / 1000000).toFixed(2)}M`
@@ -204,7 +204,7 @@ export function ChartPieInteractive({
                         <tspan
                           x={viewBox.cx}
                           y={(viewBox.cy || 0) + 20}
-                          className='fill-muted-foreground text-xs md:text-sm font-medium'
+                          className='fill-muted-foreground text-xs md:text-sm 2xl:text-lg font-medium'
                         >
                           Total Wealth
                         </tspan>
@@ -234,10 +234,10 @@ export function ChartPieInteractive({
                 className='h-2 w-2 rounded-full shrink-0'
                 style={{ backgroundColor: item.fill }}
               />
-              <span className='text-[10px] lg:text-xs font-semibold'>
+              <span className='text-[10px] lg:text-xs 2xl:text-sm font-bold'>
                 {Math.round((item.valueInMDL / totalMDLValue) * 100)}%
               </span>
-              <span className='text-[10px] lg:text-xs text-muted-foreground'>
+              <span className='text-[10px] lg:text-xs 2xl:text-sm text-muted-foreground font-medium'>
                 {item.currency}
               </span>
             </div>
