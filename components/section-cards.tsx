@@ -364,24 +364,6 @@ export function SectionCards({
                     <h3 className='text-sm lg:text-base font-semibold text-gray-400'>
                       {getInvestmentTypeLabel(type)}
                     </h3>
-                    <div className='text-[10px] lg:text-xs text-muted-foreground italic mb-0.5'>
-                      Total:{' '}
-                      {formatAmount(
-                        Object.entries(totals).reduce(
-                          (sum, [curr, amt]) =>
-                            sum +
-                            convertCurrency(
-                              amt,
-                              curr as SupportedCurrencyCode,
-                              'MDL',
-                              exchangeRates,
-                            ),
-                          0,
-                        ),
-                        'MDL',
-                      )}{' '}
-                      Eq.
-                    </div>
                   </div>
                   <Table>
                     <TableBody>
