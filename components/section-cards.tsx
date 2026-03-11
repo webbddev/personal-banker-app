@@ -1,4 +1,6 @@
-import React from 'react';
+'use client';
+
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Card,
   CardContent,
@@ -18,7 +20,6 @@ import {
   TrendingUp,
   Briefcase,
   AlertTriangle,
-  Zap,
   PieChart,
   Timer,
   CalendarDays,
@@ -27,13 +28,11 @@ import {
   CurrencyTotals,
   MonthlyReturnsByInvestmentType,
   AverageInterestRatesByType,
+  getExpiredInvestments,
+  getInvestmentsExpiringIn7Days,
+  getInvestmentsExpiringIn30Days,
 } from '@/utils/investment-calculations';
-import {
-  formatAmount,
-  convertCurrency,
-  ExchangeRates,
-  SupportedCurrencyCode,
-} from '@/utils/currency-formatter';
+import { formatAmount, ExchangeRates } from '@/utils/currency-formatter';
 // import { Investment } from '@prisma/client';
 import { Investment } from '@/prisma/generated/prisma/client';
 import { investmentTypeOptions } from '@/utils/investment-constants';
@@ -64,27 +63,52 @@ export function SectionCards({
   monthlyReturns,
   totalMonthlyRevenue,
   totalInvestments,
-  expiringIn7Days,
-  expiringIn30Days,
+  expiringIn7Days: server7Days,
+  expiringIn30Days: server30Days,
   monthlyReturnsByType,
   totalInvestedByType,
-  expiredInvestments,
+  expiredInvestments: serverExpired,
   allInvestments = [],
   averageInterestRatesByType,
   exchangeRates,
 }: SectionCardsProps) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Recalculate these on the client to use the browser's timezone
+  const localExpired = useMemo(
+    () => getExpiredInvestments(allInvestments),
+    [allInvestments],
+  );
+  const local7Days = useMemo(
+    () => getInvestmentsExpiringIn7Days(allInvestments),
+    [allInvestments],
+  );
+  const local30Days = useMemo(
+    () => getInvestmentsExpiringIn30Days(allInvestments),
+    [allInvestments],
+  );
+
+  // Use local versions when mounted, fallback to server props during SSR
+  const currentExpired = mounted ? localExpired : serverExpired;
+  const current7Days = mounted ? local7Days : server7Days;
+  const current30Days = mounted ? local30Days : server30Days;
+
   // Sort investments chronologically (nearest maturity first)
-  const sortedExpired = [...expiredInvestments].sort(
+  const sortedExpired = [...currentExpired].sort(
     (a, b) =>
       new Date(a.expirationDate).getTime() -
       new Date(b.expirationDate).getTime(),
   );
-  const sorted7Days = [...expiringIn7Days].sort(
+  const sorted7Days = [...current7Days].sort(
     (a, b) =>
       new Date(a.expirationDate).getTime() -
       new Date(b.expirationDate).getTime(),
   );
-  const sorted30Days = [...expiringIn30Days].sort(
+  const sorted30Days = [...current30Days].sort(
     (a, b) =>
       new Date(a.expirationDate).getTime() -
       new Date(b.expirationDate).getTime(),
@@ -165,7 +189,7 @@ export function SectionCards({
             </div>
             <div className='space-y-4 mt-4'>
               {/* Investments that have already expired */}
-              {expiredInvestments.length > 0 && (
+              {currentExpired.length > 0 && (
                 <div>
                   <h3 className='text-sm lg:text-base font-semibold text-red-500 mb-2 flex justify-between items-center'>
                     <span className='flex items-center'>
@@ -173,7 +197,7 @@ export function SectionCards({
                       <span>Expired Investments</span>
                     </span>
                     <span className='text-sm lg:text-base font-semibold'>
-                      {expiredInvestments.length}
+                      {currentExpired.length}
                     </span>
                   </h3>
                   <Table>
@@ -206,9 +230,11 @@ export function SectionCards({
                             )}
                           </TableCell>
                           <TableCell className='text-xs lg:text-sm text-muted-foreground py-2'>
-                            {new Date(
-                              investment.expirationDate,
-                            ).toLocaleDateString('en-GB')}
+                            {mounted
+                              ? new Date(
+                                  investment.expirationDate,
+                                ).toLocaleDateString('en-GB')
+                              : ''}
                           </TableCell>
                         </TableRow>
                       ))}
@@ -217,7 +243,7 @@ export function SectionCards({
                 </div>
               )}
               {/* Investments expiring in 7 days */}
-              {expiringIn7Days.length > 0 && (
+              {current7Days.length > 0 && (
                 <div>
                   <h3 className='text-sm lg:text-base font-semibold text-yellow-500 dark:text-yellow-400 mb-2 flex justify-between items-center'>
                     <span className='flex items-center'>
@@ -225,7 +251,7 @@ export function SectionCards({
                       <span>Investments Expiring in 7 Days</span>
                     </span>
                     <span className='text-sm lg:text-base font-semibold'>
-                      {expiringIn7Days.length}
+                      {current7Days.length}
                     </span>
                   </h3>
                   <Table>
@@ -258,9 +284,11 @@ export function SectionCards({
                             )}
                           </TableCell>
                           <TableCell className='text-xs lg:text-sm text-muted-foreground py-2'>
-                            {new Date(
-                              investment.expirationDate,
-                            ).toLocaleDateString('en-GB')}
+                            {mounted
+                              ? new Date(
+                                  investment.expirationDate,
+                                ).toLocaleDateString('en-GB')
+                              : ''}
                           </TableCell>
                         </TableRow>
                       ))}
@@ -269,7 +297,7 @@ export function SectionCards({
                 </div>
               )}
               {/* Investments expiring in 30 days */}
-              {expiringIn30Days.length > 0 && (
+              {current30Days.length > 0 && (
                 <div>
                   <h3 className='text-sm lg:text-base font-semibold text-green-600 dark:text-green-400 mb-2 flex justify-between items-center'>
                     <span className='flex items-center'>
@@ -277,7 +305,7 @@ export function SectionCards({
                       <span>Investments Expiring in 30 Days</span>
                     </span>{' '}
                     <span className='text-sm lg:text-base font-semibold'>
-                      {expiringIn30Days.length}
+                      {current30Days.length}
                     </span>
                   </h3>
                   <Table>
@@ -310,9 +338,11 @@ export function SectionCards({
                             )}
                           </TableCell>
                           <TableCell className='text-xs lg:text-sm text-muted-foreground py-2'>
-                            {new Date(
-                              investment.expirationDate,
-                            ).toLocaleDateString('en-GB')}
+                            {mounted
+                              ? new Date(
+                                  investment.expirationDate,
+                                ).toLocaleDateString('en-GB')
+                              : ''}
                           </TableCell>
                         </TableRow>
                       ))}
@@ -320,17 +350,16 @@ export function SectionCards({
                   </Table>
                 </div>
               )}
-              {expiringIn7Days.length === 0 &&
-                expiringIn30Days.length === 0 && (
-                  <p className='text-left text-gray-500 lg:text-base pt-4'>
-                    All clear! No investments are maturing in the next 30 days
-                  </p>
-                )}
+              {current7Days.length === 0 && current30Days.length === 0 && (
+                <p className='text-left text-gray-500 lg:text-base pt-4'>
+                  All clear! No investments are maturing in the next 30 days
+                </p>
+              )}
             </div>
           </div>
 
           {/* Button at the bottom */}
-          {(expiringIn7Days.length > 0 || expiringIn30Days.length > 0) && (
+          {(current7Days.length > 0 || current30Days.length > 0) && (
             <div className='pt-4 mt-auto border-t border-gray-200 dark:border-gray-800 flex flex-col sm:flex-row gap-2'>
               <SendEmailReminderButton />
               <SendTelegramReminderButton />
