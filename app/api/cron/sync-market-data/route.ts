@@ -88,21 +88,41 @@ export async function GET(request: Request) {
       const inflationHtml = await inflationRes.text();
       const $inf = cheerio.load(inflationHtml);
 
-      // The latest inflation value is rendered in the chart/table area.
-      // We look for the annual inflation rate text on the page.
+      // The BNM page contains text like:
+      // "in February 2026 was 5,06 percent."
+      // We extract both the value AND the month/year it refers to.
       let inflationVal: number | null = null;
+      let dataDate: Date | null = null;
 
-      // Try to find from the page text - look for percentage values
-      // The BNM inflation page shows "Annual inflation rate" with the latest value
       const pageText = $inf('body').text();
-      const inflationMatch = pageText.match(
-        /Annual\s+inflation\s+rate[^0-9]*?(\d+[.,]\d+)\s*%/i,
+
+      // Primary pattern: "in <Month> <Year> was <value> percent"
+      const fullMatch = pageText.match(
+        /in\s+(January|February|March|April|May|June|July|August|September|October|November|December)\s+(\d{4})\s+was\s+(\d+[.,]\d+)\s*percent/i,
       );
-      if (inflationMatch) {
-        inflationVal = parseFloat(inflationMatch[1].replace(',', '.'));
+
+      if (fullMatch) {
+        const monthNames: Record<string, number> = {
+          january: 0, february: 1, march: 2, april: 3, may: 4, june: 5,
+          july: 6, august: 7, september: 8, october: 9, november: 10, december: 11,
+        };
+        const monthIndex = monthNames[fullMatch[1].toLowerCase()];
+        const year = parseInt(fullMatch[2], 10);
+        inflationVal = parseFloat(fullMatch[3].replace(',', '.'));
+        dataDate = new Date(year, monthIndex, 1);
       }
 
-      // Fallback: try finding the bold text near the chart
+      // Fallback: try the old "Annual inflation rate ... X.XX%" pattern
+      if (inflationVal === null) {
+        const inflationMatch = pageText.match(
+          /Annual\s+inflation\s+rate[^0-9]*?(\d+[.,]\d+)\s*%/i,
+        );
+        if (inflationMatch) {
+          inflationVal = parseFloat(inflationMatch[1].replace(',', '.'));
+        }
+      }
+
+      // Last resort fallback: any standalone percentage on the page
       if (inflationVal === null) {
         $inf('text').each((_, el) => {
           const text = $inf(el).text().trim();
@@ -113,11 +133,13 @@ export async function GET(request: Request) {
         });
       }
 
-      if (inflationVal !== null && !isNaN(inflationVal)) {
+      // If we couldn't parse the date from the page, fall back to previous month
+      if (dataDate === null) {
         const now = new Date();
-        // Inflation data is typically released for the previous month
-        const dataDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        dataDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      }
 
+      if (inflationVal !== null && !isNaN(inflationVal)) {
         await prisma.marketIndicator.upsert({
           where: {
             name_date: {
@@ -137,6 +159,7 @@ export async function GET(request: Request) {
           success: true,
           value: inflationVal,
           date: dataDate.toISOString(),
+          parsedMonth: dataDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
         };
       } else {
         results.inflation = {

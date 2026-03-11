@@ -78,6 +78,36 @@ export async function getMarketIntelligenceData(): Promise<
       }
     }
 
+    // 3b. Ensure all months from the earliest data up to the current month are included,
+    // even if no market indicator row exists for them yet.
+    // This guarantees the chart always extends to the present.
+    const existingKeys = Array.from(dateMap.keys()).sort();
+    if (existingKeys.length > 0) {
+      const [startYear, startMonth] = existingKeys[0].split('-').map(Number);
+      const now = new Date();
+      const endYear = now.getUTCFullYear();
+      const endMonth = now.getUTCMonth() + 1; // 1-indexed
+
+      let y = startYear;
+      let m = startMonth;
+      while (y < endYear || (y === endYear && m <= endMonth)) {
+        const key = `${y}-${String(m).padStart(2, '0')}`;
+        if (!dateMap.has(key)) {
+          dateMap.set(key, {
+            baseRate: null,
+            inflation: null,
+            mdlGovBondRates: [],
+            mdlDepositRates: [],
+          });
+        }
+        m++;
+        if (m > 12) {
+          m = 1;
+          y++;
+        }
+      }
+    }
+
     // 4. For each month key, calculate average interest rates for active investments
     // An investment is "active" for a month if its createdAt <= end of month AND expirationDate >= start of month
     for (const [key] of dateMap) {
