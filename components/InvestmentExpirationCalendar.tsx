@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { Calendar } from '@/components/ui/calendar';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -15,7 +16,8 @@ import { Investment } from '@/prisma/generated/prisma/client';
 
 import { calculateDaysUntilExpiration } from '@/utils/investment-calculations';
 import { cn } from '@/lib/utils';
-import { CalendarDays } from 'lucide-react';
+import { CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react';
+import { addMonths, format } from 'date-fns';
 
 interface InvestmentExpirationCalendarProps {
   investments: Investment[];
@@ -46,6 +48,9 @@ export function InvestmentExpirationCalendar({
     today
   );
   const [month, setMonth] = React.useState<Date>(today);
+
+  const handlePrevMonth = () => setMonth((prev) => addMonths(prev, -1));
+  const handleNextMonth = () => setMonth((prev) => addMonths(prev, 1));
 
   // 3. Consolidated Data Processing
   // We process everything in one pass for efficiency and readability.
@@ -127,7 +132,7 @@ export function InvestmentExpirationCalendar({
             {...props}
             className={cn(
               props.className,
-              'relative w-full h-full flex items-center justify-center rounded-md transition-all duration-150',
+              'relative w-full h-full min-h-[--cell-size] min-w-[--cell-size] flex items-center justify-center rounded-md transition-all duration-150',
               isSelected && 'bg-teal-600/30 text-white shadow-md scale-105',
               !isSelected && 'hover:bg-blue-50 dark:hover:bg-blue-900/30',
               hasInvestments && 'font-bold'
@@ -169,6 +174,36 @@ export function InvestmentExpirationCalendar({
         </CardDescription>
       </CardHeader>
       <CardContent className='flex-1 flex flex-col p-4 pb-6 gap-4'>
+        {/* custom month navigation moved above calendar */}
+        <div className='flex justify-center items-center gap-6 mb-2'>
+          <Button
+            variant='outline'
+            size='icon'
+            onClick={handlePrevMonth}
+            className='h-10 w-10 sm:h-12 sm:w-12 rounded-full shadow-md hover:shadow-lg transition-all active:scale-90'
+            aria-label='Previous month'
+          >
+            <ChevronLeft className='h-6 w-6' />
+          </Button>
+          <div className='flex flex-col items-center min-w-[120px]'>
+            {/* <span className='text-[10px] font-medium text-muted-foreground uppercase tracking-widest'>
+              Navigation
+            </span> */}
+            <span className='text-sm font-bold'>
+              {format(month, 'MMMM yyyy')}
+            </span>
+          </div>
+          <Button
+            variant='outline'
+            size='icon'
+            onClick={handleNextMonth}
+            className='h-10 w-10 sm:h-12 sm:w-12 rounded-full shadow-md hover:shadow-lg transition-all active:scale-90'
+            aria-label='Next month'
+          >
+            <ChevronRight className='h-6 w-6' />
+          </Button>
+        </div>
+
         <div className='flex-shrink-0 flex justify-center'>
           <Calendar
             mode='single'
@@ -176,14 +211,19 @@ export function InvestmentExpirationCalendar({
             onSelect={setSelectedDate}
             month={month}
             onMonthChange={setMonth}
-            className='rounded-lg [--cell-size:3.5rem] sm:[--cell-size:2.25rem] md:[--cell-size:2.5rem] lg:[--cell-size:3.25rem]'
+            weekStartsOn={1}
+            className='rounded-lg w-90% [&>div]:w-full sm:w-fit [--cell-size:10vw] sm:[--cell-size:2.25rem] md:[--cell-size:2.5rem] lg:[--cell-size:3.25rem] mx-auto flex justify-center [&_.rdp-months]:w-full [&_.rdp-month]:w-full [&_table]:w-full'
+            classNames={{
+              nav: 'hidden',
+              month_caption: 'hidden',
+            }}
             // Since we handle styling in DayButton, we don't need complex modifiers for logic anymore
             components={calendarComponents}
           />
         </div>
 
         {/* Legend */}
-        <div className='flex-shrink-0 mx-auto mt-2 flex justify-center flex-wrap gap-y-0'>
+        <div className='flex-shrink-0 mx-auto mt-0 flex justify-center flex-wrap gap-y-0'>
           {viewStats.hasExpired && (
             <LegendItem color='#ef4444' label='Expired' />
           )}
@@ -198,28 +238,47 @@ export function InvestmentExpirationCalendar({
           )}
         </div>
 
-        {/* Selected date details */}
-        <div className='flex-shrink-0 min-h-[90px]'>
-          {selectedDateInvestments.length > 0 && (
-            <div className='pt-4 border-t border-gray-200 dark:border-gray-800'>
-              <p className='text-xs lg:text-sm font-semibold text-gray-400 mb-2'>
-                Expiring on {selectedDate?.toLocaleDateString('en-GB')}:
-              </p>
-              <div className='space-y-1'>
-                {selectedDateInvestments.map((inv) => (
-                  <div
-                    key={inv.id}
-                    className='text-xs lg:text-sm text-gray-500 flex justify-between'
-                  >
-                    <span>{inv.organisationName}</span>
-                    <span className='text-gray-400'>
-                      {inv.investmentAmount} {inv.currency}
-                    </span>
-                  </div>
-                ))}
+        {/* Selected date details - Styled logic similar to Portfolio Overview */}
+        <div className='flex-shrink-0 min-h-[100px] mt-4'>
+          <div
+            className={cn(
+              'rounded-lg border bg-card p-4 transition-all duration-300',
+              selectedDateInvestments.length > 0
+                ? 'opacity-100 translate-y-0'
+                : 'opacity-40 grayscale-[0.5] border-dashed'
+            )}
+          >
+            {selectedDateInvestments.length > 0 ? (
+              <div className='flex flex-col gap-1'>
+                <div className='flex items-center justify-between'>
+                  <span className='text-xs font-medium text-muted-foreground uppercase tracking-widest'>
+                    Expiring on
+                  </span>
+                  <span className='text-xs font-mono bg-muted px-2 py-0.5 rounded'>
+                    {selectedDate?.toLocaleDateString('en-GB')}
+                  </span>
+                </div>
+                <div className='space-y-3 mt-2'>
+                  {selectedDateInvestments.map((inv) => (
+                    <div key={inv.id} className='flex flex-col border-l-2 border-blue-500/30 pl-3 py-1'>
+                      <p className='text-sm font-bold text-foreground'>
+                        {inv.organisationName}
+                      </p>
+                      <p className='text-xs font-semibold text-blue-500'>
+                        {inv.investmentAmount.toLocaleString()} {inv.currency}
+                      </p>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            ) : (
+              <div className='flex flex-col items-center justify-center h-full py-4 text-center'>
+                <p className='text-xs text-muted-foreground italic'>
+                  Select a highlighted date to see details
+                </p>
+              </div>
+            )}
+          </div>
         </div>
       </CardContent>
     </Card>
