@@ -27,3 +27,4 @@
 
 # Agentic Skills
 /.agent.tmp-ref/
+.agent/
