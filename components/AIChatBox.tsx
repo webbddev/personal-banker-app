@@ -70,7 +70,6 @@ import { Loader } from './ai-elements/loader';
 import Image from 'next/image';
 
 interface AIChatBoxProps {
-  open: boolean;
   onClose: () => void;
 }
 
@@ -114,7 +113,7 @@ const models = [
   },
 ];
 
-export function AIChatBox({ open, onClose }: AIChatBoxProps) {
+export function AIChatBox({ onClose }: AIChatBoxProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const { user } = useUser();
   const firstName = user?.firstName;
@@ -156,19 +155,17 @@ export function AIChatBox({ open, onClose }: AIChatBoxProps) {
 
   const currentModel = models.find((m) => m.value === model) || models[0];
 
-  if (!open) return null;
-
   return (
     <div
       className={cn(
-        'animate-in slide-in-from-bottom-10 bg-card fixed right-4 bottom-4 z-50 flex flex-col rounded-lg border shadow-lg duration-300 2xl:right-16',
+        'bg-card flex flex-col overflow-hidden rounded-2xl border shadow-2xl transition-[width,height] duration-300',
         isExpanded
-          ? 'h-[950px] max-h-[90vh] w-[550px] max-w-[90vw]'
-          : 'h-[500px] max-h-[80vh] w-80 sm:w-96'
+          ? 'h-[85vh] w-[90vw] sm:w-[550px]'
+          : 'h-[500px] max-h-[80vh] w-[calc(100vw-32px)] sm:w-[360px] md:w-[380px]'
       )}
     >
       {/* Header */}
-      <div className='bg-[#40C1AC] text-primary-foreground flex items-center justify-between rounded-t-lg border-b p-3'>
+      <div className='animate-orb-flow text-primary-foreground flex items-center justify-between rounded-t-2xl border-b p-3'>
         <div className='flex items-center gap-2'>
           <BrainCog size={18} />
           <h3 className='font-medium'>Personal Banker</h3>

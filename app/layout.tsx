@@ -5,6 +5,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/toaster';
 import { ClerkProvider, SignedIn } from '@clerk/nextjs';
 import { dark, neobrutalism } from '@clerk/themes';
+import { AIChatButton } from '@/components/AIChatButton';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -44,7 +45,7 @@ export default function RootLayout({
     >
       <html lang='en' suppressHydrationWarning>
         <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+          className={`${geistSans.variable} ${geistMono.variable} antialiased relative`}
         >
           <ThemeProvider
             attribute='class'
@@ -54,6 +55,7 @@ export default function RootLayout({
           >
             {children}
           </ThemeProvider>
+          <AIChatButton />
           <Toaster />
         </body>
       </html>

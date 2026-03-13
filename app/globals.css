@@ -100,3 +100,21 @@ body {
   transform: translateX(-50%);
   border-radius: 1px;
 }
+
+@keyframes orb-flow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-orb-flow {
+  background: linear-gradient(-45deg, #40C1AC, #B2FFF2, #11453F, #2A8173, #40C1AC);
+  background-size: 400% 400%;
+  animation: orb-flow 10s ease-in-out infinite;
+}
