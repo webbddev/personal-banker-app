@@ -10,6 +10,8 @@ import {
   sendDailyReminder,
   sendMonthlyDigest,
   sendThirtyDayReminder,
+  sendSevenDayReminder,
+  sendOneDayReminder,
 } from '@/lib/mailer';
 import { sendTelegramMessage } from '@/lib/telegram';
 import { prisma } from '@/lib/prisma';
@@ -174,7 +176,13 @@ async function processRemindersForInterval(
 
       // Send Email
       if (options.sendEmail) {
-        await sendThirtyDayReminder(user, userInvestments);
+        if (days === 1) {
+          await sendOneDayReminder(user, userInvestments);
+        } else if (days === 7) {
+          await sendSevenDayReminder(user, userInvestments);
+        } else {
+          await sendThirtyDayReminder(user, userInvestments);
+        }
       }
 
       // Send Telegram
@@ -297,3 +305,56 @@ export async function sendMonthlyDigests() {
     return { success: false, message: 'An error occurred.' };
   }
 }
+
+/**
+ * TEST ACTION: Sends a mock 1-day reminder email to the logged-in user.
+ */
+export async function sendOneDayTestEmail() {
+  try {
+    const user = await checkUser();
+    if (!user || !user.email) return { success: false, error: 'User not found' };
+
+    const mockInvestments = [
+      {
+        id: 'test-1',
+        organisationName: 'MobiasBanca (Test)',
+        interestRate: 5.0,
+        investmentAmount: 200000,
+        currency: 'MDL',
+        expirationDate: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      },
+    ];
+
+    const sent = await sendOneDayReminder(user, mockInvestments as any);
+    return { success: sent, message: sent ? 'Test email sent' : 'Failed to send' };
+  } catch (error) {
+    return { success: false, error: String(error) };
+  }
+}
+
+/**
+ * TEST ACTION: Sends a mock 7-day reminder email to the logged-in user.
+ */
+export async function sendSevenDayTestEmail() {
+  try {
+    const user = await checkUser();
+    if (!user || !user.email) return { success: false, error: 'User not found' };
+
+    const mockInvestments = [
+      {
+        id: 'test-7',
+        organisationName: 'MAIB (Test)',
+        interestRate: 4.5,
+        investmentAmount: 150000,
+        currency: 'MDL',
+        expirationDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      },
+    ];
+
+    const sent = await sendSevenDayReminder(user, mockInvestments as any);
+    return { success: sent, message: sent ? 'Test email sent' : 'Failed to send' };
+  } catch (error) {
+    return { success: false, error: String(error) };
+  }
+}
+

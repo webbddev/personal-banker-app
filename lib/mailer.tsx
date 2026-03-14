@@ -6,6 +6,8 @@ import { DailyReminderEmail } from '@/emails/DailyReminderEmail';
 import { MonthlyDigestEmail } from '@/emails/MonthlyDigestEmail';
 import { formatAmount } from '@/utils/currency-formatter';
 import ThirtyDayReminderEmail from '@/emails/ThirtyDayReminderEmail';
+import SevenDayReminderEmail from '@/emails/SevenDayReminderEmail';
+import OneDayReminderEmail from '@/emails/OneDayReminderEmail';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const fromEmail = process.env.EMAIL_FROM;
@@ -120,6 +122,51 @@ export async function sendThirtyDayReminder(
     ),
   });
 }
+
+export async function sendSevenDayReminder(
+  user: User,
+  investments: Investment[],
+): Promise<boolean> {
+  if (!user.email || investments.length === 0) {
+    console.error(`Skipping 7-day reminder for ${user.id}`);
+    return false;
+  }
+
+  return sendEmail({
+    to: user.email,
+    subject: '🔔 Your 7-Day Investment Expiration Reminder',
+    component: (
+      <SevenDayReminderEmail
+        userFirstName={user.name || 'there'}
+        investments={investments.map(formatInvestment)}
+        appBaseUrl={appBaseUrl}
+      />
+    ),
+  });
+}
+
+export async function sendOneDayReminder(
+  user: User,
+  investments: Investment[],
+): Promise<boolean> {
+  if (!user.email || investments.length === 0) {
+    console.error(`Skipping 1-day reminder for ${user.id}`);
+    return false;
+  }
+
+  return sendEmail({
+    to: user.email,
+    subject: '🚨 Urgent: Investment Expiring Tomorrow!',
+    component: (
+      <OneDayReminderEmail
+        userFirstName={user.name || 'there'}
+        investments={investments.map(formatInvestment)}
+        appBaseUrl={appBaseUrl}
+      />
+    ),
+  });
+}
+
 
 export async function sendBaseRateChangeEmail(
   to: string,
