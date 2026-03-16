@@ -29,6 +29,7 @@ import { currentUser } from '@clerk/nextjs/server';
 import { ModeToggle } from './ModeToggle';
 import { SidebarLink } from './SidebarLink';
 import { NavUser } from './NavUser';
+import { WorldClock } from './WorldClock';
 
 // Suggestions section items
 const suggestionItems = [
@@ -93,12 +94,12 @@ const AppSidebar = async () => {
                 href='/dashboard'
                 className='flex items-center justify-center w-full'
               >
-                <div className='w-full max-w-[200px] aspect-square relative group-data-[collapsible=icon]:w-8 group-data-[collapsible=icon]:h-8 rounded-full overflow-hidden bg-sidebar-accent/50 p-1'>
+                <div className='w-full max-w-[200px] aspect-square relative group-data-[collapsible=icon]:w-8 group-data-[collapsible=icon]:h-8 p-1'>
                   <Image
                     src='/logo/colour-logo_no-background.webp'
                     alt='logo'
                     fill
-                    className='object-contain p-2'
+                    className='object-contain'
                   />
                 </div>
               </SidebarLink>
@@ -108,6 +109,18 @@ const AppSidebar = async () => {
       </SidebarHeader>
       <SidebarSeparator />
       <SidebarContent>
+        {/* World Clock Section */}
+        <SidebarGroup className="group-data-[collapsible=icon]:hidden">
+          <SidebarGroupLabel className='lg:text-base'>
+            World Markets Time
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <WorldClock />
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarSeparator />
+
         {/* Suggestions Section */}
         <SidebarGroup>
           <SidebarGroupLabel className='lg:text-base'>

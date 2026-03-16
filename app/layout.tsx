@@ -55,7 +55,9 @@ export default function RootLayout({
           >
             {children}
           </ThemeProvider>
-          <AIChatButton />
+          <SignedIn>
+            <AIChatButton />
+          </SignedIn>
           <Toaster />
         </body>
       </html>
