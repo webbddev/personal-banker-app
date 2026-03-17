@@ -25,7 +25,6 @@ import {
   SidebarSeparator,
 } from './ui/sidebar';
 import Image from 'next/image';
-import { currentUser } from '@clerk/nextjs/server';
 import { ModeToggle } from './ModeToggle';
 import { SidebarLink } from './SidebarLink';
 import { NavUser } from './NavUser';
@@ -109,16 +108,6 @@ const AppSidebar = async () => {
       </SidebarHeader>
       <SidebarSeparator />
       <SidebarContent>
-        {/* World Clock Section */}
-        <SidebarGroup className="group-data-[collapsible=icon]:hidden px-0">
-          <SidebarGroupLabel className='px-4 lg:text-base whitespace-nowrap'>
-            World Markets Time
-          </SidebarGroupLabel>
-          <SidebarGroupContent className="overflow-hidden">
-            <WorldClock />
-          </SidebarGroupContent>
-        </SidebarGroup>
-
         <SidebarSeparator />
 
         {/* Suggestions Section */}
@@ -143,9 +132,18 @@ const AppSidebar = async () => {
         </SidebarGroup>
 
         <SidebarSeparator />
+        {/* World Clock Section */}
+        <SidebarGroup className='group-data-[collapsible=icon]:hidden px-0'>
+          <SidebarGroupLabel className='px-4 lg:text-base whitespace-nowrap'>
+            World Markets Time
+          </SidebarGroupLabel>
+          <SidebarGroupContent className='overflow-hidden'>
+            <WorldClock />
+          </SidebarGroupContent>
+        </SidebarGroup>
 
         {/* Settings Section */}
-        <SidebarGroup>
+        {/* <SidebarGroup>
           <SidebarGroupLabel className='lg:text-base'>
             Settings
           </SidebarGroupLabel>
@@ -168,10 +166,10 @@ const AppSidebar = async () => {
               ))}
             </SidebarMenu>
           </SidebarGroupContent>
-        </SidebarGroup>
+        </SidebarGroup> */}
 
         {/* Projects Section */}
-        <SidebarGroup>
+        {/* <SidebarGroup>
           <SidebarGroupLabel className='lg:text-base'>
             Projects
           </SidebarGroupLabel>
@@ -198,7 +196,7 @@ const AppSidebar = async () => {
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
-        </SidebarGroup>
+        </SidebarGroup> */}
       </SidebarContent>
 
       <SidebarSeparator />
