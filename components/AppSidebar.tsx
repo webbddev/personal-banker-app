@@ -106,7 +106,9 @@ const AppSidebar = async () => {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
+
       <SidebarSeparator />
+
       <SidebarContent>
         <SidebarSeparator />
 
@@ -216,6 +218,4 @@ const AppSidebar = async () => {
   );
 };
 
-
 export default AppSidebar;
-
