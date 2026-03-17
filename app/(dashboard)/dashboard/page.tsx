@@ -27,6 +27,7 @@ import { ChartPieInteractive } from '@/components/ChartPieInteractive';
 import { ExchangeRatesDisplay } from '@/components/ExchangeRatesDisplay';
 import { MarketIntelligenceChart } from '@/components/MarketIntelligenceChart';
 import { getMarketIntelligenceData } from '@/app/actions/marketIntelligenceActions';
+import { WorldClock } from '@/components/WorldClock';
 
 export default async function DashboardPage() {
   const investments = await getAllInvestmentsSortedByExpiration();
@@ -118,8 +119,14 @@ export default async function DashboardPage() {
               </div>
 
               {/* Currency Rates */}
-              <div className='lg:col-span- xl:col-span-2'>
+              <div className='lg:col-span-2 xl:col-span-2'>
                 <ExchangeRatesDisplay />
+              </div>
+
+              {/* World Markets Time Grid */}
+              <div className='md:col-span-2 lg:col-span-2 xl:col-span-4'>
+                <h3 className="text-xl font-bold px-4 mb-2">Global Market Times</h3>
+                <WorldClock className="md:grid-cols-3 lg:grid-cols-6" />
               </div>
 
               {/* Market Intelligence Chart - Full width */}

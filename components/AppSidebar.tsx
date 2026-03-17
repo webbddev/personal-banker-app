@@ -110,11 +110,11 @@ const AppSidebar = async () => {
       <SidebarSeparator />
       <SidebarContent>
         {/* World Clock Section */}
-        <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-          <SidebarGroupLabel className='lg:text-base'>
+        <SidebarGroup className="group-data-[collapsible=icon]:hidden px-0">
+          <SidebarGroupLabel className='px-4 lg:text-base whitespace-nowrap'>
             World Markets Time
           </SidebarGroupLabel>
-          <SidebarGroupContent>
+          <SidebarGroupContent className="overflow-hidden">
             <WorldClock />
           </SidebarGroupContent>
         </SidebarGroup>
