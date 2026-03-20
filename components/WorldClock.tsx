@@ -101,12 +101,30 @@ const CityClock = React.memo(({ name, timezone, time }: { name: string; timezone
 CityClock.displayName = 'CityClock';
 
 export function WorldClock({ className, dialSize = '120px' }: { className?: string; dialSize?: string }) {
-  const [now, setNow] = React.useState(new Date());
+  const [now, setNow] = React.useState<Date | null>(null);
 
   React.useEffect(() => {
+    setNow(new Date());
     const timer = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
+
+  if (!now) {
+    return (
+      <div 
+        className={cn("grid grid-cols-2 gap-2 p-1 w-full justify-items-center mx-auto", className)}
+        style={{ '--clock-size': dialSize } as React.CSSProperties}
+      >
+        {cities.map((city) => (
+          <div 
+            key={city.name}
+            className="rounded-[1.25rem] bg-black/[0.03] dark:bg-white/5 backdrop-blur-md border border-black/5 dark:border-white/5 animate-pulse"
+            style={{ width: dialSize, height: dialSize }}
+          />
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div 

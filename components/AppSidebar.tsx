@@ -95,12 +95,11 @@ const AppSidebar = async () => {
               >
                 <div className='w-full max-w-[200px] aspect-square relative group-data-[collapsible=icon]:w-8 group-data-[collapsible=icon]:h-8 p-1'>
                   <Image
-                    src='/logo/colour-logo_no-background.webp'
+                    src='/logo/colour-logo_no-background.svg'
                     alt='logo'
                     fill
                     className='object-contain'
                     priority
-                    sizes='(max-width: 768px) 32px, 200px'
                   />
                 </div>
               </SidebarLink>
@@ -136,7 +135,7 @@ const AppSidebar = async () => {
         </SidebarGroup>
 
         <SidebarSeparator />
-        {/* World Clock Section */}
+        {/* World Clock Section - Comment out to fix ReferenceError */}
         <SidebarGroup className='group-data-[collapsible=icon]:hidden px-0'>
           <SidebarGroupLabel className='px-4 lg:text-base whitespace-nowrap'>
             World Markets Time

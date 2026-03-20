@@ -9,6 +9,7 @@ import { ConsoleWarningSuppressor } from '@/components/ConsoleWarningSuppressor'
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { cookies } from 'next/headers';
 import { AIChatButton } from '@/components/AIChatButton';
+import { MobileFloatingTrigger } from '@/components/MobileFloatingTrigger';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -65,6 +66,7 @@ export default async function RootLayout({
               <div className='w-full'>
                 {children}
               </div>
+              <MobileFloatingTrigger />
               <SignedIn>
                 <AIChatButton />
               </SignedIn>
