@@ -17,8 +17,8 @@ import type * as Prisma from "./prismaNamespace.ts"
 
 const config: runtime.GetPrismaClientConfig = {
   "previewFeatures": [],
-  "clientVersion": "7.4.1",
-  "engineVersion": "55ae170b1ced7fc6ed07a15f110549408c501bb3",
+  "clientVersion": "7.5.0",
+  "engineVersion": "280c870be64f457428992c43c1f6d557fab6e29e",
   "activeProvider": "postgresql",
   "inlineSchema": "generator client {\n  provider               = \"prisma-client\"\n  output                 = \"./generated/prisma\"\n  generatedFileExtension = \"ts\"\n  importFileExtension    = \"ts\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n}\n\nmodel User {\n  id          String       @id @default(cuid())\n  clerkUserId String       @unique\n  email       String       @unique\n  name        String?\n  imageUrl    String?\n  createdAt   DateTime     @default(now()) @map(\"created_at\")\n  updatedAt   DateTime     @updatedAt @map(\"updated_at\")\n  documents   Document[]\n  investments Investment[]\n}\n\nmodel Document {\n  id         String   @id @default(cuid())\n  userId     String\n  blobUrl    String   @unique\n  filename   String\n  fileType   String\n  fileSize   Int\n  uploadedAt DateTime @default(now())\n  user       User     @relation(fields: [userId], references: [clerkUserId], onDelete: Cascade)\n\n  @@index([userId])\n}\n\nmodel Investment {\n  id               String           @id @default(cuid())\n  organisationName String\n  relatedData      String?\n  investmentType   String\n  currency         String\n  investmentAmount Float\n  interestRate     Float\n  incomeTax        Float\n  expirationDate   DateTime\n  expirationStatus ExpirationStatus\n  userId           String\n  createdAt        DateTime         @default(now()) @map(\"created_at\")\n  updatedAt        DateTime         @updatedAt @map(\"updated_at\")\n  user             User             @relation(fields: [userId], references: [clerkUserId], onDelete: Cascade)\n\n  @@index([userId])\n  @@index([expirationDate])\n}\n\nmodel BnmBaseRate {\n  id        String   @id @default(cuid())\n  rate      Float\n  createdAt DateTime @default(now()) @map(\"created_at\")\n}\n\nmodel MarketIndicator {\n  id        String              @id @default(cuid())\n  name      MarketIndicatorName\n  value     Float\n  date      DateTime\n  updatedAt DateTime            @updatedAt @map(\"updated_at\")\n\n  @@unique([name, date])\n}\n\nenum MarketIndicatorName {\n  BASE_RATE\n  INFLATION\n}\n\nenum ExpirationStatus {\n  EXPIRING_LESS_THAN_3_MONTHS\n  EXPIRING_IN_A_MONTH\n  EXPIRED\n  ACTIVE\n}\n\nenum InvestmentType {\n  deposit\n  bankDeposit\n  governmentBond\n  corporateBond\n  eVMS\n}\n",
   "runtimeDataModel": {
@@ -67,7 +67,9 @@ export interface PrismaClientConstructor {
    * Type-safe database client for TypeScript
    * @example
    * ```
-   * const prisma = new PrismaClient()
+   * const prisma = new PrismaClient({
+   *   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL })
+   * })
    * // Fetch zero or more Users
    * const users = await prisma.user.findMany()
    * ```
@@ -89,7 +91,9 @@ export interface PrismaClientConstructor {
  * Type-safe database client for TypeScript
  * @example
  * ```
- * const prisma = new PrismaClient()
+ * const prisma = new PrismaClient({
+ *   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL })
+ * })
  * // Fetch zero or more Users
  * const users = await prisma.user.findMany()
  * ```

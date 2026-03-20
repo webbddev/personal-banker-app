@@ -1470,6 +1470,11 @@ export type InvestmentFindManyArgs<ExtArgs extends runtime.Types.Extensions.Inte
    * Skip the first `n` Investments.
    */
   skip?: number
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+   * 
+   * Filter by unique combinations of Investments.
+   */
   distinct?: Prisma.InvestmentScalarFieldEnum | Prisma.InvestmentScalarFieldEnum[]
 }
 

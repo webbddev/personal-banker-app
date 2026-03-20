@@ -12,6 +12,6 @@ export default defineConfig({
   datasource: {
     // CLI commands (like migrations) MUST use the direct, non-pooled connection
     // Fallback to DATABASE_URL if DIRECT_DATABASE_URL is not provided (e.g. locally)
-    url: env('DIRECT_DATABASE_URL') || env('DATABASE_URL'),
+    url: process.env.DIRECT_DATABASE_URL || env('DATABASE_URL'),
   },
 });
