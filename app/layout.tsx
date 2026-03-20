@@ -4,7 +4,10 @@ import './globals.css';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/toaster';
 import { ClerkProvider, SignedIn } from '@clerk/nextjs';
-import { dark, neobrutalism } from '@clerk/themes';
+import { dark } from '@clerk/themes';
+import { ConsoleWarningSuppressor } from '@/components/ConsoleWarningSuppressor';
+import { SidebarProvider } from '@/components/ui/sidebar';
+import { cookies } from 'next/headers';
 import { AIChatButton } from '@/components/AIChatButton';
 
 const geistSans = Geist({
@@ -22,24 +25,27 @@ export const metadata: Metadata = {
   description: 'Your investments tracked',
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieStore = await cookies();
+  const defaultOpen = cookieStore.get('sidebar_state')?.value === 'true';
+
   return (
     <ClerkProvider
       afterSignOutUrl={'/'}
       appearance={{
-        baseTheme: 'simple',
+        baseTheme: dark,
         variables: {
-          colorPrimary: '#40C1AB', // Tailwinszd teal-500
+          colorPrimary: '#40C1AB', // Tailwind's teal-500
         },
         signIn: {
-          baseTheme: 'simple',
+          baseTheme: dark,
         },
         signUp: {
-          baseTheme: 'simple',
+          baseTheme: dark,
         },
       }}
     >
@@ -54,14 +60,20 @@ export default function RootLayout({
             enableSystem={true}
             disableTransitionOnChange
           >
-            {children}
+            <ConsoleWarningSuppressor />
+            <SidebarProvider defaultOpen={defaultOpen}>
+              <div className='w-full'>
+                {children}
+              </div>
+              <SignedIn>
+                <AIChatButton />
+              </SignedIn>
+            </SidebarProvider>
           </ThemeProvider>
-          <SignedIn>
-            <AIChatButton />
-          </SignedIn>
           <Toaster />
         </body>
       </html>
     </ClerkProvider>
   );
 }
+

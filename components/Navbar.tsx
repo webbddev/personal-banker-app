@@ -4,7 +4,6 @@ import logo from '@/assets/White-Logo_noBackground.svg';
 import { SignedIn, SignOutButton, UserButton } from '@clerk/nextjs';
 import { ModeToggle } from './ModeToggle';
 import { currentUser } from '@clerk/nextjs/server';
-import { SidebarTrigger, useSidebar } from './ui/sidebar';
 
 const Navbar = async () => {
   const user = await currentUser();
