@@ -1,6 +1,4 @@
-import * as XLSX from 'xlsx';
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
+// Dynamic imports will be used inside functions to avoid SSR issues and optimize bundle size
 import { FinancialInstrument } from '@/types/investment-schema';
 import {
   calculateMonthlyReturn,
@@ -84,14 +82,18 @@ function formatInvestmentForExport(investment: FinancialInstrument) {
 /**
  * Exports investments to Excel format with improved professional layout
  */
-export function exportToExcel(
+export async function exportToExcel(
   investments: FinancialInstrument[],
   currencyTotals?: CurrencyTotals,
   monthlyReturns?: CurrencyTotals,
   investorName?: string,
   filename: string = 'investments-export'
-): void {
+): Promise<void> {
+  // Ensure this only runs on the client
+  if (typeof window === 'undefined') return;
+
   try {
+    const XLSX = await import('xlsx');
     const wb = XLSX.utils.book_new();
     const timestamp = formatDate(new Date());
 
@@ -285,14 +287,21 @@ export function exportToExcel(
 /**
  * Exports investments to PDF format with improved professional layout
  */
-export function exportToPDF(
+export async function exportToPDF(
   investments: FinancialInstrument[],
   currencyTotals?: CurrencyTotals,
   monthlyReturns?: CurrencyTotals,
   investorName?: string,
   filename: string = 'investments-export'
-): void {
+): Promise<void> {
+  // Ensure this only runs on the client
+  if (typeof window === 'undefined') return;
+
   try {
+    // Dynamic imports to avoid SSR issues with Node.js modules like fflate
+    const { default: jsPDF } = await import('jspdf');
+    const { default: autoTable } = await import('jspdf-autotable');
+
     const doc = new jsPDF({
       orientation: 'landscape',
       unit: 'mm',
@@ -612,13 +621,17 @@ export function exportToPDF(
 /**
  * Exports investments to CSV format
  */
-export function exportToCSV(
+export async function exportToCSV(
   investments: FinancialInstrument[],
   filename: string = 'investments-export'
-): void {
+): Promise<void> {
+  // Ensure this only runs on the client
+  if (typeof window === 'undefined') return;
+
   try {
     if (investments.length === 0) return;
 
+    const XLSX = await import('xlsx');
     // Format the data for CSV
     const formattedData = investments.map(formatInvestmentForExport);
 

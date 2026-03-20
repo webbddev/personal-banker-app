@@ -99,6 +99,8 @@ const AppSidebar = async () => {
                     alt='logo'
                     fill
                     className='object-contain'
+                    priority
+                    sizes='(max-width: 768px) 32px, 200px'
                   />
                 </div>
               </SidebarLink>

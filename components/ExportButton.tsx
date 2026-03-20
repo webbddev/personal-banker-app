@@ -54,7 +54,7 @@ export function ExportButton({
 
     setIsExporting(true);
     try {
-      exportToExcel(
+      await exportToExcel(
         investments,
         currencyTotals,
         monthlyReturns,
@@ -94,7 +94,7 @@ export function ExportButton({
       console.log('Investor name type:', typeof investorName);
       console.log('Investor name value:', JSON.stringify(investorName));
 
-      exportToPDF(
+      await exportToPDF(
         investments,
         currencyTotals,
         monthlyReturns,
@@ -130,7 +130,7 @@ export function ExportButton({
 
     setIsExporting(true);
     try {
-      exportToCSV(investments, filename);
+      await exportToCSV(investments, filename);
       toast({
         title: 'Export Successful',
         description: `Exported ${investments.length} investment(s) to CSV.`,

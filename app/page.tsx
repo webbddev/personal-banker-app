@@ -41,6 +41,7 @@ export default function Home() {
             src={LandingImg}
             alt='landing'
             className='hidden lg:block w-full drop-shadow-2xl'
+            priority
             />
             {/* Subtle light reflection on the safe when lamp is on */}
             <div className='absolute inset-0 bg-yellow-400/5 blur-[100px] rounded-full pointer-events-none opacity-0 dark:opacity-100 transition-opacity duration-1000' />
