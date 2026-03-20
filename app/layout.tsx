@@ -66,8 +66,8 @@ export default async function RootLayout({
               <div className='w-full'>
                 {children}
               </div>
-              <MobileFloatingTrigger />
               <SignedIn>
+                <MobileFloatingTrigger />
                 <AIChatButton />
               </SignedIn>
             </SidebarProvider>
