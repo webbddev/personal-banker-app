@@ -76,16 +76,16 @@ interface AIChatBoxProps {
 // Define available llm models using LobeHub Icon components
 const models = [
   {
-    name: 'Grok 4.1 Fast Non-Reasoning',
+    name: 'Gemini Flash 3',
+    shortName: 'Gemini Flash',
+    value: 'google/gemini-3-flash',
+    Icon: Gemini.Color,
+  },
+  {
+    name: 'Grok 4.1 Fast',
     shortName: 'Grok 4.1',
     value: 'xai/grok-4.1-fast-non-reasoning',
     Icon: Grok,
-  },
-  {
-    name: 'Gemini Flash 2.5',
-    shortName: 'Gemini Flash',
-    value: 'google/gemini-2.5-flash',
-    Icon: Gemini.Color,
   },
   {
     name: 'Perplexity Sonar',
@@ -146,7 +146,7 @@ export function AIChatBox({ onClose }: AIChatBoxProps) {
       },
       {
         body: { model, webSearch },
-      }
+      },
     );
     setPrompt('');
   };
@@ -160,8 +160,8 @@ export function AIChatBox({ onClose }: AIChatBoxProps) {
       className={cn(
         'bg-card flex flex-col overflow-hidden rounded-2xl border shadow-2xl transition-[width,height] duration-300',
         isExpanded
-          ? 'h-[85vh] w-[90vw] sm:w-[550px]'
-          : 'h-[500px] max-h-[80vh] w-[calc(100vw-32px)] sm:w-[360px] md:w-[380px]'
+          ? 'h-[85vh] w-[90vw] sm:w-[550px] md:w-[650px] lg:w-[750px] xl:w-[850px]'
+          : 'h-[500px] max-h-[80vh] w-[calc(100vw-32px)] sm:w-[360px] md:w-[480px] lg:w-[580px] xl:w-[680px]',
       )}
     >
       {/* Header */}
@@ -267,7 +267,7 @@ export function AIChatBox({ onClose }: AIChatBoxProps) {
                                             ...prev,
                                             [partId]: false,
                                           })),
-                                        2000
+                                        2000,
                                       );
                                     }}
                                     label={isCopied[partId] ? 'Copied' : 'Copy'}
@@ -361,13 +361,13 @@ export function AIChatBox({ onClose }: AIChatBoxProps) {
                 <SelectTrigger
                   className={cn(
                     'border-none bg-transparent font-medium text-muted-foreground shadow-none transition-colors h-9',
-                    'hover:bg-accent hover:text-foreground max-w-[140px]'
+                    'hover:bg-accent hover:text-foreground w-fit px-2 gap-2',
                   )}
                 >
                   <div className='flex items-center gap-2 min-w-0'>
                     {/* Using Lobe Icon Component */}
                     <currentModel.Icon size={16} />
-                    <span className='truncate text-sm'>
+                    <span className='text-sm whitespace-nowrap'>
                       {isExpanded ? currentModel.name : currentModel.shortName}
                     </span>
                   </div>

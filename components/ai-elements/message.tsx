@@ -26,7 +26,7 @@ export const Message = ({
       from === 'user' ? 'items-end' : 'items-start'
     )}
   >
-    {displayName && <div className='text-xs font-medium'>{displayName}</div>}
+    {displayName && <div className='text-base font-medium'>{displayName}</div>}
     <div
       className={cn(
         'group flex w-full items-end justify-end gap-2',
@@ -43,7 +43,7 @@ export const Message = ({
 );
 
 const messageContentVariants = cva(
-  "is-user:dark flex flex-col gap-2 overflow-hidden rounded-lg text-sm",
+  "is-user:dark flex flex-col gap-2 overflow-hidden rounded-lg text-base md:text-xl",
   {
     variants: {
       variant: {

@@ -385,6 +385,9 @@ export function EditInvestmentDialog() {
                           onSelect={field.onChange}
                           disabled={(date) => date < new Date() || isPending}
                           initialFocus
+                          captionLayout='dropdown'
+                          startMonth={new Date(new Date().getFullYear() - 5, 0)}
+                          endMonth={new Date(new Date().getFullYear() + 100, 11)}
                         />
                       </PopoverContent>
                     </Popover>
