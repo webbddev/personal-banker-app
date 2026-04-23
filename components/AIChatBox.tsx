@@ -94,9 +94,9 @@ const models = [
     Icon: Perplexity.Color,
   },
   {
-    name: 'GPT 4o mini',
-    shortName: 'GPT 4o mini',
-    value: 'openai/gpt-4o-mini',
+    name: 'GPT 4.1 mini',
+    shortName: 'GPT 4.1 mini',
+    value: 'openai/gpt-4.1-mini',
     Icon: OpenAI,
   },
   {
