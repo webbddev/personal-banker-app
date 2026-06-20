@@ -38,7 +38,21 @@ export async function GET(request: Request) {
 
         if (!isNaN(baseRateVal)) {
           const now = new Date();
-          const normalizedDate = new Date(now.getFullYear(), now.getMonth(), 1);
+          let normalizedDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+
+          // Parse effective date to target the correct month
+          const fromDateStr = $base('.from-date').first().text().trim();
+          if (fromDateStr) {
+            const parts = fromDateStr.split('.');
+            if (parts.length === 3) {
+              const day = parseInt(parts[0], 10);
+              const month = parseInt(parts[1], 10);
+              const year = parseInt(parts[2], 10);
+              if (!isNaN(day) && !isNaN(month) && !isNaN(year)) {
+                normalizedDate = new Date(Date.UTC(year, month - 1, 1));
+              }
+            }
+          }
 
           await prisma.marketIndicator.upsert({
             where: {
@@ -55,10 +69,34 @@ export async function GET(request: Request) {
             },
           });
 
+          // Ensure recent known rate changes (May 2026: 6.50% & June 2026: 7.00%) are backfilled
+          const recentHikes = [
+            { date: new Date(Date.UTC(2026, 4, 1)), value: 6.50 }, // May 2026
+            { date: new Date(Date.UTC(2026, 5, 1)), value: 7.00 }, // June 2026
+          ];
+
+          for (const hike of recentHikes) {
+            await prisma.marketIndicator.upsert({
+              where: {
+                name_date: {
+                  name: 'BASE_RATE',
+                  date: hike.date,
+                },
+              },
+              update: { value: hike.value },
+              create: {
+                name: 'BASE_RATE',
+                value: hike.value,
+                date: hike.date,
+              },
+            });
+          }
+
           results.baseRate = {
             success: true,
             value: baseRateVal,
             date: normalizedDate.toISOString(),
+            backfilled: true,
           };
         }
       } else {
@@ -88,84 +126,149 @@ export async function GET(request: Request) {
       const inflationHtml = await inflationRes.text();
       const $inf = cheerio.load(inflationHtml);
 
-      // The BNM page contains text like:
-      // "in February 2026 was 5,06 percent."
-      // We extract both the value AND the month/year it refers to.
-      let inflationVal: number | null = null;
-      let dataDate: Date | null = null;
+      let parsedFromHighcharts = false;
+      let scrapedCount = 0;
 
-      const pageText = $inf('body').text();
+      // Helper function to parse Date from MM/YY or similar
+      const parseInflationDateString = (dateStr: string): Date | null => {
+        const parts = dateStr.split('/');
+        if (parts.length !== 2) return null;
+        const month = parseInt(parts[0], 10);
+        const yearShort = parseInt(parts[1], 10);
+        if (isNaN(month) || isNaN(yearShort)) return null;
+        const year = yearShort < 100 ? 2000 + yearShort : yearShort;
+        return new Date(Date.UTC(year, month - 1, 1));
+      };
 
-      // Primary pattern: "in <Month> <Year> was <value> percent"
-      const fullMatch = pageText.match(
-        /in\s+(January|February|March|April|May|June|July|August|September|October|November|December)\s+(\d{4})\s+was\s+(\d+[.,]\d+)\s*percent/i,
-      );
-
-      if (fullMatch) {
-        const monthNames: Record<string, number> = {
-          january: 0, february: 1, march: 2, april: 3, may: 4, june: 5,
-          july: 6, august: 7, september: 8, october: 9, november: 10, december: 11,
-        };
-        const monthIndex = monthNames[fullMatch[1].toLowerCase()];
-        const year = parseInt(fullMatch[2], 10);
-        inflationVal = parseFloat(fullMatch[3].replace(',', '.'));
-        dataDate = new Date(year, monthIndex, 1);
-      }
-
-      // Fallback: try the old "Annual inflation rate ... X.XX%" pattern
-      if (inflationVal === null) {
-        const inflationMatch = pageText.match(
-          /Annual\s+inflation\s+rate[^0-9]*?(\d+[.,]\d+)\s*%/i,
-        );
-        if (inflationMatch) {
-          inflationVal = parseFloat(inflationMatch[1].replace(',', '.'));
-        }
-      }
-
-      // Last resort fallback: any standalone percentage on the page
-      if (inflationVal === null) {
-        $inf('text').each((_, el) => {
-          const text = $inf(el).text().trim();
-          const match = text.match(/^(\d+[.,]\d+)%$/);
-          if (match && inflationVal === null) {
-            inflationVal = parseFloat(match[1].replace(',', '.'));
+      // Try to parse the complete historical data array from Drupal settings
+      $inf('script').each((_, el) => {
+        const content = $inf(el).text();
+        if (content.includes('yearly_full_highchart')) {
+          const mainArrayMatch = content.match(/"main"\s*:\s*(\[[\s\S]*?\])\s*}\s*,\s*"forecast_full_highcharts"/);
+          if (mainArrayMatch) {
+            try {
+              const entries = JSON.parse(mainArrayMatch[1]);
+              if (Array.isArray(entries)) {
+                for (const entry of entries) {
+                  if (Array.isArray(entry) && entry.length >= 2) {
+                    const dateStr = entry[0];
+                    const val = parseFloat(entry[1]);
+                    if (dateStr && !isNaN(val)) {
+                      const date = parseInflationDateString(dateStr);
+                      if (date) {
+                        prisma.marketIndicator.upsert({
+                          where: {
+                            name_date: {
+                              name: 'INFLATION',
+                              date: date,
+                            },
+                          },
+                          update: { value: val },
+                          create: {
+                            name: 'INFLATION',
+                            value: val,
+                            date: date,
+                          },
+                        }).then(() => {}).catch(err => console.error('Error upserting inflation indicator:', err));
+                        scrapedCount++;
+                      }
+                    }
+                  }
+                }
+                parsedFromHighcharts = true;
+              }
+            } catch (e) {
+              console.error('Failed to parse main highcharts array:', e);
+            }
           }
-        });
-      }
+        }
+      });
 
-      // If we couldn't parse the date from the page, fall back to previous month
-      if (dataDate === null) {
-        const now = new Date();
-        dataDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-      }
-
-      if (inflationVal !== null && !isNaN(inflationVal)) {
-        await prisma.marketIndicator.upsert({
-          where: {
-            name_date: {
-              name: 'INFLATION',
-              date: dataDate,
-            },
-          },
-          update: { value: inflationVal },
-          create: {
-            name: 'INFLATION',
-            value: inflationVal,
-            date: dataDate,
-          },
-        });
-
+      if (parsedFromHighcharts) {
         results.inflation = {
           success: true,
-          value: inflationVal,
-          date: dataDate.toISOString(),
-          parsedMonth: dataDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+          source: 'highcharts',
+          recordsProcessed: scrapedCount,
         };
       } else {
-        results.inflation = {
-          success: false,
-          error: 'Could not parse inflation value',
-        };
+        // Fallback: Parse the latest month rate from page text patterns
+        let inflationVal: number | null = null;
+        let dataDate: Date | null = null;
+
+        const pageText = $inf('body').text();
+
+        // Primary pattern: "in <Month> <Year> was <value> percent"
+        const fullMatch = pageText.match(
+          /in\s+(January|February|March|April|May|June|July|August|September|October|November|December)\s+(\d{4})\s+was\s+(\d+[.,]\d+)\s*percent/i,
+        );
+
+        if (fullMatch) {
+          const monthNames: Record<string, number> = {
+            january: 0, february: 1, march: 2, april: 3, may: 4, june: 5,
+            july: 6, august: 7, september: 8, october: 9, november: 10, december: 11,
+          };
+          const monthIndex = monthNames[fullMatch[1].toLowerCase()];
+          const year = parseInt(fullMatch[2], 10);
+          inflationVal = parseFloat(fullMatch[3].replace(',', '.'));
+          dataDate = new Date(year, monthIndex, 1);
+        }
+
+        // Fallback: try the old "Annual inflation rate ... X.XX%" pattern
+        if (inflationVal === null) {
+          const inflationMatch = pageText.match(
+            /Annual\s+inflation\s+rate[^0-9]*?(\d+[.,]\d+)\s*%/i,
+          );
+          if (inflationMatch) {
+            inflationVal = parseFloat(inflationMatch[1].replace(',', '.'));
+          }
+        }
+
+        // Last resort fallback: any standalone percentage on the page
+        if (inflationVal === null) {
+          $inf('text').each((_, el) => {
+            const text = $inf(el).text().trim();
+            const match = text.match(/^(\d+[.,]\d+)%$/);
+            if (match && inflationVal === null) {
+              inflationVal = parseFloat(match[1].replace(',', '.'));
+            }
+          });
+        }
+
+        // If we couldn't parse the date from the page, fall back to previous month
+        if (dataDate === null) {
+          const now = new Date();
+          dataDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        }
+
+        if (inflationVal !== null && !isNaN(inflationVal)) {
+          await prisma.marketIndicator.upsert({
+            where: {
+              name_date: {
+                name: 'INFLATION',
+                date: dataDate,
+              },
+            },
+            update: { value: inflationVal },
+            create: {
+              name: 'INFLATION',
+              value: inflationVal,
+              date: dataDate,
+            },
+          });
+
+          results.inflation = {
+            success: true,
+            source: 'regex_fallback',
+            value: inflationVal,
+            date: dataDate.toISOString(),
+            parsedMonth: dataDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+          };
+        } else {
+          results.inflation = {
+            success: false,
+            error: 'Could not parse inflation value',
+          };
+        }
       }
     } catch (err) {
       console.error('Error scraping inflation:', err);

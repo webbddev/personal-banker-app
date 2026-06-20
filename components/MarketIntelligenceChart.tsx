@@ -348,6 +348,12 @@ export function MarketIntelligenceChart({
     data.length > 0 ? data.length - 1 : 0,
   );
 
+  React.useEffect(() => {
+    if (data.length > 0) {
+      setActiveIndex(data.length - 1);
+    }
+  }, [data]);
+
   const handleNext = () => {
     setActiveIndex((prev) => (prev >= data.length - 1 ? 0 : prev + 1));
   };
