@@ -32,7 +32,7 @@ import {
   getInvestmentsExpiringIn7Days,
   getInvestmentsExpiringIn30Days,
 } from '@/utils/investment-calculations';
-import { formatAmount, ExchangeRates } from '@/utils/currency-formatter';
+import { formatAmount, ExchangeRates, convertCurrency } from '@/utils/currency-formatter';
 // import { Investment } from '@prisma/client';
 import { Investment } from '@/prisma/generated/prisma/client';
 import { investmentTypeOptions } from '@/utils/investment-constants';
@@ -143,6 +143,24 @@ export function SectionCards({
             <p className='text-2xl lg:text-3xl font-bold'>
               {formatAmount(totalMonthlyRevenue, 'MDL')}
             </p>
+            <div className='flex flex-wrap items-center gap-2 mt-3.5'>
+              <span className='text-[10px] uppercase tracking-wider text-gray-400 font-semibold'>Equivalents:</span>
+              <div className='flex flex-wrap gap-1.5'>
+                {(['EUR', 'USD', 'GBP'] as const).map((currency) => (
+                  <div 
+                    key={currency} 
+                    className='inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-[10px] text-gray-500 font-medium border border-gray-200/60 dark:border-gray-700/60'
+                    title={`${currency} Equivalent`}
+                  >
+                    <span>{currency}</span>
+                    <span className='text-gray-400'>≈</span>
+                    <span className='text-gray-800 dark:text-gray-200 font-semibold'>
+                      {formatAmount(convertCurrency(totalMonthlyRevenue, 'MDL', currency, exchangeRates), currency)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
           <div className='space-y-2'>
             {Object.entries(monthlyReturns)

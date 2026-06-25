@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import * as cheerio from 'cheerio';
+import { sendBaseRateChangeEmail, sendInflationChangeEmail } from '@/lib/mailer';
 
 export const revalidate = 0;
 
@@ -13,6 +14,16 @@ export const revalidate = 0;
 export async function GET(request: Request) {
   try {
     const results: Record<string, any> = {};
+
+    // Get the latest records BEFORE syncing to detect changes
+    const beforeBaseRate = await prisma.marketIndicator.findFirst({
+      where: { name: 'BASE_RATE' },
+      orderBy: { date: 'desc' },
+    });
+    const beforeInflation = await prisma.marketIndicator.findFirst({
+      where: { name: 'INFLATION' },
+      orderBy: { date: 'desc' },
+    });
 
     // ─── 1. Scrape Base Rate from bnm.md/en ───────────────────────────
     try {
@@ -141,7 +152,8 @@ export async function GET(request: Request) {
       };
 
       // Try to parse the complete historical data array from Drupal settings
-      $inf('script').each((_, el) => {
+      const scriptElements = $inf('script').toArray();
+      for (const el of scriptElements) {
         const content = $inf(el).text();
         if (content.includes('yearly_full_highchart')) {
           const mainArrayMatch = content.match(/"main"\s*:\s*(\[[\s\S]*?\])\s*}\s*,\s*"forecast_full_highcharts"/);
@@ -149,6 +161,7 @@ export async function GET(request: Request) {
             try {
               const entries = JSON.parse(mainArrayMatch[1]);
               if (Array.isArray(entries)) {
+                const upsertPromises = [];
                 for (const entry of entries) {
                   if (Array.isArray(entry) && entry.length >= 2) {
                     const dateStr = entry[0];
@@ -156,25 +169,28 @@ export async function GET(request: Request) {
                     if (dateStr && !isNaN(val)) {
                       const date = parseInflationDateString(dateStr);
                       if (date) {
-                        prisma.marketIndicator.upsert({
-                          where: {
-                            name_date: {
+                        upsertPromises.push(
+                          prisma.marketIndicator.upsert({
+                            where: {
+                              name_date: {
+                                name: 'INFLATION',
+                                date: date,
+                              },
+                            },
+                            update: { value: val },
+                            create: {
                               name: 'INFLATION',
+                              value: val,
                               date: date,
                             },
-                          },
-                          update: { value: val },
-                          create: {
-                            name: 'INFLATION',
-                            value: val,
-                            date: date,
-                          },
-                        }).then(() => {}).catch(err => console.error('Error upserting inflation indicator:', err));
+                          }).catch(err => console.error('Error upserting inflation indicator:', err))
+                        );
                         scrapedCount++;
                       }
                     }
                   }
                 }
+                await Promise.all(upsertPromises);
                 parsedFromHighcharts = true;
               }
             } catch (e) {
@@ -182,7 +198,7 @@ export async function GET(request: Request) {
             }
           }
         }
-      });
+      }
 
       if (parsedFromHighcharts) {
         results.inflation = {
@@ -276,6 +292,61 @@ export async function GET(request: Request) {
         success: false,
         error: err instanceof Error ? err.message : String(err),
       };
+    }
+
+    // ─── 3. Detect Changes and Send Notifications ────────────────────────
+
+    const adminEmail = process.env.ADMIN_EMAIL;
+    if (adminEmail) {
+      const afterBaseRate = await prisma.marketIndicator.findFirst({
+        where: { name: 'BASE_RATE' },
+        orderBy: { date: 'desc' },
+      });
+      const afterInflation = await prisma.marketIndicator.findFirst({
+        where: { name: 'INFLATION' },
+        orderBy: { date: 'desc' },
+      });
+
+      // Detect Base Rate change
+      if (
+        afterBaseRate &&
+        (!beforeBaseRate ||
+          beforeBaseRate.date.getTime() !== afterBaseRate.date.getTime() ||
+          beforeBaseRate.value !== afterBaseRate.value)
+      ) {
+        // A change occurred! Only notify if the new rate isn't identical to the old one if date didn't change
+        // Actually, if we have a new entry with a different date, we notify, or if the value changed.
+        // Wait, if a new month appears but the value is the SAME, do we notify?
+        // User: "only when data changes, i.e. inflation rates do change... and base rates changes do occur"
+        // Let's only send if the *value* changed, or if it's the very first time.
+        if (!beforeBaseRate || beforeBaseRate.value !== afterBaseRate.value) {
+          await sendBaseRateChangeEmail(
+            adminEmail,
+            beforeBaseRate?.value ?? null,
+            afterBaseRate.value
+          );
+          results.notifiedBaseRateChange = true;
+        }
+      }
+
+      // Detect Inflation change
+      if (
+        afterInflation &&
+        (!beforeInflation ||
+          beforeInflation.date.getTime() !== afterInflation.date.getTime() ||
+          beforeInflation.value !== afterInflation.value)
+      ) {
+        if (!beforeInflation || beforeInflation.value !== afterInflation.value || beforeInflation.date.getTime() !== afterInflation.date.getTime()) {
+          const monthDateStr = afterInflation.date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+          await sendInflationChangeEmail(
+            adminEmail,
+            beforeInflation?.value ?? null,
+            afterInflation.value,
+            monthDateStr
+          );
+          results.notifiedInflationChange = true;
+        }
+      }
     }
 
     return NextResponse.json({

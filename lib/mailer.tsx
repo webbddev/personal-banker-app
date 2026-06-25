@@ -206,3 +206,40 @@ export async function sendBaseRateChangeEmail(
     ),
   });
 }
+
+export async function sendInflationChangeEmail(
+  to: string,
+  oldRate: number | null,
+  newRate: number,
+  monthDateStr: string,
+): Promise<boolean> {
+  const oldRateText = oldRate !== null ? `${oldRate.toFixed(2)}%` : 'unknown';
+  const newRateText = `${newRate.toFixed(2)}%`;
+
+  return sendEmail({
+    to,
+    subject: `⚠️ BNM Inflation Rate Changed to ${newRateText}`,
+    component: (
+      <div style={{ fontFamily: 'sans-serif', padding: '20px' }}>
+        <h2>National Bank of Moldova - Inflation Rate Update</h2>
+        <p>The inflation rate for {monthDateStr} has been updated.</p>
+        <ul>
+          <li>
+            <strong>Previous Rate:</strong> {oldRateText}
+          </li>
+          <li>
+            <strong>New Rate:</strong> {newRateText}
+          </li>
+        </ul>
+        <p>
+          <a
+            href='https://www.bnm.md/en/content/inflation'
+            style={{ color: '#0066cc', textDecoration: 'none' }}
+          >
+            Visit BNM for official details &rarr;
+          </a>
+        </p>
+      </div>
+    ),
+  });
+}
