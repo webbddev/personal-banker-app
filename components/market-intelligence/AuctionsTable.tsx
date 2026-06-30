@@ -15,7 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Landmark, CalendarDays, TrendingUp, Loader2 } from 'lucide-react';
+import { Landmark, CalendarDays, TrendingUp, Loader2, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 // ─── Types ─────────────────────────────────────────────────────────────
