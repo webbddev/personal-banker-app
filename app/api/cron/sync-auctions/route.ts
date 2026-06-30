@@ -44,22 +44,13 @@ export async function GET(request: Request) {
 
       try {
         // ─── Extract raw text from each column ───────────────────────
-        const titleRaw = row
-          .find('.views-field-title')
-          .text()
-          .trim();
+        const titleRaw = row.find('.views-field-title').text().trim();
         const dateRaw = row
           .find('.views-field-field-data-licitatiei')
           .text()
           .trim();
-        const typeRaw = row
-          .find('.views-field-field-tipul-vms')
-          .text()
-          .trim();
-        const maturityRaw = row
-          .find('.views-field-name-i18n')
-          .text()
-          .trim();
+        const typeRaw = row.find('.views-field-field-tipul-vms').text().trim();
+        const maturityRaw = row.find('.views-field-name-i18n').text().trim();
         const rateRaw = row
           .find('.views-field-field-rata-nominala-a-dobinzii')
           .text()
@@ -110,8 +101,7 @@ export async function GET(request: Request) {
 
         synced++;
       } catch (rowErr) {
-        const msg =
-          rowErr instanceof Error ? rowErr.message : String(rowErr);
+        const msg = rowErr instanceof Error ? rowErr.message : String(rowErr);
         errors.push(`Row ${i}: ${msg}`);
       }
     }
