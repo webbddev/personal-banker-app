@@ -67,8 +67,9 @@ const columns: ColumnDef<BondAuction>[] = [
       const isBill = gsType.toLowerCase().includes('bill');
       return (
         <span
+          title={gsType}
           className={cn(
-            'inline-flex items-center px-2.5 py-1 rounded-md text-[10px] sm:text-xs font-bold uppercase tracking-wider whitespace-nowrap',
+            'inline-block px-2.5 py-1 rounded-md text-[10px] sm:text-xs font-bold uppercase tracking-wider truncate max-w-[140px] align-middle',
             isBill
               ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
               : 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20',
@@ -176,26 +177,28 @@ export function AuctionsTable() {
       </div>
 
       {/* ─── Table Container ─── */}
-      <div className='rounded-xl border border-border/50 dark:border-slate-800/60 overflow-hidden bg-card/30 dark:bg-slate-900/20 backdrop-blur-sm'>
+      <div className='rounded-xl border border-border/50 dark:border-slate-800/60 overflow-hidden bg-card/30 dark:bg-slate-900/20 backdrop-blur-sm xl:w-max xl:min-w-[900px]'>
         {loading ? (
-          <div className='flex items-center justify-center gap-3 py-16'>
-            <Loader2 className='h-5 w-5 animate-spin text-sky-400' />
-            <span className='text-sm text-muted-foreground font-medium'>
-              Loading auction data…
-            </span>
+          <div className='h-[400px] flex flex-col items-center justify-center gap-4'>
+            <Loader2 className='h-8 w-8 animate-spin text-sky-500' />
+            <p className='text-sm text-muted-foreground font-medium'>
+              Loading auction data...
+            </p>
           </div>
         ) : error ? (
-          <div className='flex flex-col items-center justify-center py-16 gap-2'>
-            <p className='text-sm text-rose-400 font-medium'>{error}</p>
-            <p className='text-xs text-muted-foreground'>
-              Run the sync endpoint to populate auction data.
+          <div className='h-[400px] flex flex-col items-center justify-center gap-2 text-center px-4'>
+            <AlertCircle className='h-8 w-8 text-destructive/80 mb-2' />
+            <p className='text-sm text-destructive font-bold uppercase tracking-wider'>
+              Failed to load auctions
+            </p>
+            <p className='text-xs text-muted-foreground font-medium'>
+              {error}
             </p>
           </div>
         ) : data.length === 0 ? (
-          <div className='flex flex-col items-center justify-center py-16 gap-2'>
-            <Landmark className='h-8 w-8 text-muted-foreground/30' />
-            <p className='text-sm text-muted-foreground'>
-              No auction data available yet.
+          <div className='h-[400px] flex flex-col items-center justify-center gap-2 text-center px-4'>
+            <p className='text-sm text-muted-foreground font-bold uppercase tracking-wider'>
+              No auctions available
             </p>
             <p className='text-xs text-muted-foreground/60'>
               Data will populate after the next sync cycle.
@@ -203,7 +206,7 @@ export function AuctionsTable() {
           </div>
         ) : (
           <div className='overflow-x-auto'>
-            <Table>
+            <Table className='w-full xl:w-auto xl:min-w-[1000px]'>
               <TableHeader>
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow
