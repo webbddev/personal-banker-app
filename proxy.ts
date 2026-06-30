@@ -11,6 +11,7 @@ const isProtectedRoute = createRouteMatcher([
 const isPublicApiRoute = createRouteMatcher([
   '/api/v1/investments(.*)',
   '/api/notifications(.*)',
+  '/api/cron(.*)',
 ]);
 
 /**

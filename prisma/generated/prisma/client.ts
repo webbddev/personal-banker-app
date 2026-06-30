@@ -66,3 +66,8 @@ export type BnmBaseRate = Prisma.BnmBaseRateModel
  * 
  */
 export type MarketIndicator = Prisma.MarketIndicatorModel
+/**
+ * Model BondAuction
+ * 
+ */
+export type BondAuction = Prisma.BondAuctionModel

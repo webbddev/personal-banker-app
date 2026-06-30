@@ -70,6 +70,19 @@ model MarketIndicator {
   @@unique([name, date])
 }
 
+model BondAuction {
+  id           String   @id @default(cuid())
+  title        String
+  auctionDate  DateTime @map("auction_date")
+  gsType       String   @map("gs_type")
+  maturity     String
+  interestRate Float?   @map("interest_rate")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@unique([title, auctionDate])
+  @@index([auctionDate])
+}
+
 enum MarketIndicatorName {
   BASE_RATE
   INFLATION

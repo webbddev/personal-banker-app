@@ -55,7 +55,8 @@ export const ModelName = {
   Document: 'Document',
   Investment: 'Investment',
   BnmBaseRate: 'BnmBaseRate',
-  MarketIndicator: 'MarketIndicator'
+  MarketIndicator: 'MarketIndicator',
+  BondAuction: 'BondAuction'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -137,6 +138,19 @@ export const MarketIndicatorScalarFieldEnum = {
 } as const
 
 export type MarketIndicatorScalarFieldEnum = (typeof MarketIndicatorScalarFieldEnum)[keyof typeof MarketIndicatorScalarFieldEnum]
+
+
+export const BondAuctionScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  auctionDate: 'auctionDate',
+  gsType: 'gsType',
+  maturity: 'maturity',
+  interestRate: 'interestRate',
+  createdAt: 'createdAt'
+} as const
+
+export type BondAuctionScalarFieldEnum = (typeof BondAuctionScalarFieldEnum)[keyof typeof BondAuctionScalarFieldEnum]
 
 
 export const SortOrder = {

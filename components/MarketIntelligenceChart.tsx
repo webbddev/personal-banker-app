@@ -415,7 +415,7 @@ export function MarketIntelligenceChart({
 
   if (data.length === 0) {
     return (
-      <Card className='h-full'>
+      <Card>
         <CardHeader>
           <CardTitle className='flex items-center gap-2 text-xl'>
             <TrendingUp className='h-5 w-5 text-emerald-400' />
@@ -433,7 +433,7 @@ export function MarketIntelligenceChart({
   }
 
   return (
-    <Card className='h-full overflow-hidden border-none shadow-none bg-transparent'>
+    <Card className='overflow-hidden border-none shadow-none bg-transparent'>
       <CardHeader className='px-0 pb-6'>
         <div className='flex items-start justify-between w-full'>
           <div>

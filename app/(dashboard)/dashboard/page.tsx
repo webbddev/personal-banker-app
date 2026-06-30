@@ -27,6 +27,7 @@ import { ChartPieInteractive } from '@/components/ChartPieInteractive';
 import { ExchangeRatesDisplay } from '@/components/ExchangeRatesDisplay';
 import { MarketIntelligenceChart } from '@/components/MarketIntelligenceChart';
 import { getMarketIntelligenceData } from '@/app/actions/marketIntelligenceActions';
+import { AuctionsTable } from '@/components/market-intelligence/AuctionsTable';
 // import { WorldClock } from '@/components/WorldClock';
 
 export default async function DashboardPage() {
@@ -129,9 +130,10 @@ export default async function DashboardPage() {
                 <WorldClock className="md:grid-cols-3 lg:grid-cols-6" />
               </div> */}
 
-              {/* Market Intelligence Chart - Full width */}
-              <div className='md:col-span-2 lg:col-span-2 xl:col-span-4'>
+              {/* Market Intelligence Chart + Auctions Table - Full width */}
+              <div className='md:col-span-2 lg:col-span-2 xl:col-span-4 flex flex-col gap-8'>
                 <MarketIntelligenceChart data={marketData} />
+                <AuctionsTable />
               </div>
             </div>
           </div>

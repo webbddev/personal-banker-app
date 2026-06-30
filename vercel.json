@@ -15,6 +15,10 @@
     {
       "path": "/api/cron/sync-market-data",
       "schedule": "0 10 * * *"
+    },
+    {
+      "path": "/api/cron/sync-auctions",
+      "schedule": "0 16 * * *"
     }
   ]
 }

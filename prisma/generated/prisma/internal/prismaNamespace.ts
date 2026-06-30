@@ -388,7 +388,8 @@ export const ModelName = {
   Document: 'Document',
   Investment: 'Investment',
   BnmBaseRate: 'BnmBaseRate',
-  MarketIndicator: 'MarketIndicator'
+  MarketIndicator: 'MarketIndicator',
+  BondAuction: 'BondAuction'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -404,7 +405,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "document" | "investment" | "bnmBaseRate" | "marketIndicator"
+    modelProps: "user" | "document" | "investment" | "bnmBaseRate" | "marketIndicator" | "bondAuction"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -778,6 +779,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    BondAuction: {
+      payload: Prisma.$BondAuctionPayload<ExtArgs>
+      fields: Prisma.BondAuctionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.BondAuctionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BondAuctionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.BondAuctionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BondAuctionPayload>
+        }
+        findFirst: {
+          args: Prisma.BondAuctionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BondAuctionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.BondAuctionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BondAuctionPayload>
+        }
+        findMany: {
+          args: Prisma.BondAuctionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BondAuctionPayload>[]
+        }
+        create: {
+          args: Prisma.BondAuctionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BondAuctionPayload>
+        }
+        createMany: {
+          args: Prisma.BondAuctionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.BondAuctionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BondAuctionPayload>[]
+        }
+        delete: {
+          args: Prisma.BondAuctionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BondAuctionPayload>
+        }
+        update: {
+          args: Prisma.BondAuctionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BondAuctionPayload>
+        }
+        deleteMany: {
+          args: Prisma.BondAuctionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.BondAuctionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.BondAuctionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BondAuctionPayload>[]
+        }
+        upsert: {
+          args: Prisma.BondAuctionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BondAuctionPayload>
+        }
+        aggregate: {
+          args: Prisma.BondAuctionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateBondAuction>
+        }
+        groupBy: {
+          args: Prisma.BondAuctionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BondAuctionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.BondAuctionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BondAuctionCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -880,6 +955,19 @@ export const MarketIndicatorScalarFieldEnum = {
 } as const
 
 export type MarketIndicatorScalarFieldEnum = (typeof MarketIndicatorScalarFieldEnum)[keyof typeof MarketIndicatorScalarFieldEnum]
+
+
+export const BondAuctionScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  auctionDate: 'auctionDate',
+  gsType: 'gsType',
+  maturity: 'maturity',
+  interestRate: 'interestRate',
+  createdAt: 'createdAt'
+} as const
+
+export type BondAuctionScalarFieldEnum = (typeof BondAuctionScalarFieldEnum)[keyof typeof BondAuctionScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1095,6 +1183,7 @@ export type GlobalOmitConfig = {
   investment?: Prisma.InvestmentOmit
   bnmBaseRate?: Prisma.BnmBaseRateOmit
   marketIndicator?: Prisma.MarketIndicatorOmit
+  bondAuction?: Prisma.BondAuctionOmit
 }
 
 /* Types for Logging */
