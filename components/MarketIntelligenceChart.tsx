@@ -312,7 +312,7 @@ function DataSummaryTable({
                   {m.isRealRate ? (
                     <div
                       className={cn(
-                        'inline-flex items-center px-2.5 py-0.5 rounded-full shadow-sm',
+                        'inline-flex items-center px-2.5 py-0.5 rounded-full shadow-sm animate-pulse',
                         m.value >= 0
                           ? 'text-emerald-400 bg-emerald-400/10'
                           : 'text-rose-400 bg-rose-400/10',
@@ -365,7 +365,7 @@ function DataSummaryTable({
                   className='h-2.5 w-2.5 rounded-full flex-shrink-0 mt-1'
                   style={{ backgroundColor: m.color }}
                 />
-                <span className='text-[10px] sm:text-[11px] text-muted-foreground font-bold uppercase tracking-wider whitespace-normal break-words sm:whitespace-nowrap leading-tight'>
+                <span className='text-[10px] sm:text-[11px] text-muted-foreground font-bold uppercase tracking-wider whitespace-normal break-words sm:whitespace-nowrap leading-tight min-h-[2.2em] sm:min-h-0 flex items-start'>
                   {m.label}
                 </span>
               </div>
