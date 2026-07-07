@@ -136,9 +136,35 @@ export async function getMarketIntelligenceData(): Promise<
     let lastBaseRate: number | null = null;
     let lastInflation: number | null = null;
 
-    // Get current month/year to prevent "future" inflation fill
+    // Get current month/year to prevent "future" inflation fill.
+    // BNM publishes month N's inflation data around the 10th of month N+1.
+    // Before the 10th, the latest *available* data is for month N-2
+    //   (e.g., on July 7th → May data is latest; June not yet published).
+    // After the 10th, the latest *available* data is for month N-1
+    //   (e.g., on July 12th → June data is now published).
     const now = new Date();
-    const currentMonthKey = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}`;
+    const currentYear = now.getUTCFullYear();
+    const currentMonth = now.getUTCMonth() + 1; // 1-indexed
+    const dayOfMonth = now.getUTCDate();
+
+    // Calculate the cutoff month: the first month we should NOT forward-fill into
+    const BNM_PUBLICATION_DAY = 10;
+    let cutoffYear = currentYear;
+    let cutoffMonth = currentMonth; // start with current month as the default no-fill zone
+
+    if (dayOfMonth < BNM_PUBLICATION_DAY) {
+      // Before the 10th: data for (currentMonth - 1) isn't published yet,
+      // so also exclude it from forward-fill → cutoff is (currentMonth - 1)
+      cutoffMonth = currentMonth - 1;
+      if (cutoffMonth < 1) {
+        cutoffMonth = 12;
+        cutoffYear -= 1;
+      }
+    }
+    // After the 10th: cutoff stays at currentMonth (current month data isn't out,
+    // but previous month data IS published, so forward-fill up to previous month is fine)
+
+    const inflationCutoffKey = `${cutoffYear}-${String(cutoffMonth).padStart(2, '0')}`;
 
     for (const key of sortedKeys) {
       const entry = dateMap.get(key)!;
@@ -150,11 +176,12 @@ export async function getMarketIntelligenceData(): Promise<
         entry.baseRate = lastBaseRate;
       }
 
-      // Inflation: Forward-fill ONLY up to the month PREVIOUS to current
-      // (as current month data is typically released in the next month)
+      // Inflation: Forward-fill ONLY up to (but NOT including) the cutoff month,
+      // which represents the earliest month whose official data hasn't been
+      // published yet by BNM.
       if (entry.inflation !== null) {
         lastInflation = entry.inflation;
-      } else if (lastInflation !== null && key < currentMonthKey) {
+      } else if (lastInflation !== null && key < inflationCutoffKey) {
         entry.inflation = lastInflation;
       }
     }
