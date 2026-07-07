@@ -130,9 +130,13 @@ export default async function DashboardPage() {
                 <WorldClock className="md:grid-cols-3 lg:grid-cols-6" />
               </div> */}
 
-              {/* Market Intelligence Chart + Auctions Table - Full width */}
-              <div className='md:col-span-2 lg:col-span-2 xl:col-span-4 flex flex-col gap-8'>
+              {/* Market Intelligence Chart - 50% on large screens */}
+              <div className='md:col-span-2 lg:col-span-2 xl:col-span-2 flex flex-col'>
                 <MarketIntelligenceChart data={marketData} />
+              </div>
+
+              {/* Auctions Table - 50% on large screens */}
+              <div className='md:col-span-2 lg:col-span-2 xl:col-span-2 flex flex-col'>
                 <AuctionsTable />
               </div>
             </div>

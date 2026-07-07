@@ -26,6 +26,8 @@ import {
   EyeOff,
   ChevronLeft,
   ChevronRight,
+  Landmark,
+  Wallet,
 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { MarketIntelligenceDataPoint } from '@/app/actions/marketIntelligenceActions';
@@ -192,6 +194,29 @@ function formatXAxisTick(dateStr: string, dataLength: number): string {
   }
 }
 
+// ─── Section Header Component ────────────────────────────────────
+function SectionHeader({
+  icon: Icon,
+  label,
+  colorClass,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  colorClass: string;
+}) {
+  return (
+    <div className='flex items-center gap-2 mb-2'>
+      <Icon className={`h-4 w-4 ${colorClass}`} />
+      <span
+        className={`text-[11px] font-black uppercase tracking-[0.15em] ${colorClass}`}
+      >
+        {label}
+      </span>
+      <span className='h-px flex-1 bg-border dark:bg-slate-800/80' />
+    </div>
+  );
+}
+
 // ═══════════════════════════════════════════════════════════════════
 // ─── Data Summary Table (shows selected month's data) ────────────
 // ═══════════════════════════════════════════════════════════════════
@@ -216,119 +241,154 @@ function DataSummaryTable({
       ? depositVal - inflationVal
       : null;
 
-  const mainMetrics = [
+  const portfolioMetrics = [
     {
       label: 'MDL Gov. Bonds Avg.',
       value: govBondVal,
       color: COLORS.mdlGovBondAvg,
-      isInvestment: true,
     },
     {
       label: 'MDL Deposits Avg.',
       value: depositVal,
       color: COLORS.mdlDepositAvg,
-      isInvestment: true,
     },
+    {
+      label: 'Real Rate (Bonds)',
+      value: realRateBonds,
+      isRealRate: true,
+    },
+    {
+      label: 'Real Rate (Deposits)',
+      value: realRateDeposits,
+      isRealRate: true,
+    },
+  ];
+
+  const marketMetrics = [
     {
       label: 'Inflation (Annual)',
       value: inflationVal,
       color: COLORS.inflation,
-      isInvestment: false,
     },
     {
       label: 'BNM Base Rate',
       value: baseRateVal,
       color: COLORS.baseRate,
-      isInvestment: false,
     },
   ];
 
-  const realRateMetrics = [
-    { label: 'Real Rate (Bonds)', value: realRateBonds },
-    { label: 'Real Rate (Deposits)', value: realRateDeposits },
-  ];
-
   return (
-    <div className='w-full'>
+    <div className='w-full space-y-4'>
       {/* Period label */}
       <p className='text-xs font-semibold text-muted-foreground mb-4 uppercase tracking-[0.2em] flex items-center gap-2'>
-        <span className='h-1px flex-1 bg-border dark:bg-slate-800' />
+        <span className='h-px flex-1 bg-border dark:bg-slate-800' />
         {dateLabel}
-        <span className='h-1px flex-1 bg-border dark:bg-slate-800' />
+        <span className='h-px flex-1 bg-border dark:bg-slate-800' />
       </p>
 
-      {/* Responsive grid: Full width on all devices */}
-      <div className='grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4'>
-        {/* 4 main metrics */}
-        {mainMetrics.map((m) => (
-          <div
-            key={m.label}
-            className='flex flex-col items-start gap-2 rounded-xl border border-border bg-muted/20 dark:bg-slate-800/20 p-4 transition-all duration-300 hover:bg-muted/30 dark:hover:bg-slate-800/30'
-          >
-            <div className='flex items-center gap-2'>
-              <span
-                className='h-2.5 w-2.5 rounded-full flex-shrink-0 shadow-[0_0_8px_rgba(0,0,0,0.1)]'
-                style={{ backgroundColor: m.color }}
-              />
-              <span className='text-[10px] sm:text-[11px] text-muted-foreground font-bold uppercase tracking-wider truncate'>
+      {/* ─── YOUR PORTFOLIO ─── */}
+      <div>
+        <SectionHeader
+          icon={Wallet}
+          label='Your Portfolio'
+          colorClass='text-emerald-400'
+        />
+        <div className='grid grid-cols-[repeat(auto-fit,_minmax(140px,_1fr))] gap-2'>
+          {portfolioMetrics.map((m) => (
+            <div
+              key={m.label}
+              className={cn(
+                'flex flex-col items-start gap-1 rounded-xl border bg-muted/20 dark:bg-slate-800/20 p-3 transition-all duration-300 hover:bg-muted/30 dark:hover:bg-slate-800/30',
+                m.isRealRate
+                  ? 'border-l-4 border-l-emerald-500/60 border-border'
+                  : 'border-border',
+              )}
+            >
+              <span className='text-[10px] sm:text-[11px] text-muted-foreground font-bold uppercase tracking-wider whitespace-normal break-words leading-tight min-h-[2.2em] flex items-start w-full'>
                 {m.label}
               </span>
+              {m.value != null ? (
+                <div className='flex items-center'>
+                  {m.isRealRate ? (
+                    <div
+                      className={cn(
+                        'inline-flex items-center px-2.5 py-0.5 rounded-full shadow-sm',
+                        m.value >= 0
+                          ? 'text-emerald-400 bg-emerald-400/10'
+                          : 'text-rose-400 bg-rose-400/10',
+                      )}
+                    >
+                      <span className='text-lg sm:text-xl font-mono font-black'>
+                        {m.value >= 0 ? '+' : ''}
+                        {m.value.toFixed(2)}%
+                      </span>
+                    </div>
+                  ) : (
+                    <span
+                      className='text-lg sm:text-xl font-mono font-black'
+                      style={{ color: m.color }}
+                    >
+                      {m.value.toFixed(2)}%
+                    </span>
+                  )}
+                </div>
+              ) : (
+                <div className='flex flex-col'>
+                  <span className='text-lg sm:text-xl font-mono text-muted-foreground/30'>
+                    —
+                  </span>
+                  <span className='text-[9px] text-muted-foreground/50 italic font-medium -mt-1 uppercase'>
+                    No Data
+                  </span>
+                </div>
+              )}
             </div>
-            {m.value != null ? (
-              <span
-                className={cn('text-xl sm:text-2xl font-mono font-black')}
-                style={{ color: m.color }}
-              >
-                {m.value.toFixed(2)}%
-              </span>
-            ) : (
-              <div className='flex flex-col'>
-                <span className='text-xl sm:text-2xl font-mono text-muted-foreground/30'>
-                  —
-                </span>
-                <span className='text-[9px] text-muted-foreground/50 italic font-medium -mt-1 uppercase'>
-                  No Data
+          ))}
+        </div>
+      </div>
+
+      {/* ─── MARKET BENCHMARKS ─── */}
+      <div>
+        <SectionHeader
+          icon={Landmark}
+          label='Market Benchmarks'
+          colorClass='text-amber-400'
+        />
+        <div className='grid grid-cols-2 gap-2 sm:flex sm:flex-wrap'>
+          {marketMetrics.map((m) => (
+            <div
+              key={m.label}
+              className='flex flex-col items-start gap-1 rounded-xl border border-dashed border-border/60 bg-muted/10 dark:bg-slate-800/10 p-3 transition-all duration-300 hover:bg-muted/20 dark:hover:bg-slate-800/20 sm:w-fit sm:min-w-[160px]'
+            >
+              <div className='flex items-start gap-2 w-full sm:w-auto'>
+                <span
+                  className='h-2.5 w-2.5 rounded-full flex-shrink-0 mt-1'
+                  style={{ backgroundColor: m.color }}
+                />
+                <span className='text-[10px] sm:text-[11px] text-muted-foreground font-bold uppercase tracking-wider whitespace-normal break-words sm:whitespace-nowrap leading-tight'>
+                  {m.label}
                 </span>
               </div>
-            )}
-          </div>
-        ))}
-
-        {/* 2 Real Rate pills */}
-        {realRateMetrics.map((m) => (
-          <div
-            key={m.label}
-            className='flex flex-col items-start gap-2 rounded-xl border border-border bg-muted/20 dark:bg-slate-800/20 p-4 transition-all duration-300 hover:bg-muted/30 dark:hover:bg-slate-800/30'
-          >
-            <span className='text-[10px] sm:text-[11px] text-muted-foreground font-bold uppercase tracking-wider'>
-              {m.label}
-            </span>
-            {m.value != null ? (
-              <div
-                className={cn(
-                  'inline-flex items-center px-4 py-1.5 rounded-full animate-pulse shadow-sm',
-                  m.value >= 0
-                    ? 'text-emerald-400 bg-emerald-400/10'
-                    : 'text-rose-400 bg-rose-400/10',
-                )}
-              >
-                <span className='text-xl sm:text-2xl font-mono font-black'>
-                  {m.value >= 0 ? '+' : ''}
+              {m.value != null ? (
+                <span
+                  className='text-lg sm:text-xl font-mono font-black'
+                  style={{ color: m.color }}
+                >
                   {m.value.toFixed(2)}%
                 </span>
-              </div>
-            ) : (
-              <div className='flex flex-col'>
-                <span className='text-xl sm:text-2xl font-mono text-muted-foreground/30'>
-                  —
-                </span>
-                <span className='text-[9px] text-muted-foreground/50 italic font-medium -mt-1 uppercase truncate w-full'>
-                  Insufficient Data
-                </span>
-              </div>
-            )}
-          </div>
-        ))}
+              ) : (
+                <div className='flex flex-col'>
+                  <span className='text-lg sm:text-xl font-mono text-muted-foreground/30'>
+                    —
+                  </span>
+                  <span className='text-[9px] text-muted-foreground/50 italic font-medium -mt-1 uppercase'>
+                    No Data
+                  </span>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -433,8 +493,8 @@ export function MarketIntelligenceChart({
   }
 
   return (
-    <Card className='overflow-hidden border-none shadow-none bg-transparent'>
-      <CardHeader className='px-0 pb-6'>
+    <Card className='flex flex-col h-full overflow-hidden'>
+      <CardHeader className='pb-2'>
         <div className='flex items-start justify-between w-full'>
           <div>
             <CardTitle className='flex items-center gap-3 text-2xl lg:text-3xl font-black tracking-tight'>
@@ -451,7 +511,7 @@ export function MarketIntelligenceChart({
         </div>
 
         {/* ─── Improved Interactive Legend ──────────────────── */}
-        <div className='flex flex-wrap gap-2.5 mt-6'>
+        <div className='flex flex-wrap gap-2.5 mt-6 mb-4'>
           {LINE_CONFIG.map((line) => {
             const isVisible = visibleLines.has(line.key);
             return (
@@ -487,7 +547,7 @@ export function MarketIntelligenceChart({
         </div>
       </CardHeader>
 
-      <CardContent className='px-0 pt-0'>
+      <CardContent className='flex-1'>
         <div className='flex flex-col gap-8'>
           {/* ─── Full Width Data Table ── */}
           <div className='w-full'>
@@ -670,13 +730,13 @@ export function MarketIntelligenceChart({
               <ChevronRight className='h-8 w-8' />
             </Button>
           </div>
-          <p className='text-[10px] text-muted-foreground font-medium uppercase tracking-widest opacity-40'>
+          <p className='text-[10px] text-muted-foreground font-medium uppercase tracking-widest opacity-40 text-center'>
             Use arrows or click the chart to step through historical performance
           </p>
         </div>
       </CardContent>
 
-      <CardFooter className='px-6 pt-8 pb-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-border/40'>
+      <CardFooter className='flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-border/40 pt-6 mt-auto'>
         <div className='flex items-center gap-2 ml-2'>
           <div className='h-1.5 w-1.5 rounded-full bg-emerald-500 animate-ping' />
           <p className='text-[11px] font-bold text-muted-foreground uppercase tracking-wider'>
