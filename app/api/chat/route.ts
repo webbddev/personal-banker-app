@@ -82,10 +82,10 @@ export async function POST(req: NextRequest) {
 
     // Portfolio analysis calculations
     const expired = userInvestments.filter(
-      (i) => i.expirationDate && i.expirationDate < today
+      (i) => i.expirationDate && i.expirationDate < today,
     );
     const active = userInvestments.filter(
-      (i) => i.expirationDate && i.expirationDate >= today
+      (i) => i.expirationDate && i.expirationDate >= today,
     );
     const expiringSoon = userInvestments.filter((i) => {
       if (!i.expirationDate) return false;
@@ -102,7 +102,7 @@ export async function POST(req: NextRequest) {
 
     const maxReturn = Math.max(...userInvestments.map((i) => i.interestRate));
     const highestReturn = userInvestments.filter(
-      (i) => i.interestRate === maxReturn
+      (i) => i.interestRate === maxReturn,
     );
 
     const portfolioSummary = {
@@ -317,7 +317,7 @@ Current date: ${currentDate}
         error: 'Failed to process chat message',
         details: error instanceof Error ? error.message : 'Unknown error',
       }),
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

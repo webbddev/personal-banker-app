@@ -4,6 +4,8 @@
 
 body {
   font-family: Arial, Helvetica, sans-serif;
+  width: 100%;
+  height: 100%;
 }
 
 @layer base {
@@ -116,5 +118,7 @@ body {
 .animate-orb-flow {
   background: linear-gradient(-45deg, #40C1AC, #B2FFF2, #11453F, #2A8173, #40C1AC);
   background-size: 400% 400%;
+  animation: orb-flow 10s ease-in-out infinite;
+} background-size: 400% 400%;
   animation: orb-flow 10s ease-in-out infinite;
 }
