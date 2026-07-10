@@ -2,6 +2,9 @@ import { SectionCards } from '@/components/section-cards';
 import { SiteHeader } from '@/components/site-header';
 import { SidebarInset } from '@/components/ui/sidebar';
 
+// Ensure fresh data on every request — market data is updated by cron jobs
+export const dynamic = 'force-dynamic';
+
 import { ChartBarInteractive } from '@/components/ChartBarInteractive';
 import {
   getAllInvestmentsSortedByExpiration,

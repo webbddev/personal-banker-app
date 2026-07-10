@@ -152,9 +152,11 @@ export async function getMarketIntelligenceData(): Promise<
     let cutoffYear = currentYear;
     let cutoffMonth = currentMonth; // start with current month as the default no-fill zone
 
-    if (dayOfMonth < BNM_PUBLICATION_DAY) {
-      // Before the 10th: data for (currentMonth - 1) isn't published yet,
-      // so also exclude it from forward-fill → cutoff is (currentMonth - 1)
+    if (dayOfMonth <= BNM_PUBLICATION_DAY) {
+      // On or before the 10th: data for (currentMonth - 1) may not be published
+      // or scraped yet, so exclude it from forward-fill → cutoff is (currentMonth - 1).
+      // This prevents showing stale forward-filled values on the publication day
+      // before the cron job has scraped the actual data.
       cutoffMonth = currentMonth - 1;
       if (cutoffMonth < 1) {
         cutoffMonth = 12;
@@ -162,7 +164,7 @@ export async function getMarketIntelligenceData(): Promise<
       }
     }
     // After the 10th: cutoff stays at currentMonth (current month data isn't out,
-    // but previous month data IS published, so forward-fill up to previous month is fine)
+    // but previous month data IS published and scraped, so forward-fill up to previous month is fine)
 
     const inflationCutoffKey = `${cutoffYear}-${String(cutoffMonth).padStart(2, '0')}`;
 
