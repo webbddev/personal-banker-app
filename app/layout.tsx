@@ -10,6 +10,7 @@ import { SidebarProvider } from '@/components/ui/sidebar';
 import { cookies } from 'next/headers';
 import { AIChatButton } from '@/components/AIChatButton';
 import { MobileFloatingTrigger } from '@/components/MobileFloatingTrigger';
+import { CVIProvider } from '@/app/components/cvi/components/cvi-provider';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -63,13 +64,15 @@ export default async function RootLayout({
           >
             <ConsoleWarningSuppressor />
             <SidebarProvider defaultOpen={defaultOpen}>
-              <div className='w-full'>
-                {children}
-              </div>
-              <SignedIn>
-                <MobileFloatingTrigger />
-                <AIChatButton />
-              </SignedIn>
+              <CVIProvider>
+                <div className='w-full'>
+                  {children}
+                </div>
+                <SignedIn>
+                  <MobileFloatingTrigger />
+                  <AIChatButton />
+                </SignedIn>
+              </CVIProvider>
             </SidebarProvider>
           </ThemeProvider>
           <Toaster />
