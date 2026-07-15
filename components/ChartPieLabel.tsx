@@ -1,12 +1,11 @@
 'use client';
 
 import * as React from 'react';
-import { Pie, PieChart } from 'recharts';
+import { Pie, PieChart, Label, Cell } from 'recharts';
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -14,7 +13,6 @@ import {
   ChartConfig,
   ChartContainer,
   ChartStyle,
-  ChartTooltip,
 } from '@/components/ui/chart';
 import { formatAmount } from '@/utils/currency-formatter';
 
@@ -28,51 +26,23 @@ const formatInvestmentType = (type: string) => {
     .join(' ');
 };
 
+const formatCompact = (num: number) => {
+  return new Intl.NumberFormat('en-US', {
+    notation: 'compact',
+    compactDisplay: 'short',
+    maximumFractionDigits: 2,
+  }).format(num);
+};
+
 type ConvertedTypeData = {
   type: string;
   total: number;
   breakdown: Record<string, number>;
 };
 
-const CustomTooltip = ({ active, payload }: any) => {
-  if (active && payload && payload.length) {
-    const data = payload[0].payload;
-
-    return (
-      <div className='flex flex-col gap-2 rounded-lg bg-background p-3 shadow-md border text-xs lg:text-sm min-w-[160px]'>
-        <div className='flex items-center gap-2 border-b pb-1 mb-1'>
-          <div
-            className='h-2 w-2 rounded-full'
-            style={{ backgroundColor: data.fill }}
-          />
-          <span className='font-bold'>{formatInvestmentType(data.type)}</span>
-        </div>
-        <div className='flex flex-col gap-1'>
-          <div className='flex justify-between items-center text-muted-foreground gap-4'>
-            <span>Equivalent:</span>
-            <span className='font-semibold text-foreground whitespace-nowrap'>
-              {formatAmount(data.total, 'MDL')}
-            </span>
-          </div>
-          <div className='h-px bg-muted my-1' />
-          {Object.entries(data.breakdown || {}).map(([curr, amt]: any) => (
-            <div
-              key={curr}
-              className='flex justify-between items-center text-[10px] lg:text-xs'
-            >
-              <span className='text-muted-foreground'>{curr}:</span>
-              <span>{formatAmount(amt, curr)}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-  return null;
-};
-
 export function ChartPieLabel({ data }: { data: ConvertedTypeData[] }) {
   const id = 'pie-types-interactive';
+  const [activeIndex, setActiveIndex] = React.useState<number | null>(null);
 
   const chartData = React.useMemo(() => {
     return data
@@ -98,6 +68,10 @@ export function ChartPieLabel({ data }: { data: ConvertedTypeData[] }) {
     return config;
   }, [chartData]);
 
+  const totalValue = React.useMemo(() => {
+    return chartData.reduce((acc, curr) => acc + curr.value, 0);
+  }, [chartData]);
+
   if (chartData.length === 0) {
     return (
       <Card className='flex flex-col h-full'>
@@ -121,49 +95,129 @@ export function ChartPieLabel({ data }: { data: ConvertedTypeData[] }) {
           Portfolio distribution in MDL equivalent
         </CardDescription>
       </CardHeader>
-      <CardContent className='flex-1 pb-0 flex flex-col items-center justify-center relative min-h-[300px]'>
-        <ChartContainer
-          id={id}
-          config={dynamicChartConfig}
-          className='mx-auto aspect-square h-[250px] md:h-[280px] lg:h-[350px] 2xl:h-[600px] w-full max-w-[500px] [&_.recharts-pie-label-text]:fill-foreground [&_.recharts-pie-label-text]:text-[10px] md:[&_.recharts-pie-label-text]:text-xs 2xl:[&_.recharts-pie-label-text]:text-sm [&_.recharts-pie-label-text]:font-medium'
-        >
-          <PieChart>
-            <ChartTooltip cursor={false} content={<CustomTooltip />} />
-            <Pie
-              data={chartData}
-              dataKey='value'
-              nameKey='name'
-              label={({ name, percent }) =>
-                `${name} (${(percent * 100).toFixed(0)}%)`
-              }
-              innerRadius={0}
-              stroke='hsl(var(--background))'
-              strokeWidth={2}
-            />
-          </PieChart>
-        </ChartContainer>
-      </CardContent>
-      <CardFooter className='flex-col gap-2 pt-4'>
-        <div className='leading-none text-muted-foreground text-xs 2xl:text-base text-center italic'>
-          Hover for currency breakdown
+      <CardContent className='flex-1 flex flex-col 2xl:flex-row items-center justify-center gap-8 2xl:gap-12 p-6'>
+        <div className='w-full 2xl:w-[500px] flex justify-center'>
+          <ChartContainer
+            id={id}
+            config={dynamicChartConfig}
+            className='mx-auto aspect-square h-[300px] md:h-[300px] lg:h-[350px] 2xl:h-[600px] w-full max-w-[500px] [&_.recharts-pie-label-text]:fill-foreground [&_.recharts-pie-label-text]:text-[10px] md:[&_.recharts-pie-label-text]:text-xs [&_.recharts-pie-label-text]:font-medium'
+          >
+            <PieChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+              <Pie
+                data={chartData}
+                dataKey='value'
+                nameKey='name'
+                innerRadius="50%"
+                outerRadius="80%"
+                strokeWidth={2}
+                stroke='hsl(var(--background))'
+                labelLine={true}
+                label={({ percent }) => `${(percent * 100).toFixed(0)}%`}
+                onMouseEnter={(_, index) => setActiveIndex(index)}
+                onMouseLeave={() => setActiveIndex(null)}
+              >
+                {chartData.map((entry, index) => (
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={entry.fill}
+                    opacity={activeIndex === null || activeIndex === index ? 1 : 0.4}
+                    style={{
+                      transition: 'opacity 0.2s',
+                      cursor: 'pointer',
+                    }}
+                  />
+                ))}
+                <Label
+                  content={({ viewBox }) => {
+                    if (viewBox && 'cx' in viewBox && 'cy' in viewBox) {
+                      return (
+                        <text
+                          x={viewBox.cx}
+                          y={viewBox.cy}
+                          textAnchor='middle'
+                          dominantBaseline='middle'
+                        >
+                          <tspan
+                            x={viewBox.cx}
+                            y={viewBox.cy}
+                            className='fill-foreground text-3xl font-bold'
+                          >
+                            {formatCompact(totalValue)}
+                          </tspan>
+                          <tspan
+                            x={viewBox.cx}
+                            y={(viewBox.cy || 0) + 24}
+                            className='fill-muted-foreground text-sm'
+                          >
+                            Total Wealth
+                          </tspan>
+                        </text>
+                      );
+                    }
+                  }}
+                />
+              </Pie>
+            </PieChart>
+          </ChartContainer>
         </div>
-        <div className='flex flex-wrap justify-center gap-2 w-full mt-2'>
-          {chartData.map((item) => (
-            <div
-              key={item.type}
-              className='flex items-center gap-1.5 px-2 py-1'
-            >
+
+        <div className='flex flex-col gap-3 w-full max-w-[500px] mx-auto 2xl:mx-0 2xl:max-w-[370px] overflow-y-auto pr-2'>
+          {chartData.map((item, index) => {
+            const isHovered = activeIndex === index;
+            const isFaded = activeIndex !== null && activeIndex !== index;
+
+            return (
               <div
-                className='h-2 w-2 rounded-full shrink-0'
-                style={{ backgroundColor: item.fill }}
-              />
-              <span className='text-[10px] lg:text-xs 2xl:text-sm text-muted-foreground font-medium'>
-                {item.name}
-              </span>
-            </div>
-          ))}
+                key={item.type}
+                className={`flex flex-col gap-2 p-3 rounded-lg border transition-all duration-200 ${
+                  isHovered
+                    ? 'bg-muted shadow-sm scale-[1.02]'
+                    : isFaded
+                    ? 'opacity-40 bg-background'
+                    : 'bg-background'
+                }`}
+                onMouseEnter={() => setActiveIndex(index)}
+                onMouseLeave={() => setActiveIndex(null)}
+                style={{ cursor: 'pointer' }}
+              >
+                <div className='flex items-center justify-between'>
+                  <div className='flex items-center gap-2'>
+                    <div
+                      className='h-3 w-3 rounded-full shrink-0'
+                      style={{ backgroundColor: item.fill }}
+                    />
+                    <span className='font-semibold text-sm'>
+                      {item.name}
+                    </span>
+                  </div>
+                  <span className='text-sm font-bold'>
+                    {((item.value / totalValue) * 100).toFixed(0)}%
+                  </span>
+                </div>
+
+                <div className='flex justify-between items-center text-sm'>
+                  <span className='text-muted-foreground'>Total (MDL)</span>
+                  <span className='font-medium'>
+                    {formatAmount(item.value, 'MDL')}
+                  </span>
+                </div>
+
+                {Object.keys(item.breakdown || {}).length > 0 && (
+                  <div className='flex flex-col gap-1 mt-1 pt-2 border-t'>
+                    {Object.entries(item.breakdown).map(([curr, amt]: any) => (
+                      <div key={curr} className='flex justify-between text-xs'>
+                        <span className='text-muted-foreground'>{curr}:</span>
+                        <span>{formatAmount(amt, curr)}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
-      </CardFooter>
+      </CardContent>
     </Card>
   );
 }
+
