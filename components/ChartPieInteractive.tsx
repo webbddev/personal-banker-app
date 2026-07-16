@@ -1,28 +1,42 @@
 'use client';
 
 import * as React from 'react';
-import { Label, Pie, PieChart, Sector } from 'recharts';
+import Image from 'next/image';
+import { Label, Pie, PieChart, Cell, Sector } from 'recharts';
 import { PieSectorDataItem } from 'recharts/types/polar/Pie';
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import {
-  ChartConfig,
-  ChartContainer,
-  ChartStyle,
-  ChartTooltip,
-} from '@/components/ui/chart';
+import { ChartConfig, ChartContainer, ChartStyle } from '@/components/ui/chart';
 import {
   formatAmount,
   convertCurrency,
   ExchangeRates,
   SupportedCurrencyCode,
 } from '@/utils/currency-formatter';
+
+// Метаданные для отображения валют и флагов
+const currencyInfo: Record<
+  string,
+  { name: string; flag: string; symbol: string }
+> = {
+  MDL: { name: 'Moldovan leu', flag: '/flags/md.svg', symbol: 'MDL' },
+  USD: { name: 'US Dollar', flag: '/flags/us.svg', symbol: 'USD' },
+  EUR: { name: 'Euro', flag: '/flags/eu.svg', symbol: 'EUR' },
+  GBP: { name: 'British pound', flag: '/flags/gb.svg', symbol: 'GBP' },
+};
+
+const formatCompact = (num: number) => {
+  return new Intl.NumberFormat('en-US', {
+    notation: 'compact',
+    compactDisplay: 'short',
+    maximumFractionDigits: 2,
+  }).format(num);
+};
 
 interface ChartPieInteractiveProps {
   data: Record<string, number>;
@@ -34,6 +48,7 @@ export function ChartPieInteractive({
   exchangeRates,
 }: ChartPieInteractiveProps) {
   const id = 'pie-currency-interactive';
+  const [activeIndex, setActiveIndex] = React.useState<number | null>(null);
 
   const chartData = React.useMemo(() => {
     return Object.entries(data)
@@ -55,10 +70,6 @@ export function ChartPieInteractive({
       .sort((a, b) => b.valueInMDL - a.valueInMDL);
   }, [data, exchangeRates]);
 
-  const [activeIndex, setActiveIndex] = React.useState<number | undefined>(
-    undefined,
-  );
-
   const totalMDLValue = React.useMemo(() => {
     return chartData.reduce((sum, item) => sum + item.valueInMDL, 0);
   }, [chartData]);
@@ -76,51 +87,6 @@ export function ChartPieInteractive({
     });
     return config;
   }, [chartData]);
-
-  const CustomTooltip = ({ active, payload }: any) => {
-    if (active && payload && payload.length) {
-      const data = payload[0].payload;
-      return (
-        // 1. Increased min-width to 180px to accommodate larger numbers
-        <div className='flex flex-col gap-2 rounded-lg bg-background p-3 shadow-md border text-xs lg:text-sm min-w-[180px]'>
-          <div className='flex items-center gap-2 border-b pb-2 mb-1'>
-            <div
-              className='h-2 w-2 rounded-full'
-              style={{ backgroundColor: data.fill }}
-            />
-            <span className='font-bold'>{data.currency} Exposure</span>
-          </div>
-
-          <div className='flex flex-col gap-1.5'>
-            {/* 2. Added gap-4 and w-20 for consistent label spacing */}
-            <div className='flex justify-between items-center gap-4'>
-              <span className='text-muted-foreground w-20'>Original:</span>
-              <span className='font-medium text-right flex-1'>
-                {formatAmount(data.amount, data.currency)}
-              </span>
-            </div>
-
-            <div className='flex justify-between items-center gap-4'>
-              <span className='text-muted-foreground w-20'>MDL Eq:</span>
-              <span className='font-medium text-right flex-1'>
-                {formatAmount(data.valueInMDL, 'MDL')}
-              </span>
-            </div>
-
-            <div className='h-px bg-muted my-1' />
-
-            <div className='flex justify-between items-center gap-4 text-blue-600 font-bold'>
-              <span className='w-20'>Weight:</span>
-              <span className='text-right flex-1'>
-                {((data.valueInMDL / totalMDLValue) * 100).toFixed(1)}%
-              </span>
-            </div>
-          </div>
-        </div>
-      );
-    }
-    return null;
-  };
 
   if (chartData.length === 0) {
     return (
@@ -154,96 +120,194 @@ export function ChartPieInteractive({
           Unified portfolio weight by currency
         </CardDescription>
       </CardHeader>
-      <CardContent className='flex-1 pb-0 flex flex-col items-center justify-center relative min-h-[300px]'>
-        <ChartContainer
-          id={id}
-          config={dynamicChartConfig}
-          className='mx-auto aspect-square h-[250px] md:h-[280px] lg:h-[350px] 2xl:h-[600px] w-full max-w-[500px]'
-        >
-          <PieChart>
-            <ChartTooltip cursor={false} content={<CustomTooltip />} />
-            <Pie
-              data={chartData}
-              dataKey='valueInMDL'
-              nameKey='currency'
-              innerRadius={65}
-              strokeWidth={8}
-              stroke='hsl(var(--background))'
-              paddingAngle={2}
-              activeIndex={activeIndex}
-              onMouseEnter={(_, index) => setActiveIndex(index)}
-              onMouseLeave={() => setActiveIndex(undefined)}
-              activeShape={({
-                outerRadius = 0,
-                ...props
-              }: PieSectorDataItem) => (
-                <g>
-                  <Sector {...props} outerRadius={outerRadius + 8} />
-                </g>
-              )}
-            >
-              <Label
-                content={({ viewBox }) => {
-                  if (viewBox && 'cx' in viewBox && 'cy' in viewBox) {
-                    return (
-                      <text
-                        x={viewBox.cx}
-                        y={viewBox.cy}
-                        textAnchor='middle'
-                        dominantBaseline='middle'
-                      >
-                        <tspan
-                          x={viewBox.cx}
-                          y={(viewBox.cy || 0) - 5}
-                          className='fill-foreground text-xl md:text-2xl lg:text-3xl 2xl:text-3xl font-bold'
-                        >
-                          {totalMDLValue > 1000000
-                            ? `${(totalMDLValue / 1000000).toFixed(2)}M`
-                            : totalMDLValue.toLocaleString()}
-                        </tspan>
-                        <tspan
-                          x={viewBox.cx}
-                          y={(viewBox.cy || 0) + 20}
-                          className='fill-muted-foreground text-xs md:text-sm 2xl:text-lg font-medium'
-                        >
-                          Total Wealth
-                        </tspan>
-                      </text>
-                    );
-                  }
-                }}
-              />
-            </Pie>
-          </PieChart>
-        </ChartContainer>
-      </CardContent>
-      <CardFooter className='pt-0'>
-        <div className='flex flex-wrap justify-center gap-2 w-full'>
-          {chartData.map((item, index) => (
-            <div
-              key={item.currency}
-              className={`flex items-center gap-1.5 px-2 py-1 rounded-md transition-all cursor-default ${
-                activeIndex === index
-                  ? 'bg-muted ring-1 ring-border'
-                  : 'opacity-80 hover:opacity-100'
-              }`}
-              onMouseEnter={() => setActiveIndex(index)}
-              onMouseLeave={() => setActiveIndex(undefined)}
-            >
-              <div
-                className='h-2 w-2 rounded-full shrink-0'
-                style={{ backgroundColor: item.fill }}
-              />
-              <span className='text-[10px] lg:text-xs 2xl:text-sm font-bold'>
-                {Math.round((item.valueInMDL / totalMDLValue) * 100)}%
-              </span>
-              <span className='text-[10px] lg:text-xs 2xl:text-sm text-muted-foreground font-medium'>
-                {item.currency}
-              </span>
-            </div>
-          ))}
+      <CardContent className='flex-1 flex flex-col 2xl:flex-row items-center justify-center gap-8 2xl:gap-12 p-6'>
+        <div className='w-full 2xl:w-[500px] flex justify-center'>
+          <ChartContainer
+            id={id}
+            config={dynamicChartConfig}
+            className='mx-auto aspect-square h-[300px] md:h-[300px] lg:h-[350px] 2xl:h-[600px] w-full max-w-[500px] [&_.recharts-pie-label-text]:fill-foreground [&_.recharts-pie-label-text]:text-[10px] md:[&_.recharts-pie-label-text]:text-xs [&_.recharts-pie-label-text]:font-medium'
+          >
+            <PieChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+              <Pie
+                data={chartData}
+                dataKey='valueInMDL'
+                nameKey='currency'
+                innerRadius='50%'
+                outerRadius='80%'
+                strokeWidth={2}
+                stroke='hsl(var(--background))'
+                paddingAngle={0}
+                labelLine={true}
+                label={({ percent }) => `${(percent * 100).toFixed(0)}%`}
+                onMouseEnter={(_, index) => setActiveIndex(index)}
+                onMouseLeave={() => setActiveIndex(null)}
+                activeShape={({
+                  outerRadius = 0,
+                  ...props
+                }: PieSectorDataItem) => (
+                  <g style={{ filter: 'drop-shadow(0 0 8px rgba(0,0,0,0.2))' }}>
+                    <Sector {...props} outerRadius={outerRadius * 1.03} />
+                  </g>
+                )}
+              >
+                {chartData.map((entry, index) => (
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={entry.fill}
+                    opacity={
+                      activeIndex === null || activeIndex === index ? 1 : 0.4
+                    }
+                    style={{
+                      transition: 'opacity 0.2s, transform 0.2s',
+                      cursor: 'pointer',
+                    }}
+                  />
+                ))}
+                <Label
+                  content={({ viewBox }) => {
+                    if (viewBox && 'cx' in viewBox && 'cy' in viewBox) {
+                      const activeItem =
+                        activeIndex !== null ? chartData[activeIndex] : null;
+                      const percentage = activeItem
+                        ? Math.round(
+                            (activeItem.valueInMDL / totalMDLValue) * 100,
+                          )
+                        : 0;
+
+                      return (
+                        <g>
+                          {!activeItem ? (
+                            <text
+                              x={viewBox.cx}
+                              y={viewBox.cy}
+                              textAnchor='middle'
+                              dominantBaseline='middle'
+                              style={{ transition: 'opacity 0.3s ease' }}
+                            >
+                              <tspan
+                                x={viewBox.cx}
+                                y={viewBox.cy}
+                                className='fill-foreground text-3xl font-bold'
+                              >
+                                {formatCompact(totalMDLValue)}
+                              </tspan>
+                              <tspan
+                                x={viewBox.cx}
+                                y={(viewBox.cy || 0) + 24}
+                                className='fill-muted-foreground text-sm'
+                              >
+                                Total Wealth
+                              </tspan>
+                            </text>
+                          ) : (
+                            <text
+                              x={viewBox.cx}
+                              y={viewBox.cy}
+                              textAnchor='middle'
+                              dominantBaseline='middle'
+                              style={{ transition: 'opacity 0.3s ease' }}
+                            >
+                              <tspan
+                                x={viewBox.cx}
+                                y={(viewBox.cy || 0) - 12}
+                                className='fill-foreground text-lg md:text-xl lg:text-2xl 2xl:text-2xl font-bold'
+                              >
+                                {formatAmount(
+                                  activeItem.amount,
+                                  activeItem.currency as SupportedCurrencyCode,
+                                )}
+                              </tspan>
+                              <tspan
+                                x={viewBox.cx}
+                                y={(viewBox.cy || 0) + 22}
+                                className='fill-muted-foreground text-xs md:text-sm lg:text-sm 2xl:text-sm font-medium'
+                              >
+                                {percentage}% of total
+                              </tspan>
+                            </text>
+                          )}
+                        </g>
+                      );
+                    }
+                  }}
+                />
+              </Pie>
+            </PieChart>
+          </ChartContainer>
         </div>
-      </CardFooter>
+
+        <div className='flex flex-col gap-3 w-full max-w-[500px] mx-auto 2xl:mx-0 2xl:max-w-[370px] overflow-y-auto pr-2'>
+          {chartData.map((item, index) => {
+            const isHovered = activeIndex === index;
+            const isFaded = activeIndex !== null && activeIndex !== index;
+            const percentage = Math.round(
+              (item.valueInMDL / totalMDLValue) * 100,
+            );
+            const info = currencyInfo[item.currency];
+
+            return (
+              <div
+                key={item.currency}
+                className={`flex flex-col gap-2 p-3 rounded-lg border transition-all duration-200 ${
+                  isHovered
+                    ? 'bg-muted shadow-sm scale-[1.02]'
+                    : isFaded
+                      ? 'opacity-40 bg-background'
+                      : 'bg-background'
+                }`}
+                onMouseEnter={() => setActiveIndex(index)}
+                onMouseLeave={() => setActiveIndex(null)}
+                style={{
+                  cursor: 'pointer',
+                  borderLeft: isHovered
+                    ? `3px solid ${item.fill}`
+                    : '3px solid transparent',
+                }}
+              >
+                <div className='flex items-center justify-between'>
+                  <div className='flex items-center gap-3'>
+                    {info?.flag && (
+                      <div className='relative h-6 w-6 shrink-0'>
+                        <Image
+                          src={info.flag}
+                          alt={`${item.currency} flag`}
+                          fill
+                          className='rounded-full object-cover'
+                        />
+                      </div>
+                    )}
+                    <span className='font-semibold text-sm'>
+                      {item.currency}
+                    </span>
+                    <div
+                      className='h-3 w-3 rounded-full shrink-0'
+                      style={{ backgroundColor: item.fill }}
+                    />
+                  </div>
+                  <span className='text-sm font-bold'>{percentage}%</span>
+                </div>
+
+                <div className='flex justify-between items-center text-sm'>
+                  <span className='text-muted-foreground'>Invested</span>
+                  <span className='font-medium'>
+                    {formatAmount(
+                      item.amount,
+                      item.currency as SupportedCurrencyCode,
+                    )}
+                  </span>
+                </div>
+
+                <div className='flex justify-between items-center text-sm'>
+                  <span className='text-muted-foreground'>MDL Equiv.</span>
+                  <span className='font-medium'>
+                    {formatAmount(item.valueInMDL, 'MDL')}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </CardContent>
     </Card>
   );
 }

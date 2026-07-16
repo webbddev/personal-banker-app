@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Pie, PieChart, Label, Cell } from 'recharts';
+import { Pie, PieChart, Label, Cell, Sector } from 'recharts';
 import {
   Card,
   CardContent,
@@ -9,11 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import {
-  ChartConfig,
-  ChartContainer,
-  ChartStyle,
-} from '@/components/ui/chart';
+import { ChartConfig, ChartContainer, ChartStyle } from '@/components/ui/chart';
 import { formatAmount } from '@/utils/currency-formatter';
 
 // Helper function to add spaces between camelCase words
@@ -107,20 +103,27 @@ export function ChartPieLabel({ data }: { data: ConvertedTypeData[] }) {
                 data={chartData}
                 dataKey='value'
                 nameKey='name'
-                innerRadius="50%"
-                outerRadius="80%"
+                innerRadius='50%'
+                outerRadius='80%'
                 strokeWidth={2}
                 stroke='hsl(var(--background))'
                 labelLine={true}
                 label={({ percent }) => `${(percent * 100).toFixed(0)}%`}
                 onMouseEnter={(_, index) => setActiveIndex(index)}
                 onMouseLeave={() => setActiveIndex(null)}
+                activeShape={({ outerRadius = 0, ...props }: any) => (
+                  <g style={{ filter: 'drop-shadow(0 0 8px rgba(0,0,0,0.2))' }}>
+                    <Sector {...props} outerRadius={outerRadius * 1.03} />
+                  </g>
+                )}
               >
                 {chartData.map((entry, index) => (
                   <Cell
                     key={`cell-${index}`}
                     fill={entry.fill}
-                    opacity={activeIndex === null || activeIndex === index ? 1 : 0.4}
+                    opacity={
+                      activeIndex === null || activeIndex === index ? 1 : 0.4
+                    }
                     style={{
                       transition: 'opacity 0.2s',
                       cursor: 'pointer',
@@ -130,28 +133,69 @@ export function ChartPieLabel({ data }: { data: ConvertedTypeData[] }) {
                 <Label
                   content={({ viewBox }) => {
                     if (viewBox && 'cx' in viewBox && 'cy' in viewBox) {
+                      const activeItem =
+                        activeIndex !== null ? chartData[activeIndex] : null;
+                      const percentage = activeItem
+                        ? Math.round((activeItem.value / totalValue) * 100)
+                        : 0;
+
                       return (
-                        <text
-                          x={viewBox.cx}
-                          y={viewBox.cy}
-                          textAnchor='middle'
-                          dominantBaseline='middle'
-                        >
-                          <tspan
-                            x={viewBox.cx}
-                            y={viewBox.cy}
-                            className='fill-foreground text-3xl font-bold'
-                          >
-                            {formatCompact(totalValue)}
-                          </tspan>
-                          <tspan
-                            x={viewBox.cx}
-                            y={(viewBox.cy || 0) + 24}
-                            className='fill-muted-foreground text-sm'
-                          >
-                            Total Wealth
-                          </tspan>
-                        </text>
+                        <g>
+                          {!activeItem ? (
+                            <text
+                              x={viewBox.cx}
+                              y={viewBox.cy}
+                              textAnchor='middle'
+                              dominantBaseline='middle'
+                              style={{ transition: 'opacity 0.3s ease' }}
+                            >
+                              <tspan
+                                x={viewBox.cx}
+                                y={viewBox.cy}
+                                className='fill-foreground text-3xl font-bold'
+                              >
+                                {formatCompact(totalValue)}
+                              </tspan>
+                              <tspan
+                                x={viewBox.cx}
+                                y={(viewBox.cy || 0) + 24}
+                                className='fill-muted-foreground text-sm'
+                              >
+                                Total Wealth
+                              </tspan>
+                            </text>
+                          ) : (
+                            <text
+                              x={viewBox.cx}
+                              y={viewBox.cy}
+                              textAnchor='middle'
+                              dominantBaseline='middle'
+                              style={{ transition: 'opacity 0.3s ease' }}
+                            >
+                              <tspan
+                                x={viewBox.cx}
+                                y={(viewBox.cy || 0) - 20}
+                                className='fill-foreground text-base md:text-lg lg:text-xl font-bold'
+                              >
+                                {activeItem.name}
+                              </tspan>
+                              <tspan
+                                x={viewBox.cx}
+                                y={(viewBox.cy || 0) + 4}
+                                className='fill-muted-foreground text-sm md:text-base lg:text-lg font-medium'
+                              >
+                                {formatAmount(activeItem.value, 'MDL')}
+                              </tspan>
+                              <tspan
+                                x={viewBox.cx}
+                                y={(viewBox.cy || 0) + 28}
+                                className='fill-muted-foreground text-xs md:text-sm lg:text-sm font-medium'
+                              >
+                                {percentage}% of total
+                              </tspan>
+                            </text>
+                          )}
+                        </g>
                       );
                     }
                   }}
@@ -165,6 +209,7 @@ export function ChartPieLabel({ data }: { data: ConvertedTypeData[] }) {
           {chartData.map((item, index) => {
             const isHovered = activeIndex === index;
             const isFaded = activeIndex !== null && activeIndex !== index;
+            const percentage = Math.round((item.value / totalValue) * 100);
 
             return (
               <div
@@ -173,45 +218,50 @@ export function ChartPieLabel({ data }: { data: ConvertedTypeData[] }) {
                   isHovered
                     ? 'bg-muted shadow-sm scale-[1.02]'
                     : isFaded
-                    ? 'opacity-40 bg-background'
-                    : 'bg-background'
+                      ? 'opacity-40 bg-background'
+                      : 'bg-background'
                 }`}
                 onMouseEnter={() => setActiveIndex(index)}
                 onMouseLeave={() => setActiveIndex(null)}
-                style={{ cursor: 'pointer' }}
+                style={{
+                  cursor: 'pointer',
+                  borderLeft: isHovered
+                    ? `3px solid ${item.fill}`
+                    : '3px solid transparent',
+                }}
               >
                 <div className='flex items-center justify-between'>
-                  <div className='flex items-center gap-2'>
+                  <div className='flex items-center gap-3'>
                     <div
                       className='h-3 w-3 rounded-full shrink-0'
                       style={{ backgroundColor: item.fill }}
                     />
-                    <span className='font-semibold text-sm'>
-                      {item.name}
-                    </span>
+                    <span className='font-semibold text-sm'>{item.name}</span>
                   </div>
-                  <span className='text-sm font-bold'>
-                    {((item.value / totalValue) * 100).toFixed(0)}%
-                  </span>
+                  <span className='text-sm font-bold'>{percentage}%</span>
                 </div>
 
+                {Object.keys(item.breakdown || {}).length > 0 &&
+                  Object.entries(item.breakdown).map(([curr, amt]: any) => (
+                    <div
+                      key={curr}
+                      className='flex justify-between items-center text-sm'
+                    >
+                      <span className='text-muted-foreground'>
+                        {curr} Invested
+                      </span>
+                      <span className='font-medium'>
+                        {formatAmount(amt, curr)}
+                      </span>
+                    </div>
+                  ))}
+
                 <div className='flex justify-between items-center text-sm'>
-                  <span className='text-muted-foreground'>Total (MDL)</span>
+                  <span className='text-muted-foreground'>MDL Equivalent</span>
                   <span className='font-medium'>
                     {formatAmount(item.value, 'MDL')}
                   </span>
                 </div>
-
-                {Object.keys(item.breakdown || {}).length > 0 && (
-                  <div className='flex flex-col gap-1 mt-1 pt-2 border-t'>
-                    {Object.entries(item.breakdown).map(([curr, amt]: any) => (
-                      <div key={curr} className='flex justify-between text-xs'>
-                        <span className='text-muted-foreground'>{curr}:</span>
-                        <span>{formatAmount(amt, curr)}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
               </div>
             );
           })}
@@ -220,4 +270,3 @@ export function ChartPieLabel({ data }: { data: ConvertedTypeData[] }) {
     </Card>
   );
 }
-
