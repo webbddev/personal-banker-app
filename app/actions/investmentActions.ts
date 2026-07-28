@@ -253,6 +253,10 @@ export async function updateInvestmentAction(formData: FormData) {
     const currency = formData.get('currency') as string;
     const investmentType = formData.get('investmentType') as string;
     const relatedData = formData.get('relatedData') as string;
+    const monthlyRentStr = formData.get('monthlyRent') as string | null;
+    const monthlyRent = monthlyRentStr ? parseFloat(monthlyRentStr) : null;
+    const propertyType = formData.get('propertyType') as string | null;
+    const tenantName = formData.get('tenantName') as string | null;
 
     // Server-side validation
     if (!organisationName || organisationName.trim().length < 2) {
@@ -262,10 +266,17 @@ export async function updateInvestmentAction(formData: FormData) {
       };
     }
 
-    if (isNaN(investmentAmount) || investmentAmount <= 0) {
+    if (isNaN(investmentAmount) || (investmentAmount <= 0 && investmentType !== 'realEstate')) {
       return {
         success: false,
         error: 'Investment amount must be greater than 0',
+      };
+    }
+
+    if (investmentType === 'realEstate' && (monthlyRent === null || isNaN(monthlyRent) || monthlyRent <= 0)) {
+      return {
+        success: false,
+        error: 'Monthly rent must be greater than 0 for real estate',
       };
     }
 
@@ -295,6 +306,9 @@ export async function updateInvestmentAction(formData: FormData) {
         currency,
         investmentType,
         relatedData,
+        monthlyRent,
+        propertyType,
+        tenantName,
         updatedAt: new Date(),
       },
     });

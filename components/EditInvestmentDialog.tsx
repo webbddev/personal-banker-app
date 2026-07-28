@@ -35,7 +35,7 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { CalendarIcon, Loader2 } from 'lucide-react';
+import { CalendarIcon, Loader2, Building2 } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import {
@@ -43,33 +43,13 @@ import {
   SupportedCurrencyCode,
   CURRENCY_OPTIONS,
 } from '@/utils/currency-formatter';
-import { investmentTypeOptions } from '@/utils/investment-constants';
+import { investmentTypeOptions, INVESTMENT_TYPES, PROPERTY_TYPE_OPTIONS } from '@/utils/investment-constants';
+import { formSchema, CreateInvestmentFormValues as FormValues } from '@/types/investment-schema';
 import React, { useTransition, useEffect } from 'react';
 import { updateInvestmentAction } from '@/app/actions/investmentActions';
 import { useInvestmentStore } from '@/store/financialInvestmentsStore';
 
-const formSchema = z.object({
-  organisationName: z
-    .string()
-    .min(2, { message: 'Organisation Name is required' }),
-  investmentType: z.string().min(1, { message: 'Investment Type is required' }),
-  relatedData: z.string(),
-  currency: z.string().min(1, { message: 'Currency is required' }),
-  incomeTax: z
-    .number()
-    .min(0, { message: 'Income Tax must be 0 or greater' })
-    .max(100, { message: 'Income Tax cannot exceed 100%' }),
-  investmentAmount: z
-    .number()
-    .min(0.01, { message: 'Amount must be greater than 0' }),
-  interestRate: z
-    .number()
-    .min(0, { message: 'Interest Rate must be 0 or greater' })
-    .max(30, { message: 'Interest Rate cannot exceed 30%' }),
-  expirationDate: z.date(),
-});
 
-type FormValues = z.infer<typeof formSchema>;
 
 export function EditInvestmentDialog() {
   const {
@@ -85,13 +65,16 @@ export function EditInvestmentDialog() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       organisationName: '',
-      investmentType: '',
+      investmentType: 'bankDeposit',
       relatedData: '',
-      currency: '',
+      currency: 'MDL',
       incomeTax: 0,
       investmentAmount: 0,
       interestRate: 0,
       expirationDate: new Date(),
+      monthlyRent: 0,
+      propertyType: '',
+      tenantName: '',
     },
   });
 
@@ -99,16 +82,21 @@ export function EditInvestmentDialog() {
     if (selectedInvestment && openEditDialog) {
       form.reset({
         organisationName: selectedInvestment.organisationName,
-        investmentType: selectedInvestment.investmentType,
+        investmentType: selectedInvestment.investmentType as FormValues['investmentType'],
         relatedData: selectedInvestment.relatedData || '',
-        currency: selectedInvestment.currency,
+        currency: selectedInvestment.currency as FormValues['currency'],
         incomeTax: selectedInvestment.incomeTax,
         investmentAmount: selectedInvestment.investmentAmount,
         interestRate: selectedInvestment.interestRate,
         expirationDate: new Date(selectedInvestment.expirationDate),
+        monthlyRent: selectedInvestment.monthlyRent || 0,
+        propertyType: selectedInvestment.propertyType || '',
+        tenantName: selectedInvestment.tenantName || '',
       });
     }
   }, [selectedInvestment, openEditDialog, form]);
+
+  const isRealEstate = form.watch('investmentType') === INVESTMENT_TYPES.REAL_ESTATE;
 
   const onSubmit = async (values: FormValues) => {
     if (!selectedInvestment) return;
@@ -119,12 +107,15 @@ export function EditInvestmentDialog() {
         formData.append('id', selectedInvestment.id);
         formData.append('organisationName', values.organisationName.trim());
         formData.append('investmentType', values.investmentType);
-        formData.append('relatedData', values.relatedData);
+        formData.append('relatedData', values.relatedData || '');
         formData.append('currency', values.currency);
         formData.append('incomeTax', values.incomeTax.toString());
         formData.append('investmentAmount', values.investmentAmount.toString());
         formData.append('interestRate', values.interestRate.toString());
         formData.append('expirationDate', values.expirationDate.toISOString());
+        if (values.monthlyRent !== undefined) formData.append('monthlyRent', values.monthlyRent.toString());
+        if (values.propertyType) formData.append('propertyType', values.propertyType);
+        if (values.tenantName) formData.append('tenantName', values.tenantName);
 
         const result = await updateInvestmentAction(formData);
 
@@ -191,10 +182,10 @@ export function EditInvestmentDialog() {
               name='organisationName'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Organisation Name</FormLabel>
+                  <FormLabel>{isRealEstate ? 'Property Name / Address' : 'Organisation Name'}</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder='e.g. MAIB, HSBC'
+                      placeholder={isRealEstate ? 'Garage - 123 Main St, Chisinau' : 'e.g. MAIB, HSBC'}
                       {...field}
                       disabled={isPending}
                     />
@@ -241,10 +232,10 @@ export function EditInvestmentDialog() {
                 name='relatedData'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Related Data (Optional)</FormLabel>
+                    <FormLabel>{isRealEstate ? 'Lease / Agreement ID (Optional)' : 'Related Data (Optional)'}</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder='ISIC, Deposit ID...'
+                        placeholder={isRealEstate ? 'Lease #12345' : 'ISIC, Deposit ID...'}
                         {...field}
                         disabled={isPending}
                       />
@@ -254,6 +245,97 @@ export function EditInvestmentDialog() {
                 )}
               />
             </div>
+
+
+            {/* Rental Details Section — only visible for real estate */}
+            {isRealEstate && (
+              <div className='rounded-lg border border-dashed border-muted-foreground/30 bg-muted/30 p-4 space-y-4'>
+                <div className='flex items-center gap-2 text-sm font-medium text-muted-foreground'>
+                  <Building2 className='h-4 w-4' />
+                  <span>Rental Details</span>
+                </div>
+
+                <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+                  {/* Monthly Rent */}
+                  <FormField
+                    control={form.control}
+                    name='monthlyRent'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Monthly Rent</FormLabel>
+                        <FormControl>
+                          <Input
+                            type='number'
+                            step='0.01'
+                            placeholder='0.00'
+                            {...field}
+                            onChange={(e) =>
+                              field.onChange(e.target.valueAsNumber || 0)
+                            }
+                            value={field.value ?? ''}
+                            disabled={isPending}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Property Type */}
+                  <FormField
+                    control={form.control}
+                    name='propertyType'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Property Type</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value || ''}
+                          disabled={isPending}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder='Select type' />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {PROPERTY_TYPE_OPTIONS.map((option) => (
+                              <SelectItem
+                                key={option.value}
+                                value={option.value}
+                              >
+                                {option.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Tenant Name */}
+                  <FormField
+                    control={form.control}
+                    name='tenantName'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Tenant Name (Optional)</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder='John Doe'
+                            type='text'
+                            {...field}
+                            disabled={isPending}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+            )}
 
             <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
               {/* Currency */}
@@ -315,7 +397,7 @@ export function EditInvestmentDialog() {
                 name='investmentAmount'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Amount</FormLabel>
+                    <FormLabel>{isRealEstate ? 'Property Value' : 'Amount'}</FormLabel>
                     <FormControl>
                       <Input
                         type='number'
@@ -336,7 +418,7 @@ export function EditInvestmentDialog() {
                 name='interestRate'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Rate (%)</FormLabel>
+                    <FormLabel>{isRealEstate ? 'Rental Yield (%)' : 'Rate (%)'}</FormLabel>
                     <FormControl>
                       <Input
                         type='number'
@@ -357,7 +439,7 @@ export function EditInvestmentDialog() {
                 name='expirationDate'
                 render={({ field }) => (
                   <FormItem className='flex flex-col justify-end'>
-                    <FormLabel className='mb-2'>Maturity Date</FormLabel>
+                    <FormLabel className='mb-2'>{isRealEstate ? 'Lease End Date' : 'Maturity Date'}</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>

@@ -219,6 +219,9 @@ export function ChartBarInteractive({
                         )}
                       </span>
                       <span>
+                        Rate: {props.payload.interestRate}%
+                      </span>
+                      <span>
                         Expires: {props.payload.expirationDateFormatted}
                       </span>
                     </div>
@@ -298,7 +301,7 @@ export function ChartBarInteractive({
               <p className='text-lg font-bold text-foreground'>
                 {chartData[activeIndex].organisationName}
               </p>
-              <div className='grid grid-cols-2 gap-4 mt-2'>
+              <div className='grid grid-cols-3 gap-4 mt-2'>
                 <div>
                   <p className='text-xs text-muted-foreground uppercase tracking-wider'>
                     Amount
@@ -308,6 +311,14 @@ export function ChartBarInteractive({
                       Number(chartData[activeIndex].investmentAmount),
                       chartData[activeIndex].currency as string,
                     )}
+                  </p>
+                </div>
+                <div>
+                  <p className='text-xs text-muted-foreground uppercase tracking-wider'>
+                    Rate
+                  </p>
+                  <p className='text-base font-semibold'>
+                    {chartData[activeIndex].interestRate}%
                   </p>
                 </div>
                 <div>
