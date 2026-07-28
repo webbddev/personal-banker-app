@@ -33,7 +33,11 @@ import {
   getInvestmentsExpiringIn30Days,
   calculateConvertedTotalsByType,
 } from '@/utils/investment-calculations';
-import { formatAmount, ExchangeRates, convertCurrency } from '@/utils/currency-formatter';
+import {
+  formatAmount,
+  ExchangeRates,
+  convertCurrency,
+} from '@/utils/currency-formatter';
 // import { Investment } from '@prisma/client';
 import { Investment } from '@/prisma/generated/prisma/client';
 import { investmentTypeOptions } from '@/utils/investment-constants';
@@ -59,6 +63,16 @@ const getInvestmentTypeLabel = (typeValue: string) => {
   const option = investmentTypeOptions.find((opt) => opt.value === typeValue);
   return option ? option.label : typeValue;
 };
+
+// Colors for our distribution chart
+const CHART_COLORS = [
+  { bg: 'bg-blue-500', text: 'text-blue-500' },
+  { bg: 'bg-emerald-500', text: 'text-emerald-500' },
+  { bg: 'bg-violet-500', text: 'text-violet-500' },
+  { bg: 'bg-amber-500', text: 'text-amber-500' },
+  { bg: 'bg-rose-500', text: 'text-rose-500' },
+  { bg: 'bg-cyan-500', text: 'text-cyan-500' },
+];
 
 export function SectionCards({
   monthlyReturns,
@@ -120,6 +134,13 @@ export function SectionCards({
   const hoverEffect =
     'absolute inset-0 bg-gradient-to-r from-blue-100 to-blue-200 dark:from-purple-600 dark:to-indigo-600 opacity-0 group-hover:opacity-10 transition-opacity duration-300 pointer-events-none';
 
+  // Pre-calculate breakdown data for the unified chart
+  const sortedBreakdownData = Object.entries(
+    calculateConvertedTotalsByType(monthlyReturnsByType, 'MDL', exchangeRates),
+  )
+    .filter(([, data]) => data.total > 0)
+    .sort((a, b) => b[1].total - a[1].total);
+
   return (
     <div className='grid gap-6 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-4'>
       {/* Card 1 - Monthly Revenue */}
@@ -145,18 +166,28 @@ export function SectionCards({
               {formatAmount(totalMonthlyRevenue, 'MDL')}
             </p>
             <div className='flex flex-wrap items-center gap-2 mt-3.5'>
-              <span className='text-[10px] uppercase tracking-wider text-gray-400 font-semibold'>Equivalents:</span>
+              <span className='text-[10px] uppercase tracking-wider text-gray-400 font-semibold'>
+                Equivalents:
+              </span>
               <div className='flex flex-wrap gap-1.5'>
                 {(['EUR', 'USD', 'GBP'] as const).map((currency) => (
-                  <div 
-                    key={currency} 
+                  <div
+                    key={currency}
                     className='inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-[10px] text-gray-500 font-medium border border-gray-200/60 dark:border-gray-700/60'
                     title={`${currency} Equivalent`}
                   >
                     <span>{currency}</span>
                     <span className='text-gray-400'>≈</span>
                     <span className='text-gray-800 dark:text-gray-200 font-semibold'>
-                      {formatAmount(convertCurrency(totalMonthlyRevenue, 'MDL', currency, exchangeRates), currency)}
+                      {formatAmount(
+                        convertCurrency(
+                          totalMonthlyRevenue,
+                          'MDL',
+                          currency,
+                          exchangeRates,
+                        ),
+                        currency,
+                      )}
                     </span>
                   </div>
                 ))}
@@ -178,30 +209,103 @@ export function SectionCards({
                 </div>
               ))}
           </div>
-          <div className='space-y-2 mt-2 pt-3 border-t border-gray-100 dark:border-gray-800/50'>
-            <p className='text-[10px] uppercase tracking-wider text-gray-400 font-semibold mb-2'>
-              Returns Breakdown
-            </p>
-            {Object.entries(calculateConvertedTotalsByType(monthlyReturnsByType, 'MDL', exchangeRates))
-              .filter(([, data]) => data.total > 0)
-              .sort((a, b) => b[1].total - a[1].total)
-              .map(([type, data]) => {
-                const breakdownEntries = Object.entries(data.breakdown).filter(([, amt]) => amt > 0);
-                return breakdownEntries.map(([currency, amount], index) => (
-                  <div
-                    key={`${type}-${currency}`}
-                    className='flex justify-between items-center'
-                  >
-                    <span className='text-xs lg:text-sm text-gray-500 dark:text-gray-400'>
-                      {getInvestmentTypeLabel(type)} {breakdownEntries.length > 1 ? `(${currency})` : ''}
-                    </span>
-                    <span className='text-xs lg:text-sm font-medium text-green-500 dark:text-green-400'>
-                      + {formatAmount(amount, currency)}
-                    </span>
-                  </div>
-                ));
-              })}
-          </div>
+
+          {/* OPTION 3: Circular Progress Rings UI */}
+          {sortedBreakdownData.length > 0 && (
+            <div className='mt-4 pt-4 border-t border-gray-100 dark:border-gray-800/50'>
+              <div className='flex items-center justify-between mb-3'>
+                <p className='text-xs uppercase tracking-wider text-gray-500 font-semibold'>
+                  Returns Distribution
+                </p>
+                <PieChart className='h-3.5 w-3.5 text-gray-400' />
+              </div>
+
+              <div className='space-y-2'>
+                {sortedBreakdownData.map(([type, data], i) => {
+                  const percentage =
+                    totalMonthlyRevenue > 0
+                      ? Math.round((data.total / totalMonthlyRevenue) * 100)
+                      : 0;
+
+                  const colors = CHART_COLORS[i % CHART_COLORS.length];
+                  const breakdownEntries = Object.entries(
+                    data.breakdown,
+                  ).filter(([, amt]) => amt > 0);
+
+                  // Math for the SVG circle stroke
+                  const radius = 15;
+                  const circumference = 2 * Math.PI * radius;
+                  const strokeDashoffset =
+                    circumference - (percentage / 100) * circumference;
+
+                  return (
+                    <div key={type} className='flex items-start gap-3'>
+                      {/* Circular Progress Indicator */}
+                      <div className='relative flex items-center justify-center shrink-0 w-10 h-10'>
+                        <svg className='w-10 h-10 transform -rotate-90'>
+                          <circle
+                            cx='20'
+                            cy='20'
+                            r={radius}
+                            stroke='currentColor'
+                            strokeWidth='3'
+                            fill='transparent'
+                            className='text-gray-100 dark:text-gray-800'
+                          />
+                          <circle
+                            cx='20'
+                            cy='20'
+                            r={radius}
+                            stroke='currentColor'
+                            strokeWidth='3'
+                            fill='transparent'
+                            strokeDasharray={circumference}
+                            strokeDashoffset={strokeDashoffset}
+                            strokeLinecap='round'
+                            className={`${colors.text} transition-all duration-1000 ease-out`}
+                          />
+                        </svg>
+                        <span className='absolute text-[9px] font-bold text-gray-700 dark:text-gray-300'>
+                          {percentage}%
+                        </span>
+                      </div>
+
+                      {/* Content */}
+                      <div className='flex-1 flex flex-col justify-center min-h-[40px] gap-1'>
+                        {breakdownEntries.map(([currency, amount], index) => (
+                          <div
+                            key={`${type}-${currency}`}
+                            className='flex items-center justify-between'
+                          >
+                            <div className='flex items-center gap-2'>
+                              <span
+                                className={`text-sm ${index === 0 ? 'text-gray-800 dark:text-gray-200 font-medium' : 'text-gray-400'}`}
+                              >
+                                {index === 0
+                                  ? getInvestmentTypeLabel(type)
+                                  : '↳'}
+                              </span>
+                              {breakdownEntries.length > 1 && (
+                                <span className='rounded border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 px-1 py-0.5 text-[9px] font-medium text-gray-500'>
+                                  {currency}
+                                </span>
+                              )}
+                            </div>
+
+                            <span
+                              className={`text-sm tracking-tight ${index === 0 ? 'font-semibold text-green-600 dark:text-green-400' : 'font-medium text-green-500/80 dark:text-green-400/80'}`}
+                            >
+                              +{formatAmount(amount, currency)}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -434,21 +538,31 @@ export function SectionCards({
                   new Set([
                     ...Object.keys(totalInvestedByType),
                     ...Object.keys(monthlyReturnsByType),
-                  ])
+                  ]),
                 );
                 return allTypes.map((type) => {
-                  const investedTotals = totalInvestedByType[type] || { MDL: 0, EUR: 0, GBP: 0, USD: 0 };
-                  const returnTotals = monthlyReturnsByType[type] || { MDL: 0, EUR: 0, GBP: 0, USD: 0 };
+                  const investedTotals = totalInvestedByType[type] || {
+                    MDL: 0,
+                    EUR: 0,
+                    GBP: 0,
+                    USD: 0,
+                  };
+                  const returnTotals = monthlyReturnsByType[type] || {
+                    MDL: 0,
+                    EUR: 0,
+                    GBP: 0,
+                    USD: 0,
+                  };
                   // Merge currencies: show if either invested > 0 or return > 0
                   const allCurrencies = Array.from(
                     new Set([
                       ...Object.keys(investedTotals),
                       ...Object.keys(returnTotals),
-                    ])
+                    ]),
                   ).filter(
                     (currency) =>
                       (investedTotals as any)[currency] > 0 ||
-                      (returnTotals as any)[currency] > 0
+                      (returnTotals as any)[currency] > 0,
                   );
                   if (allCurrencies.length === 0) return null;
                   return (
@@ -464,8 +578,10 @@ export function SectionCards({
                       <Table>
                         <TableBody>
                           {allCurrencies.map((currency) => {
-                            const investedAmount = (investedTotals as any)[currency] || 0;
-                            const returnAmount = (returnTotals as any)[currency] || 0;
+                            const investedAmount =
+                              (investedTotals as any)[currency] || 0;
+                            const returnAmount =
+                              (returnTotals as any)[currency] || 0;
                             return (
                               <React.Fragment key={currency}>
                                 {/* Total Invested Row — only if invested > 0 */}
