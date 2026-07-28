@@ -31,6 +31,7 @@ import {
   getExpiredInvestments,
   getInvestmentsExpiringIn7Days,
   getInvestmentsExpiringIn30Days,
+  calculateConvertedTotalsByType,
 } from '@/utils/investment-calculations';
 import { formatAmount, ExchangeRates, convertCurrency } from '@/utils/currency-formatter';
 // import { Investment } from '@prisma/client';
@@ -176,6 +177,30 @@ export function SectionCards({
                   </span>
                 </div>
               ))}
+          </div>
+          <div className='space-y-2 mt-2 pt-3 border-t border-gray-100 dark:border-gray-800/50'>
+            <p className='text-[10px] uppercase tracking-wider text-gray-400 font-semibold mb-2'>
+              Returns Breakdown
+            </p>
+            {Object.entries(calculateConvertedTotalsByType(monthlyReturnsByType, 'MDL', exchangeRates))
+              .filter(([, data]) => data.total > 0)
+              .sort((a, b) => b[1].total - a[1].total)
+              .map(([type, data]) => {
+                const breakdownEntries = Object.entries(data.breakdown).filter(([, amt]) => amt > 0);
+                return breakdownEntries.map(([currency, amount], index) => (
+                  <div
+                    key={`${type}-${currency}`}
+                    className='flex justify-between items-center'
+                  >
+                    <span className='text-xs lg:text-sm text-gray-500 dark:text-gray-400'>
+                      {getInvestmentTypeLabel(type)} {breakdownEntries.length > 1 ? `(${currency})` : ''}
+                    </span>
+                    <span className='text-xs lg:text-sm font-medium text-green-500 dark:text-green-400'>
+                      + {formatAmount(amount, currency)}
+                    </span>
+                  </div>
+                ));
+              })}
           </div>
         </CardContent>
       </Card>
