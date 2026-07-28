@@ -49,7 +49,9 @@ function formatInvestmentForExport(investment: FinancialInstrument) {
   const monthlyReturn = calculateMonthlyReturn(
     investment.investmentAmount,
     investment.interestRate,
-    investment.incomeTax
+    investment.incomeTax,
+    new Date(),
+    { investmentType: investment.investmentType, monthlyRent: investment.monthlyRent ?? undefined }
   );
 
   const daysUntilExpiration = calculateDaysUntilExpiration(
@@ -431,7 +433,9 @@ export async function exportToPDF(
           acc[type].monthlyReturn += calculateMonthlyReturn(
             inv.investmentAmount,
             inv.interestRate,
-            inv.incomeTax
+            inv.incomeTax,
+            new Date(),
+            { investmentType: inv.investmentType, monthlyRent: inv.monthlyRent ?? undefined }
           );
           return acc;
         },
@@ -502,7 +506,9 @@ export async function exportToPDF(
       const monthlyReturn = calculateMonthlyReturn(
         inv.investmentAmount,
         inv.interestRate,
-        inv.incomeTax
+        inv.incomeTax,
+        new Date(),
+        { investmentType: inv.investmentType, monthlyRent: inv.monthlyRent ?? undefined }
       );
       const daysUntilExpiration = calculateDaysUntilExpiration(
         inv.expirationDate

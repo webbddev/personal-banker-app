@@ -193,13 +193,15 @@ export const columns: ColumnDef<FinancialInstrument>[] = [
     // },
     // ChatGPT
     cell: ({ row }) => {
-      const { investmentAmount, interestRate, incomeTax, currency } =
+      const { investmentAmount, interestRate, incomeTax, currency, investmentType, monthlyRent } =
         row.original;
 
       const monthlyReturn = calculateMonthlyReturn(
         investmentAmount,
         interestRate,
         incomeTax,
+        new Date(),
+        { investmentType, monthlyRent: monthlyRent ?? undefined },
       );
 
       // Format and display the calculated monthly return

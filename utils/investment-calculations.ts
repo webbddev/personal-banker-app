@@ -1,4 +1,5 @@
 import { FinancialInstrument } from '@/types/investment-schema';
+import { INVESTMENT_TYPES } from './investment-constants';
 // import { convertCurrency, SupportedCurrencyCode } from './currency-formatter';
 import {
   convertCurrency,
@@ -77,11 +78,16 @@ export function calculateTotalAmount(
 }
 
 /**
- * Calculate the monthly return for an investment
- * Formula: (days in month × interest rate × investment amount) / 365
+ * Calculate the monthly return for an investment.
+ *
+ * For bonds/deposits: (days in month × interest rate × investment amount) / 365, minus tax.
+ * For real estate: monthlyRent × (1 - incomeTax / 100).
+ *
  * @param investmentAmount - The principal investment amount
  * @param annualInterestRate - Annual interest rate as a percentage (e.g., 2.5 for 2.5%)
+ * @param incomeTax - Income tax percentage
  * @param date - Optional date to calculate for specific month (defaults to current month)
+ * @param options - Optional: investmentType and monthlyRent for real estate branching
  * @returns The calculated monthly return amount
  */
 export function calculateMonthlyReturn(
@@ -89,7 +95,19 @@ export function calculateMonthlyReturn(
   annualInterestRate: number,
   incomeTax: number,
   date: Date = new Date(),
+  options?: { investmentType?: string; monthlyRent?: number },
 ): number {
+  // Real estate / rental property: net monthly income = rent × (1 - tax%)
+  if (
+    options?.investmentType === INVESTMENT_TYPES.REAL_ESTATE &&
+    options?.monthlyRent != null &&
+    options.monthlyRent > 0
+  ) {
+    const netMonthlyReturn = options.monthlyRent * (1 - incomeTax / 100);
+    return Math.round(netMonthlyReturn * 100) / 100;
+  }
+
+  // Bonds / deposits: existing formula (unchanged)
   // Get the number of days in the specified month
   const daysInMonth = new Date(
     date.getFullYear(),
@@ -192,6 +210,11 @@ export function calculateMonthlyReturns(
         Number(investment.investmentAmount),
         Number(investment.interestRate),
         Number(investment.incomeTax),
+        new Date(),
+        {
+          investmentType: investment.investmentType,
+          monthlyRent: investment.monthlyRent ?? undefined,
+        },
       );
 
       switch (investment.currency) {
@@ -226,6 +249,11 @@ export function calculateMonthlyReturnsByInvestmentType(
       Number(investment.investmentAmount),
       Number(investment.interestRate),
       Number(investment.incomeTax),
+      new Date(),
+      {
+        investmentType: investment.investmentType,
+        monthlyRent: investment.monthlyRent ?? undefined,
+      },
     );
 
     if (!acc[investmentType]) {

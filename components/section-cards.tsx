@@ -402,67 +402,92 @@ export function SectionCards({
         <CardContent>
           {Object.keys(monthlyReturnsByType).length > 0 ? (
             <div className='flex flex-col space-y-4'>
-              {Object.entries(totalInvestedByType).map(([type, totals]) => (
-                <div
-                  key={type}
-                  className='space-y-2 border-b border-gray-800/30 pb-4 last:border-0 last:pb-0'
-                >
-                  <div className='flex justify-between items-end'>
-                    <h3 className='text-sm lg:text-base font-semibold text-gray-400'>
-                      {getInvestmentTypeLabel(type)}
-                    </h3>
-                  </div>
-                  <Table>
-                    <TableBody>
-                      {Object.entries(totals)
-                        .filter(([, amount]) => amount > 0)
-                        .map(([currency, investedAmount]) => {
-                          const returnAmount =
-                            (monthlyReturnsByType[type] as any)?.[currency] ||
-                            0;
-                          return (
-                            <React.Fragment key={currency}>
-                              {/* Total Invested Row */}
-                              <TableRow className='border-b-0 hover:bg-transparent'>
-                                <TableCell className='text-xs lg:text-sm text-gray-500 py-1 px-0'>
-                                  Total Invested ({currency})
-                                </TableCell>
-                                <TableCell className='text-xs lg:text-sm font-bold py-1 px-0 text-right'>
-                                  {formatAmount(investedAmount, currency)}
-                                </TableCell>
-                              </TableRow>
+              {(() => {
+                // Merge keys from both totalInvestedByType and monthlyReturnsByType
+                // so real estate with investmentAmount=0 still shows returns
+                const allTypes = Array.from(
+                  new Set([
+                    ...Object.keys(totalInvestedByType),
+                    ...Object.keys(monthlyReturnsByType),
+                  ])
+                );
+                return allTypes.map((type) => {
+                  const investedTotals = totalInvestedByType[type] || { MDL: 0, EUR: 0, GBP: 0, USD: 0 };
+                  const returnTotals = monthlyReturnsByType[type] || { MDL: 0, EUR: 0, GBP: 0, USD: 0 };
+                  // Merge currencies: show if either invested > 0 or return > 0
+                  const allCurrencies = Array.from(
+                    new Set([
+                      ...Object.keys(investedTotals),
+                      ...Object.keys(returnTotals),
+                    ])
+                  ).filter(
+                    (currency) =>
+                      (investedTotals as any)[currency] > 0 ||
+                      (returnTotals as any)[currency] > 0
+                  );
+                  if (allCurrencies.length === 0) return null;
+                  return (
+                    <div
+                      key={type}
+                      className='space-y-2 border-b border-gray-800/30 pb-4 last:border-0 last:pb-0'
+                    >
+                      <div className='flex justify-between items-end'>
+                        <h3 className='text-sm lg:text-base font-semibold text-gray-400'>
+                          {getInvestmentTypeLabel(type)}
+                        </h3>
+                      </div>
+                      <Table>
+                        <TableBody>
+                          {allCurrencies.map((currency) => {
+                            const investedAmount = (investedTotals as any)[currency] || 0;
+                            const returnAmount = (returnTotals as any)[currency] || 0;
+                            return (
+                              <React.Fragment key={currency}>
+                                {/* Total Invested Row — only if invested > 0 */}
+                                {investedAmount > 0 && (
+                                  <TableRow className='border-b-0 hover:bg-transparent'>
+                                    <TableCell className='text-xs lg:text-sm text-gray-500 py-1 px-0'>
+                                      Total Invested ({currency})
+                                    </TableCell>
+                                    <TableCell className='text-xs lg:text-sm font-bold py-1 px-0 text-right'>
+                                      {formatAmount(investedAmount, currency)}
+                                    </TableCell>
+                                  </TableRow>
+                                )}
 
-                              {/* Returns Row (if applicable) */}
-                              {returnAmount > 0 && (
-                                <TableRow className='border-b-0 hover:bg-transparent'>
-                                  <TableCell className='text-[11px] lg:text-xs text-gray-400 py-0 px-0 pl-3'>
-                                    <div className='flex items-center gap-2'>
-                                      <span>Returns</span>
-                                      {averageInterestRatesByType[type]?.[
-                                        currency
-                                      ] !== undefined && (
-                                        <span className='inline-flex items-center px-1 py-0.5 rounded bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 text-[10px] font-medium'>
-                                          avg.{' '}
-                                          {averageInterestRatesByType[type][
-                                            currency
-                                          ].toFixed(2)}
-                                          %
-                                        </span>
-                                      )}
-                                    </div>
-                                  </TableCell>
-                                  <TableCell className='text-[11px] lg:text-xs font-medium text-green-400 py-0 px-0 text-right'>
-                                    + {formatAmount(returnAmount, currency)}
-                                  </TableCell>
-                                </TableRow>
-                              )}
-                            </React.Fragment>
-                          );
-                        })}
-                    </TableBody>
-                  </Table>
-                </div>
-              ))}
+                                {/* Returns Row (if applicable) */}
+                                {returnAmount > 0 && (
+                                  <TableRow className='border-b-0 hover:bg-transparent'>
+                                    <TableCell className='text-[11px] lg:text-xs text-gray-400 py-0 px-0 pl-3'>
+                                      <div className='flex items-center gap-2'>
+                                        <span>Returns</span>
+                                        {averageInterestRatesByType[type]?.[
+                                          currency
+                                        ] !== undefined && (
+                                          <span className='inline-flex items-center px-1 py-0.5 rounded bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 text-[10px] font-medium'>
+                                            avg.{' '}
+                                            {averageInterestRatesByType[type][
+                                              currency
+                                            ].toFixed(2)}
+                                            %
+                                          </span>
+                                        )}
+                                      </div>
+                                    </TableCell>
+                                    <TableCell className='text-[11px] lg:text-xs font-medium text-green-400 py-0 px-0 text-right'>
+                                      + {formatAmount(returnAmount, currency)}
+                                    </TableCell>
+                                  </TableRow>
+                                )}
+                              </React.Fragment>
+                            );
+                          })}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  );
+                });
+              })()}
             </div>
           ) : (
             <p className='text-center text-gray-500 lg:text-base'>

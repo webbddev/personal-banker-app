@@ -112,6 +112,9 @@ export const InvestmentScalarFieldEnum = {
   incomeTax: 'incomeTax',
   expirationDate: 'expirationDate',
   expirationStatus: 'expirationStatus',
+  monthlyRent: 'monthlyRent',
+  propertyType: 'propertyType',
+  tenantName: 'tenantName',
   userId: 'userId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'

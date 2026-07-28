@@ -30,12 +30,14 @@ export type InvestmentAvgAggregateOutputType = {
   investmentAmount: number | null
   interestRate: number | null
   incomeTax: number | null
+  monthlyRent: number | null
 }
 
 export type InvestmentSumAggregateOutputType = {
   investmentAmount: number | null
   interestRate: number | null
   incomeTax: number | null
+  monthlyRent: number | null
 }
 
 export type InvestmentMinAggregateOutputType = {
@@ -49,6 +51,9 @@ export type InvestmentMinAggregateOutputType = {
   incomeTax: number | null
   expirationDate: Date | null
   expirationStatus: $Enums.ExpirationStatus | null
+  monthlyRent: number | null
+  propertyType: string | null
+  tenantName: string | null
   userId: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -65,6 +70,9 @@ export type InvestmentMaxAggregateOutputType = {
   incomeTax: number | null
   expirationDate: Date | null
   expirationStatus: $Enums.ExpirationStatus | null
+  monthlyRent: number | null
+  propertyType: string | null
+  tenantName: string | null
   userId: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -81,6 +89,9 @@ export type InvestmentCountAggregateOutputType = {
   incomeTax: number
   expirationDate: number
   expirationStatus: number
+  monthlyRent: number
+  propertyType: number
+  tenantName: number
   userId: number
   createdAt: number
   updatedAt: number
@@ -92,12 +103,14 @@ export type InvestmentAvgAggregateInputType = {
   investmentAmount?: true
   interestRate?: true
   incomeTax?: true
+  monthlyRent?: true
 }
 
 export type InvestmentSumAggregateInputType = {
   investmentAmount?: true
   interestRate?: true
   incomeTax?: true
+  monthlyRent?: true
 }
 
 export type InvestmentMinAggregateInputType = {
@@ -111,6 +124,9 @@ export type InvestmentMinAggregateInputType = {
   incomeTax?: true
   expirationDate?: true
   expirationStatus?: true
+  monthlyRent?: true
+  propertyType?: true
+  tenantName?: true
   userId?: true
   createdAt?: true
   updatedAt?: true
@@ -127,6 +143,9 @@ export type InvestmentMaxAggregateInputType = {
   incomeTax?: true
   expirationDate?: true
   expirationStatus?: true
+  monthlyRent?: true
+  propertyType?: true
+  tenantName?: true
   userId?: true
   createdAt?: true
   updatedAt?: true
@@ -143,6 +162,9 @@ export type InvestmentCountAggregateInputType = {
   incomeTax?: true
   expirationDate?: true
   expirationStatus?: true
+  monthlyRent?: true
+  propertyType?: true
+  tenantName?: true
   userId?: true
   createdAt?: true
   updatedAt?: true
@@ -246,6 +268,9 @@ export type InvestmentGroupByOutputType = {
   incomeTax: number
   expirationDate: Date
   expirationStatus: $Enums.ExpirationStatus
+  monthlyRent: number | null
+  propertyType: string | null
+  tenantName: string | null
   userId: string
   createdAt: Date
   updatedAt: Date
@@ -285,6 +310,9 @@ export type InvestmentWhereInput = {
   incomeTax?: Prisma.FloatFilter<"Investment"> | number
   expirationDate?: Prisma.DateTimeFilter<"Investment"> | Date | string
   expirationStatus?: Prisma.EnumExpirationStatusFilter<"Investment"> | $Enums.ExpirationStatus
+  monthlyRent?: Prisma.FloatNullableFilter<"Investment"> | number | null
+  propertyType?: Prisma.StringNullableFilter<"Investment"> | string | null
+  tenantName?: Prisma.StringNullableFilter<"Investment"> | string | null
   userId?: Prisma.StringFilter<"Investment"> | string
   createdAt?: Prisma.DateTimeFilter<"Investment"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Investment"> | Date | string
@@ -302,6 +330,9 @@ export type InvestmentOrderByWithRelationInput = {
   incomeTax?: Prisma.SortOrder
   expirationDate?: Prisma.SortOrder
   expirationStatus?: Prisma.SortOrder
+  monthlyRent?: Prisma.SortOrderInput | Prisma.SortOrder
+  propertyType?: Prisma.SortOrderInput | Prisma.SortOrder
+  tenantName?: Prisma.SortOrderInput | Prisma.SortOrder
   userId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -322,6 +353,9 @@ export type InvestmentWhereUniqueInput = Prisma.AtLeast<{
   incomeTax?: Prisma.FloatFilter<"Investment"> | number
   expirationDate?: Prisma.DateTimeFilter<"Investment"> | Date | string
   expirationStatus?: Prisma.EnumExpirationStatusFilter<"Investment"> | $Enums.ExpirationStatus
+  monthlyRent?: Prisma.FloatNullableFilter<"Investment"> | number | null
+  propertyType?: Prisma.StringNullableFilter<"Investment"> | string | null
+  tenantName?: Prisma.StringNullableFilter<"Investment"> | string | null
   userId?: Prisma.StringFilter<"Investment"> | string
   createdAt?: Prisma.DateTimeFilter<"Investment"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Investment"> | Date | string
@@ -339,6 +373,9 @@ export type InvestmentOrderByWithAggregationInput = {
   incomeTax?: Prisma.SortOrder
   expirationDate?: Prisma.SortOrder
   expirationStatus?: Prisma.SortOrder
+  monthlyRent?: Prisma.SortOrderInput | Prisma.SortOrder
+  propertyType?: Prisma.SortOrderInput | Prisma.SortOrder
+  tenantName?: Prisma.SortOrderInput | Prisma.SortOrder
   userId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -363,6 +400,9 @@ export type InvestmentScalarWhereWithAggregatesInput = {
   incomeTax?: Prisma.FloatWithAggregatesFilter<"Investment"> | number
   expirationDate?: Prisma.DateTimeWithAggregatesFilter<"Investment"> | Date | string
   expirationStatus?: Prisma.EnumExpirationStatusWithAggregatesFilter<"Investment"> | $Enums.ExpirationStatus
+  monthlyRent?: Prisma.FloatNullableWithAggregatesFilter<"Investment"> | number | null
+  propertyType?: Prisma.StringNullableWithAggregatesFilter<"Investment"> | string | null
+  tenantName?: Prisma.StringNullableWithAggregatesFilter<"Investment"> | string | null
   userId?: Prisma.StringWithAggregatesFilter<"Investment"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Investment"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Investment"> | Date | string
@@ -379,6 +419,9 @@ export type InvestmentCreateInput = {
   incomeTax: number
   expirationDate: Date | string
   expirationStatus: $Enums.ExpirationStatus
+  monthlyRent?: number | null
+  propertyType?: string | null
+  tenantName?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutInvestmentsInput
@@ -395,6 +438,9 @@ export type InvestmentUncheckedCreateInput = {
   incomeTax: number
   expirationDate: Date | string
   expirationStatus: $Enums.ExpirationStatus
+  monthlyRent?: number | null
+  propertyType?: string | null
+  tenantName?: string | null
   userId: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -411,6 +457,9 @@ export type InvestmentUpdateInput = {
   incomeTax?: Prisma.FloatFieldUpdateOperationsInput | number
   expirationDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expirationStatus?: Prisma.EnumExpirationStatusFieldUpdateOperationsInput | $Enums.ExpirationStatus
+  monthlyRent?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  propertyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tenantName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutInvestmentsNestedInput
@@ -427,6 +476,9 @@ export type InvestmentUncheckedUpdateInput = {
   incomeTax?: Prisma.FloatFieldUpdateOperationsInput | number
   expirationDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expirationStatus?: Prisma.EnumExpirationStatusFieldUpdateOperationsInput | $Enums.ExpirationStatus
+  monthlyRent?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  propertyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tenantName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -443,6 +495,9 @@ export type InvestmentCreateManyInput = {
   incomeTax: number
   expirationDate: Date | string
   expirationStatus: $Enums.ExpirationStatus
+  monthlyRent?: number | null
+  propertyType?: string | null
+  tenantName?: string | null
   userId: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -459,6 +514,9 @@ export type InvestmentUpdateManyMutationInput = {
   incomeTax?: Prisma.FloatFieldUpdateOperationsInput | number
   expirationDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expirationStatus?: Prisma.EnumExpirationStatusFieldUpdateOperationsInput | $Enums.ExpirationStatus
+  monthlyRent?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  propertyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tenantName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -474,6 +532,9 @@ export type InvestmentUncheckedUpdateManyInput = {
   incomeTax?: Prisma.FloatFieldUpdateOperationsInput | number
   expirationDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expirationStatus?: Prisma.EnumExpirationStatusFieldUpdateOperationsInput | $Enums.ExpirationStatus
+  monthlyRent?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  propertyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tenantName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -500,6 +561,9 @@ export type InvestmentCountOrderByAggregateInput = {
   incomeTax?: Prisma.SortOrder
   expirationDate?: Prisma.SortOrder
   expirationStatus?: Prisma.SortOrder
+  monthlyRent?: Prisma.SortOrder
+  propertyType?: Prisma.SortOrder
+  tenantName?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -509,6 +573,7 @@ export type InvestmentAvgOrderByAggregateInput = {
   investmentAmount?: Prisma.SortOrder
   interestRate?: Prisma.SortOrder
   incomeTax?: Prisma.SortOrder
+  monthlyRent?: Prisma.SortOrder
 }
 
 export type InvestmentMaxOrderByAggregateInput = {
@@ -522,6 +587,9 @@ export type InvestmentMaxOrderByAggregateInput = {
   incomeTax?: Prisma.SortOrder
   expirationDate?: Prisma.SortOrder
   expirationStatus?: Prisma.SortOrder
+  monthlyRent?: Prisma.SortOrder
+  propertyType?: Prisma.SortOrder
+  tenantName?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -538,6 +606,9 @@ export type InvestmentMinOrderByAggregateInput = {
   incomeTax?: Prisma.SortOrder
   expirationDate?: Prisma.SortOrder
   expirationStatus?: Prisma.SortOrder
+  monthlyRent?: Prisma.SortOrder
+  propertyType?: Prisma.SortOrder
+  tenantName?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -547,6 +618,7 @@ export type InvestmentSumOrderByAggregateInput = {
   investmentAmount?: Prisma.SortOrder
   interestRate?: Prisma.SortOrder
   incomeTax?: Prisma.SortOrder
+  monthlyRent?: Prisma.SortOrder
 }
 
 export type InvestmentCreateNestedManyWithoutUserInput = {
@@ -603,6 +675,14 @@ export type EnumExpirationStatusFieldUpdateOperationsInput = {
   set?: $Enums.ExpirationStatus
 }
 
+export type NullableFloatFieldUpdateOperationsInput = {
+  set?: number | null
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
+}
+
 export type InvestmentCreateWithoutUserInput = {
   id?: string
   organisationName: string
@@ -614,6 +694,9 @@ export type InvestmentCreateWithoutUserInput = {
   incomeTax: number
   expirationDate: Date | string
   expirationStatus: $Enums.ExpirationStatus
+  monthlyRent?: number | null
+  propertyType?: string | null
+  tenantName?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -629,6 +712,9 @@ export type InvestmentUncheckedCreateWithoutUserInput = {
   incomeTax: number
   expirationDate: Date | string
   expirationStatus: $Enums.ExpirationStatus
+  monthlyRent?: number | null
+  propertyType?: string | null
+  tenantName?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -673,6 +759,9 @@ export type InvestmentScalarWhereInput = {
   incomeTax?: Prisma.FloatFilter<"Investment"> | number
   expirationDate?: Prisma.DateTimeFilter<"Investment"> | Date | string
   expirationStatus?: Prisma.EnumExpirationStatusFilter<"Investment"> | $Enums.ExpirationStatus
+  monthlyRent?: Prisma.FloatNullableFilter<"Investment"> | number | null
+  propertyType?: Prisma.StringNullableFilter<"Investment"> | string | null
+  tenantName?: Prisma.StringNullableFilter<"Investment"> | string | null
   userId?: Prisma.StringFilter<"Investment"> | string
   createdAt?: Prisma.DateTimeFilter<"Investment"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Investment"> | Date | string
@@ -689,6 +778,9 @@ export type InvestmentCreateManyUserInput = {
   incomeTax: number
   expirationDate: Date | string
   expirationStatus: $Enums.ExpirationStatus
+  monthlyRent?: number | null
+  propertyType?: string | null
+  tenantName?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -704,6 +796,9 @@ export type InvestmentUpdateWithoutUserInput = {
   incomeTax?: Prisma.FloatFieldUpdateOperationsInput | number
   expirationDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expirationStatus?: Prisma.EnumExpirationStatusFieldUpdateOperationsInput | $Enums.ExpirationStatus
+  monthlyRent?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  propertyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tenantName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -719,6 +814,9 @@ export type InvestmentUncheckedUpdateWithoutUserInput = {
   incomeTax?: Prisma.FloatFieldUpdateOperationsInput | number
   expirationDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expirationStatus?: Prisma.EnumExpirationStatusFieldUpdateOperationsInput | $Enums.ExpirationStatus
+  monthlyRent?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  propertyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tenantName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -734,6 +832,9 @@ export type InvestmentUncheckedUpdateManyWithoutUserInput = {
   incomeTax?: Prisma.FloatFieldUpdateOperationsInput | number
   expirationDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expirationStatus?: Prisma.EnumExpirationStatusFieldUpdateOperationsInput | $Enums.ExpirationStatus
+  monthlyRent?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  propertyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tenantName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -751,6 +852,9 @@ export type InvestmentSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   incomeTax?: boolean
   expirationDate?: boolean
   expirationStatus?: boolean
+  monthlyRent?: boolean
+  propertyType?: boolean
+  tenantName?: boolean
   userId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -768,6 +872,9 @@ export type InvestmentSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   incomeTax?: boolean
   expirationDate?: boolean
   expirationStatus?: boolean
+  monthlyRent?: boolean
+  propertyType?: boolean
+  tenantName?: boolean
   userId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -785,6 +892,9 @@ export type InvestmentSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   incomeTax?: boolean
   expirationDate?: boolean
   expirationStatus?: boolean
+  monthlyRent?: boolean
+  propertyType?: boolean
+  tenantName?: boolean
   userId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -802,12 +912,15 @@ export type InvestmentSelectScalar = {
   incomeTax?: boolean
   expirationDate?: boolean
   expirationStatus?: boolean
+  monthlyRent?: boolean
+  propertyType?: boolean
+  tenantName?: boolean
   userId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type InvestmentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "organisationName" | "relatedData" | "investmentType" | "currency" | "investmentAmount" | "interestRate" | "incomeTax" | "expirationDate" | "expirationStatus" | "userId" | "createdAt" | "updatedAt", ExtArgs["result"]["investment"]>
+export type InvestmentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "organisationName" | "relatedData" | "investmentType" | "currency" | "investmentAmount" | "interestRate" | "incomeTax" | "expirationDate" | "expirationStatus" | "monthlyRent" | "propertyType" | "tenantName" | "userId" | "createdAt" | "updatedAt", ExtArgs["result"]["investment"]>
 export type InvestmentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -834,6 +947,9 @@ export type $InvestmentPayload<ExtArgs extends runtime.Types.Extensions.Internal
     incomeTax: number
     expirationDate: Date
     expirationStatus: $Enums.ExpirationStatus
+    monthlyRent: number | null
+    propertyType: string | null
+    tenantName: string | null
     userId: string
     createdAt: Date
     updatedAt: Date
@@ -1271,6 +1387,9 @@ export interface InvestmentFieldRefs {
   readonly incomeTax: Prisma.FieldRef<"Investment", 'Float'>
   readonly expirationDate: Prisma.FieldRef<"Investment", 'DateTime'>
   readonly expirationStatus: Prisma.FieldRef<"Investment", 'ExpirationStatus'>
+  readonly monthlyRent: Prisma.FieldRef<"Investment", 'Float'>
+  readonly propertyType: Prisma.FieldRef<"Investment", 'String'>
+  readonly tenantName: Prisma.FieldRef<"Investment", 'String'>
   readonly userId: Prisma.FieldRef<"Investment", 'String'>
   readonly createdAt: Prisma.FieldRef<"Investment", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Investment", 'DateTime'>

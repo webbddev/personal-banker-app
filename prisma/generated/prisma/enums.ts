@@ -32,7 +32,8 @@ export const InvestmentType = {
   bankDeposit: 'bankDeposit',
   governmentBond: 'governmentBond',
   corporateBond: 'corporateBond',
-  eVMS: 'eVMS'
+  eVMS: 'eVMS',
+  realEstate: 'realEstate'
 } as const
 
 export type InvestmentType = (typeof InvestmentType)[keyof typeof InvestmentType]

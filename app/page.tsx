@@ -10,7 +10,7 @@ export default function Home() {
   return (
     <main className='relative min-h-screen overflow-hidden'>
       <LandingLamp />
-      
+
       <section className='max-w-7xl mx-auto pt-32 sm:pt-24 lg:pt-0 px-4 lg:px-10 min-h-screen lg:h-screen flex flex-col lg:grid lg:grid-cols-[1fr,540px] xl:grid-cols-[1fr,640px] lg:items-center justify-center gap-12 lg:gap-0 relative z-10'>
         <div>
           <h1 className='capitalize text-4xl md:text-7xl xl:text-8xl font-bold -ml-2'>
@@ -22,36 +22,36 @@ export default function Home() {
             grow, and secure your wealth effortlessly with Personal Banker –
             where financial empowerment meets simplicity
           </p>
-          
+
           <div className='flex flex-wrap items-center gap-4 mt-8'>
             <ShineBorder
-              className="p-0 min-h-0 min-w-0 bg-transparent hover:scale-105 transition-transform duration-300"
+              className='p-0 min-h-0 min-w-0 bg-transparent hover:scale-105 transition-transform duration-300'
               borderRadius={40}
               borderWidth={2}
-              color={["#14b8a6", "#ffffff", "#14b8a6"]}
+              color={['#14b8a6', '#ffffff', '#14b8a6']}
               duration={10}
             >
-              <Button asChild className='h-12 px-8 text-lg rounded-full bg-teal-600 hover:bg-teal-500 text-white border-none shadow-none'>
-                <SignUpButton >
-                  Get Started
-                </SignUpButton>
+              <Button
+                asChild
+                className='h-12 px-8 text-lg rounded-full bg-teal-600 hover:bg-teal-500 text-white border-none shadow-none'
+              >
+                <SignUpButton>Get Started</SignUpButton>
               </Button>
             </ShineBorder>
             <TavusConversationDialog />
           </div>
         </div>
         <div className='relative'>
-            <Image
+          <Image
             src={LandingImg}
             alt='landing'
             className='w-full max-w-md mx-auto lg:max-w-none drop-shadow-2xl'
             priority
-            />
-            {/* Subtle light reflection on the safe when lamp is on */}
-            <div className='absolute inset-0 bg-yellow-400/5 blur-[100px] rounded-full pointer-events-none opacity-0 dark:opacity-100 transition-opacity duration-1000' />
+          />
+          {/* Subtle light reflection on the safe when lamp is on */}
+          <div className='absolute inset-0 bg-yellow-400/5 blur-[100px] rounded-full pointer-events-none opacity-0 dark:opacity-100 transition-opacity duration-1000' />
         </div>
       </section>
     </main>
   );
 }
-

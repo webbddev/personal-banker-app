@@ -45,6 +45,9 @@ model Investment {
   incomeTax        Float
   expirationDate   DateTime
   expirationStatus ExpirationStatus
+  monthlyRent      Float?
+  propertyType     String?
+  tenantName       String?
   userId           String
   createdAt        DateTime         @default(now()) @map("created_at")
   updatedAt        DateTime         @updatedAt @map("updated_at")
@@ -101,4 +104,5 @@ enum InvestmentType {
   governmentBond
   corporateBond
   eVMS
+  realEstate
 }

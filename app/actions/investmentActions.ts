@@ -25,6 +25,9 @@ export async function createInvestment(data: any) {
         incomeTax: data.incomeTax,
         expirationDate: data.expirationDate,
         expirationStatus: data.expirationStatus,
+        monthlyRent: data.monthlyRent ?? null,
+        propertyType: data.propertyType || null,
+        tenantName: data.tenantName || null,
         userId: user.clerkUserId,
       },
     });
@@ -205,6 +208,9 @@ export async function updateInvestment(id: string, data: any) {
         incomeTax: data.incomeTax,
         expirationDate: data.expirationDate,
         expirationStatus: data.expirationStatus,
+        monthlyRent: data.monthlyRent ?? null,
+        propertyType: data.propertyType || null,
+        tenantName: data.tenantName || null,
         updatedAt: new Date(),
       },
     });

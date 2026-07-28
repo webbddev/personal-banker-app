@@ -3,6 +3,7 @@ export const INVESTMENT_TYPES = {
   GOVERNMENT_BOND: 'governmentBond',
   CORPORATE_BOND: 'corporateBond',
   EVMS: 'eVMS',
+  REAL_ESTATE: 'realEstate',
 } as const;
 
 export type InvestmentType = keyof typeof INVESTMENT_TYPES;
@@ -12,6 +13,15 @@ export const investmentTypeOptions = [
   { value: INVESTMENT_TYPES.GOVERNMENT_BOND, label: 'Government Bond' },
   { value: INVESTMENT_TYPES.CORPORATE_BOND, label: 'Corporate Bond' },
   { value: INVESTMENT_TYPES.EVMS, label: 'eVMS' },
+  { value: INVESTMENT_TYPES.REAL_ESTATE, label: 'Real Estate / Rental Property' },
+] as const;
+
+export const PROPERTY_TYPE_OPTIONS = [
+  { value: 'residential', label: 'Residential' },
+  { value: 'commercial', label: 'Commercial' },
+  { value: 'garage', label: 'Garage' },
+  { value: 'industrial', label: 'Industrial' },
+  { value: 'land', label: 'Land' },
 ] as const;
 
 export const investmentValidationRules = {
