@@ -215,7 +215,7 @@ export default function UploadPage() {
   return (
     <SidebarInset className='w-full'>
       <SiteHeader title='Documents' />
-      <div className='flex flex-1 flex-col w-full'>
+      <div className='flex flex-1 flex-col w-full min-h-[101vh]'>
         <div className='flex flex-1 flex-col gap-2 w-full'>
           {/* Constrained width container for better large screen experience */}
           <div className='w-full max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-6 space-y-6'>

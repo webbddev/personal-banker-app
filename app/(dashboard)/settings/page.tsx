@@ -7,7 +7,7 @@ export default function SettingsPage() {
   return (
     <SidebarInset className='w-full'>
       <SiteHeader title='Settings' />
-      <div className='flex flex-1 flex-col w-full'>
+      <div className='flex flex-1 flex-col w-full min-h-[101vh]'>
         <div className='p-8 max-w-4xl mx-auto w-full'>
           <div className='mb-8'>
             <h1 className='text-3xl font-bold mb-2 flex items-center gap-3'>
