@@ -41,7 +41,7 @@ export default async function InvestmentsPage() {
               {/* Monthly Returns Display */}
               <div className='mb-6'>
                 <h2 className='text-xl font-semibold mb-2'>Monthly Returns</h2>
-                <MonthlyReturnsDisplay totals={monthlyReturns} />
+                <MonthlyReturnsDisplay totals={monthlyReturns} exchangeRates={exchangeRates} />
               </div>
 
               {/* Data table displaying investment details with export functionality */}

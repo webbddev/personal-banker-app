@@ -205,7 +205,7 @@ export function ChartPieLabel({ data }: { data: ConvertedTypeData[] }) {
           </ChartContainer>
         </div>
 
-        <div className='flex flex-col gap-3 w-full max-w-[500px] mx-auto 2xl:mx-0 2xl:max-w-[370px] overflow-y-auto pr-2'>
+        <div className='flex flex-col gap-3 w-full max-w-[500px] mx-auto 2xl:mx-0 2xl:max-w-[380px]'>
           {chartData.map((item, index) => {
             const isHovered = activeIndex === index;
             const isFaded = activeIndex !== null && activeIndex !== index;
@@ -214,53 +214,63 @@ export function ChartPieLabel({ data }: { data: ConvertedTypeData[] }) {
             return (
               <div
                 key={item.type}
-                className={`flex flex-col gap-2 p-3 rounded-lg border transition-all duration-200 ${
+                className={`group flex flex-col gap-2 p-4 rounded-xl border transition-all duration-200 ${
                   isHovered
-                    ? 'bg-muted shadow-sm scale-[1.02]'
+                    ? 'bg-muted/80 shadow-sm border-primary/20'
                     : isFaded
                       ? 'opacity-40 bg-background'
-                      : 'bg-background'
+                      : 'bg-background hover:bg-muted/40'
                 }`}
                 onMouseEnter={() => setActiveIndex(index)}
                 onMouseLeave={() => setActiveIndex(null)}
-                style={{
-                  cursor: 'pointer',
-                  borderLeft: isHovered
-                    ? `3px solid ${item.fill}`
-                    : '3px solid transparent',
-                }}
               >
                 <div className='flex items-center justify-between'>
-                  <div className='flex items-center gap-3'>
+                  <div className='flex items-center gap-2.5'>
                     <div
-                      className='h-3 w-3 rounded-full shrink-0'
+                      className='w-3 h-3 rounded-full shrink-0'
                       style={{ backgroundColor: item.fill }}
                     />
                     <span className='font-semibold text-sm'>{item.name}</span>
                   </div>
-                  <span className='text-sm font-bold'>{percentage}%</span>
+                  <span className='text-sm font-bold tabular-nums'>
+                    {percentage}%
+                  </span>
                 </div>
 
-                {Object.keys(item.breakdown || {}).length > 0 &&
-                  Object.entries(item.breakdown).map(([curr, amt]: any) => (
-                    <div
-                      key={curr}
-                      className='flex justify-between items-center text-sm'
-                    >
-                      <span className='text-muted-foreground'>
-                        {curr} Invested
-                      </span>
-                      <span className='font-medium'>
-                        {formatAmount(amt, curr)}
-                      </span>
-                    </div>
-                  ))}
+                <div className='h-2 w-full rounded-full bg-muted overflow-hidden'>
+                  <div
+                    className='h-full rounded-full transition-all duration-500 ease-out'
+                    style={{
+                      width: `${percentage}%`,
+                      backgroundColor: item.fill,
+                    }}
+                  />
+                </div>
 
-                <div className='flex justify-between items-center text-sm'>
-                  <span className='text-muted-foreground'>MDL Equivalent</span>
-                  <span className='font-medium'>
-                    {formatAmount(item.value, 'MDL')}
-                  </span>
+                <div className='space-y-1.5 mt-1'>
+                  {Object.keys(item.breakdown || {}).length > 0 &&
+                    Object.entries(item.breakdown).map(([curr, amt]: any) => (
+                      <div
+                        key={curr}
+                        className='flex justify-between items-center text-sm'
+                      >
+                        <span className='text-muted-foreground'>
+                          {curr} Invested
+                        </span>
+                        <span className='font-medium'>
+                          {formatAmount(amt, curr)}
+                        </span>
+                      </div>
+                    ))}
+
+                  <div className='flex justify-between items-center text-sm'>
+                    <span className='text-muted-foreground'>
+                      MDL Equivalent
+                    </span>
+                    <span className='font-medium text-foreground'>
+                      {formatAmount(item.value, 'MDL')}
+                    </span>
+                  </div>
                 </div>
               </div>
             );
