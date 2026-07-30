@@ -52,6 +52,11 @@ const suggestionItems = [
     url: '/wealth-growth',
     icon: Sparkle,
   },
+  {
+    title: 'Settings',
+    url: '/settings',
+    icon: Settings,
+  },
 ];
 
 // Settings section items

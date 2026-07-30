@@ -97,6 +97,14 @@ export async function sendTelegramReminder() {
       return { success: false, error: 'User not authenticated' };
     }
 
+    if (!user.telegramChatId) {
+      return {
+        success: false,
+        error:
+          'Your Telegram account is not linked. Go to Settings to connect it.',
+      };
+    }
+
     const now = new Date();
     const thirtyDaysFromNow = addDays(now, 30);
 
@@ -134,7 +142,7 @@ export async function sendTelegramReminder() {
       `${details}\n\n` +
       `🔗 Check your <a href="${appUrl}">dashboard</a>`;
 
-    const sent = await sendTelegramMessage(message);
+    const sent = await sendTelegramMessage(user.telegramChatId, message);
 
     if (sent) {
       return {
@@ -185,8 +193,8 @@ async function processRemindersForInterval(
         }
       }
 
-      // Send Telegram
-      if (options.sendTelegram) {
+      // Send Telegram (only if user has linked their Telegram account)
+      if (options.sendTelegram && user.telegramChatId) {
         const count = userInvestments.length;
         const mainSubject =
           days === 1
@@ -210,7 +218,7 @@ async function processRemindersForInterval(
           `${details}\n\n` +
           `🔗 Check your <a href="${appUrl}">dashboard</a>`;
 
-        await sendTelegramMessage(message);
+        await sendTelegramMessage(user.telegramChatId, message);
       }
     }),
   );

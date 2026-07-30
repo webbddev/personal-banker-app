@@ -1,15 +1,30 @@
 /**
  * Utility for sending Telegram notifications via Bot API.
- * Requires TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID environment variables.
+ * Requires TELEGRAM_BOT_TOKEN environment variable.
+ * Each user's chat ID is stored in the database.
  */
 
-export async function sendTelegramMessage(message: string): Promise<boolean> {
+/**
+ * Send a Telegram message to a specific chat.
+ * @param chatId  The Telegram chat ID for the recipient.
+ * @param message The message body (HTML-formatted).
+ */
+export async function sendTelegramMessage(
+  chatId: string,
+  message: string,
+): Promise<boolean> {
   const token = process.env.TELEGRAM_BOT_TOKEN?.trim();
-  const chatId = process.env.TELEGRAM_CHAT_ID?.trim();
 
-  if (!token || !chatId) {
+  if (!token) {
     console.warn(
-      'Telegram notifications skipped: Bot token or Chat ID not configured.',
+      'Telegram notifications skipped: Bot token not configured.',
+    );
+    return false;
+  }
+
+  if (!chatId) {
+    console.warn(
+      'Telegram notifications skipped: No chat ID provided for user.',
     );
     return false;
   }

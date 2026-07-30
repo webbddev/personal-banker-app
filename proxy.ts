@@ -13,6 +13,7 @@ const isPublicApiRoute = createRouteMatcher([
   '/api/notifications(.*)',
   '/api/cron(.*)',
   '/api/tavus(.*)',
+  '/api/telegram(.*)',
 ]);
 
 /**
