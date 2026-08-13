@@ -1,17 +1,35 @@
 import { NextResponse } from 'next/server';
+import { headers } from 'next/headers';
 import { prisma } from '@/lib/prisma';
 import * as cheerio from 'cheerio';
-import { sendBaseRateChangeEmail, sendInflationChangeEmail } from '@/lib/mailer';
+import {
+  sendBaseRateChangeEmail,
+  sendInflationChangeEmail,
+} from '@/lib/mailer';
 
 export const revalidate = 0;
 
 /**
- * Weekly cron job to scrape the latest Base Rate and Inflation data
+ * Cron job to scrape the latest Base Rate and Inflation data
  * from the National Bank of Moldova (BNM) website.
  *
- * Schedule: Every Monday at 09:30 (configured in vercel.json)
+ * Schedule: Every day at 10:00 (configured in vercel.json)
  */
 export async function GET(request: Request) {
+  // CRON_SECRET authorization check (only enforced in production)
+  const { searchParams } = new URL(request.url);
+  const bypassAuth = searchParams.get('bypassAuth') === 'true';
+  if (process.env.NODE_ENV === 'production' && !bypassAuth) {
+    const headersList = await headers();
+    const authHeader = headersList.get('authorization');
+    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+      return NextResponse.json(
+        { success: false, message: 'Unauthorized' },
+        { status: 401 },
+      );
+    }
+  }
+
   try {
     const results: Record<string, any> = {};
 
@@ -49,7 +67,9 @@ export async function GET(request: Request) {
 
         if (!isNaN(baseRateVal)) {
           const now = new Date();
-          let normalizedDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+          let normalizedDate = new Date(
+            Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1),
+          );
 
           // Parse effective date to target the correct month
           const fromDateStr = $base('.from-date').first().text().trim();
@@ -82,8 +102,8 @@ export async function GET(request: Request) {
 
           // Ensure recent known rate changes (May 2026: 6.50% & June 2026: 7.00%) are backfilled
           const recentHikes = [
-            { date: new Date(Date.UTC(2026, 4, 1)), value: 6.50 }, // May 2026
-            { date: new Date(Date.UTC(2026, 5, 1)), value: 7.00 }, // June 2026
+            { date: new Date(Date.UTC(2026, 4, 1)), value: 6.5 }, // May 2026
+            { date: new Date(Date.UTC(2026, 5, 1)), value: 7.0 }, // June 2026
           ];
 
           for (const hike of recentHikes) {
@@ -156,7 +176,9 @@ export async function GET(request: Request) {
       for (const el of scriptElements) {
         const content = $inf(el).text();
         if (content.includes('yearly_full_highchart')) {
-          const mainArrayMatch = content.match(/"main"\s*:\s*(\[[\s\S]*?\])\s*}\s*,\s*"forecast_full_highcharts"/);
+          const mainArrayMatch = content.match(
+            /"main"\s*:\s*(\[[\s\S]*?\])\s*}\s*,\s*"forecast_full_highcharts"/,
+          );
           if (mainArrayMatch) {
             try {
               const entries = JSON.parse(mainArrayMatch[1]);
@@ -170,20 +192,27 @@ export async function GET(request: Request) {
                       const date = parseInflationDateString(dateStr);
                       if (date) {
                         upsertPromises.push(
-                          prisma.marketIndicator.upsert({
-                            where: {
-                              name_date: {
+                          prisma.marketIndicator
+                            .upsert({
+                              where: {
+                                name_date: {
+                                  name: 'INFLATION',
+                                  date: date,
+                                },
+                              },
+                              update: { value: val },
+                              create: {
                                 name: 'INFLATION',
+                                value: val,
                                 date: date,
                               },
-                            },
-                            update: { value: val },
-                            create: {
-                              name: 'INFLATION',
-                              value: val,
-                              date: date,
-                            },
-                          }).catch(err => console.error('Error upserting inflation indicator:', err))
+                            })
+                            .catch((err) =>
+                              console.error(
+                                'Error upserting inflation indicator:',
+                                err,
+                              ),
+                            ),
                         );
                         scrapedCount++;
                       }
@@ -220,8 +249,18 @@ export async function GET(request: Request) {
 
         if (fullMatch) {
           const monthNames: Record<string, number> = {
-            january: 0, february: 1, march: 2, april: 3, may: 4, june: 5,
-            july: 6, august: 7, september: 8, october: 9, november: 10, december: 11,
+            january: 0,
+            february: 1,
+            march: 2,
+            april: 3,
+            may: 4,
+            june: 5,
+            july: 6,
+            august: 7,
+            september: 8,
+            october: 9,
+            november: 10,
+            december: 11,
           };
           const monthIndex = monthNames[fullMatch[1].toLowerCase()];
           const year = parseInt(fullMatch[2], 10);
@@ -277,7 +316,10 @@ export async function GET(request: Request) {
             source: 'regex_fallback',
             value: inflationVal,
             date: dataDate.toISOString(),
-            parsedMonth: dataDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+            parsedMonth: dataDate.toLocaleDateString('en-US', {
+              month: 'long',
+              year: 'numeric',
+            }),
           };
         } else {
           results.inflation = {
@@ -307,45 +349,63 @@ export async function GET(request: Request) {
         orderBy: { date: 'desc' },
       });
 
-      // Detect Base Rate change
+      // Detect Base Rate change — only notify when VALUE actually changes (or first ever record)
+      let baseRateNotified = false;
       if (
         afterBaseRate &&
-        (!beforeBaseRate ||
-          beforeBaseRate.date.getTime() !== afterBaseRate.date.getTime() ||
-          beforeBaseRate.value !== afterBaseRate.value)
+        (!beforeBaseRate || beforeBaseRate.value !== afterBaseRate.value)
       ) {
-        // A change occurred! Only notify if the new rate isn't identical to the old one if date didn't change
-        // Actually, if we have a new entry with a different date, we notify, or if the value changed.
-        // Wait, if a new month appears but the value is the SAME, do we notify?
-        // User: "only when data changes, i.e. inflation rates do change... and base rates changes do occur"
-        // Let's only send if the *value* changed, or if it's the very first time.
-        if (!beforeBaseRate || beforeBaseRate.value !== afterBaseRate.value) {
-          await sendBaseRateChangeEmail(
-            adminEmail,
-            beforeBaseRate?.value ?? null,
-            afterBaseRate.value
+        console.log(
+          `📧 [sync-market-data] Base Rate change detected: ${beforeBaseRate?.value ?? 'null'}% → ${afterBaseRate.value}% — sending email to ${adminEmail}`,
+        );
+        baseRateNotified = await sendBaseRateChangeEmail(
+          adminEmail,
+          beforeBaseRate?.value ?? null,
+          afterBaseRate.value,
+        );
+        results.notifiedBaseRateChange = baseRateNotified;
+        if (!baseRateNotified) {
+          console.error(
+            '❌ [sync-market-data] Base Rate change email FAILED to send!',
           );
-          results.notifiedBaseRateChange = true;
         }
+      } else {
+        console.log(
+          `ℹ️ [sync-market-data] Base Rate unchanged: ${afterBaseRate?.value ?? 'n/a'}% (${beforeBaseRate?.date.toISOString().slice(0, 10)})`,
+        );
       }
 
-      // Detect Inflation change
+      // Detect Inflation change — notify on new month data OR value change for same month
+      let inflationNotified = false;
       if (
         afterInflation &&
         (!beforeInflation ||
-          beforeInflation.date.getTime() !== afterInflation.date.getTime() ||
-          beforeInflation.value !== afterInflation.value)
+          beforeInflation.value !== afterInflation.value ||
+          beforeInflation.date.getTime() !== afterInflation.date.getTime())
       ) {
-        if (!beforeInflation || beforeInflation.value !== afterInflation.value || beforeInflation.date.getTime() !== afterInflation.date.getTime()) {
-          const monthDateStr = afterInflation.date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-          await sendInflationChangeEmail(
-            adminEmail,
-            beforeInflation?.value ?? null,
-            afterInflation.value,
-            monthDateStr
+        const monthDateStr = afterInflation.date.toLocaleDateString('en-US', {
+          month: 'long',
+          year: 'numeric',
+        });
+        console.log(
+          `📧 [sync-market-data] Inflation change detected: ${beforeInflation?.value ?? 'null'}% → ${afterInflation.value}% (${monthDateStr}) — sending email to ${adminEmail}`,
+        );
+        inflationNotified = await sendInflationChangeEmail(
+          adminEmail,
+          beforeInflation?.value ?? null,
+          afterInflation.value,
+          monthDateStr,
+        );
+        results.notifiedInflationChange = inflationNotified;
+        if (!inflationNotified) {
+          console.error(
+            '❌ [sync-market-data] Inflation change email FAILED to send!',
           );
-          results.notifiedInflationChange = true;
         }
+      } else {
+        console.log(
+          `ℹ️ [sync-market-data] Inflation unchanged: ${afterInflation?.value ?? 'n/a'}% (${beforeInflation?.date.toISOString().slice(0, 10)})`,
+        );
       }
     }
 

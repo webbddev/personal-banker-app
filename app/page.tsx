@@ -8,7 +8,18 @@ import { TavusConversationDialog } from '@/components/TavusConversationDialog';
 
 export default function Home() {
   return (
-    <main className='relative min-h-screen overflow-hidden'>
+    <main
+      className='
+        relative min-h-screen overflow-hidden
+        before:pointer-events-none before:absolute before:inset-0 before:-z-0 before:opacity-100
+        before:[background:
+          radial-gradient(ellipse_at_top_right,hsl(171_62%_45%_/_0.22),transparent_55%),
+          radial-gradient(ellipse_at_bottom_left,hsl(207_40%_30%_/_0.35),transparent_60%)
+        ]
+        dark:before:opacity-100
+        light:before:opacity-50
+      '
+    >
       <LandingLamp />
 
       <section className='max-w-7xl mx-auto pt-32 sm:pt-24 lg:pt-0 px-4 lg:px-10 min-h-screen lg:h-screen flex flex-col lg:grid lg:grid-cols-[1fr,540px] xl:grid-cols-[1fr,640px] lg:items-center justify-center gap-12 lg:gap-0 relative z-10'>

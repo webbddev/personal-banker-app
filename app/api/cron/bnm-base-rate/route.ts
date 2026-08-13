@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { headers } from 'next/headers';
 import { prisma } from '@/lib/prisma';
 import { fetchBnmBaseRate } from '@/utils/bnm-scraper';
 import { sendBaseRateChangeEmail } from '@/lib/mailer';
@@ -6,8 +7,20 @@ import { sendBaseRateChangeEmail } from '@/lib/mailer';
 export const revalidate = 0; // Disable cache for this cron route
 
 export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const bypassAuth = searchParams.get('bypassAuth') === 'true';
+  if (process.env.NODE_ENV === 'production' && !bypassAuth) {
+    const headersList = await headers();
+    const authHeader = headersList.get('authorization');
+    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+      return NextResponse.json(
+        { success: false, message: 'Unauthorized' },
+        { status: 401 },
+      );
+    }
+  }
+
   try {
-    const { searchParams } = new URL(request.url);
     const forceEmail = searchParams.get('forceEmail') === 'true';
 
     const scrapedRate = await fetchBnmBaseRate();
@@ -33,12 +46,16 @@ export async function GET(request: Request) {
       const isActualChange = oldRate !== scrapedRate;
       rateChanged = isActualChange;
 
-      if (isActualChange && oldRate !== null) {
+      // Always persist the record on first run OR actual change (not just oldRate !== null)
+      if (oldRate === null || isActualChange) {
         await prisma.bnmBaseRate.create({
           data: {
             rate: scrapedRate,
           },
         });
+        console.log(
+          `💾 BnmBaseRate persisted: ${oldRate ?? 'null'} → ${scrapedRate}`,
+        );
       }
 
       // Send email notification to Admin/User.
@@ -46,16 +63,28 @@ export async function GET(request: Request) {
       // verified on the Resend account!
       const adminEmail = process.env.ADMIN_EMAIL || process.env.EMAIL_FROM;
       if (adminEmail) {
+        console.log(
+          `📧 Sending BNM base rate change email to ${adminEmail}: ${oldRate ?? 'null'} → ${scrapedRate}${forceEmail ? ' (FORCED TEST)' : ''}`,
+        );
         emailSentStatus = await sendBaseRateChangeEmail(
           adminEmail,
           oldRate,
           scrapedRate,
         );
+        if (!emailSentStatus) {
+          console.error(
+            '❌ BNM base rate email FAILED to send. Check Resend dashboard logs and ADMIN_EMAIL.',
+          );
+        }
       } else {
         console.warn(
           'No ADMIN_EMAIL or EMAIL_FROM configured for base rate notification',
         );
       }
+    } else {
+      console.log(
+        `ℹ️ BNM base rate unchanged: ${oldRate}% (no email needed)`,
+      );
     }
 
     return NextResponse.json({

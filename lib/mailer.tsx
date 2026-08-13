@@ -37,23 +37,38 @@ async function sendEmail({
   to,
   subject,
   component,
+  idempotencyKey,
 }: {
   to: string;
   subject: string;
   component: React.ReactElement;
+  idempotencyKey?: string;
 }): Promise<boolean> {
-  if (!fromEmail) return false;
+  if (!fromEmail) {
+    console.error('❌ EMAIL_FROM is not set — cannot send email');
+    return false;
+  }
 
   const emailHtml = await render(component);
 
-  try {
-    await resend.emails.send({ from: fromEmail, to, subject, html: emailHtml });
-    console.log(`✅ Email sent to ${to} | ${subject}`);
-    return true;
-  } catch (error) {
-    console.error(`❌ Failed to send email to ${to}`, error);
+  const { data, error } = await resend.emails.send(
+    { from: fromEmail, to, subject, html: emailHtml },
+    idempotencyKey ? { idempotencyKey } : undefined,
+  );
+
+  if (error) {
+    console.error(`❌ Failed to send email to ${to} | ${subject}`, {
+      message: error.message,
+      name: error.name,
+      statusCode: (error as any).statusCode,
+    });
     return false;
   }
+
+  console.log(
+    `✅ Email sent to ${to} | ${subject} | id=${data?.id || 'unknown'}`,
+  );
+  return true;
 }
 
 export async function sendDailyReminder(
@@ -167,7 +182,6 @@ export async function sendOneDayReminder(
   });
 }
 
-
 export async function sendBaseRateChangeEmail(
   to: string,
   oldRate: number | null,
@@ -176,11 +190,12 @@ export async function sendBaseRateChangeEmail(
   const diff = oldRate !== null ? newRate - oldRate : 0;
   const oldRateText = oldRate !== null ? `${oldRate.toFixed(2)}%` : 'unknown';
   const newRateText = `${newRate.toFixed(2)}%`;
+  const todayStr = new Date().toISOString().slice(0, 10);
 
   return sendEmail({
     to,
     subject: `⚠️ BNM Base Rate Changed to ${newRateText}`,
-    // Simple inline HTML component since no complex Email template is provided
+    idempotencyKey: `bnm-base-rate-change/${todayStr}-${oldRate ?? 'null'}-to-${newRate}`,
     component: (
       <div style={{ fontFamily: 'sans-serif', padding: '20px' }}>
         <h2>National Bank of Moldova - Base Rate Update</h2>
@@ -192,6 +207,12 @@ export async function sendBaseRateChangeEmail(
           <li>
             <strong>New Rate:</strong> {newRateText}
           </li>
+          {oldRate !== null && (
+            <li>
+              <strong>Change:</strong> {diff > 0 ? '📈 +' : '📉 '}
+              {diff.toFixed(2)}%
+            </li>
+          )}
         </ul>
         <p>This may affect various interest rates in the economy.</p>
         <p>
@@ -215,10 +236,12 @@ export async function sendInflationChangeEmail(
 ): Promise<boolean> {
   const oldRateText = oldRate !== null ? `${oldRate.toFixed(2)}%` : 'unknown';
   const newRateText = `${newRate.toFixed(2)}%`;
+  const todayStr = new Date().toISOString().slice(0, 10);
 
   return sendEmail({
     to,
     subject: `⚠️ BNM Inflation Rate Changed to ${newRateText}`,
+    idempotencyKey: `bnm-inflation-change/${todayStr}-${monthDateStr}-${oldRate ?? 'null'}-to-${newRate}`,
     component: (
       <div style={{ fontFamily: 'sans-serif', padding: '20px' }}>
         <h2>National Bank of Moldova - Inflation Rate Update</h2>
