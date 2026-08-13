@@ -3,7 +3,14 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 import { Bar, BarChart, CartesianGrid, Cell, XAxis, YAxis } from 'recharts';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import {
+  ChevronLeft,
+  ChevronRight,
+  Landmark,
+  Percent,
+  Calendar,
+  Clock,
+} from 'lucide-react';
 import { Investment } from '@/prisma/generated/prisma/client';
 
 import {
@@ -139,6 +146,13 @@ export function ChartBarInteractive({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [activeIndex, chartData.length]);
 
+  const activeItem = activeIndex !== null ? chartData[activeIndex] : null;
+  const daysLeft = activeItem
+    ? calculateDaysUntilExpiration(new Date(activeItem.expirationDate))
+    : 0;
+  const isSoon = daysLeft > 0 && daysLeft <= 30;
+  const isUrgent = daysLeft > 0 && daysLeft <= 7;
+
   return (
     <Card className='h-full'>
       <CardHeader>
@@ -218,9 +232,7 @@ export function ChartBarInteractive({
                           props.payload.currency as string,
                         )}
                       </span>
-                      <span>
-                        Rate: {props.payload.interestRate}%
-                      </span>
+                      <span>Rate: {props.payload.interestRate}%</span>
                       <span>
                         Expires: {props.payload.expirationDateFormatted}
                       </span>
@@ -279,60 +291,150 @@ export function ChartBarInteractive({
           </Button>
         </div>
 
-        {/* Selected Investment Detail Card - Programmatic highlight/tooltip replacement */}
+        {/* Selected Investment Detail Card — Sidebar Accent (Mobile-First, No Layout Shift) */}
+        {/* Selected Investment Detail Card — Sidebar Accent (Mobile-First, No Layout Shift) */}
+        {/* Selected Investment Detail Card — Sidebar Accent */}
         <div
           className={cn(
-            'mt-4 rounded-lg border bg-card p-4 transition-all duration-300',
+            'mt-4 rounded-xl border bg-card p-5 transition-all duration-300 border-l-4',
             activeIndex !== null
               ? 'opacity-100 translate-y-0'
-              : 'opacity-0 translate-y-2 pointer-events-none h-0 p-0 overflow-hidden',
+              : 'opacity-0 translate-y-2 pointer-events-none h-0 p-0 overflow-hidden border-l-0',
+            daysLeft <= 0
+              ? 'border-l-red-500'
+              : isUrgent
+                ? 'border-l-amber-500'
+                : isSoon
+                  ? 'border-l-emerald-500'
+                  : 'border-l-[#40C1AC]',
           )}
         >
           {activeIndex !== null && chartData[activeIndex] && (
-            <div className='flex flex-col gap-1'>
-              <div className='flex items-center justify-between'>
-                <span className='text-sm font-medium text-muted-foreground'>
-                  Selected Investment
-                </span>
-                <span className='text-xs font-mono bg-muted px-2 py-0.5 rounded'>
-                  {activeIndex + 1} / {chartData.length}
+            <div className='flex flex-col gap-4'>
+              {/* Header */}
+              <div className='flex items-start justify-between gap-4'>
+                <div className='min-w-0 flex-1'>
+                  <p className='text-xs font-medium text-muted-foreground uppercase tracking-wider'>
+                    Selected Investment
+                  </p>
+                  <h3 className='text-xl font-bold text-foreground mt-1 whitespace-nowrap'>
+                    {chartData[activeIndex].organisationName}
+                  </h3>
+                  {chartData[activeIndex].relatedData && (
+                    <p className='text-sm text-muted-foreground mt-0.5 whitespace-nowrap'>
+                      {chartData[activeIndex].relatedData}
+                    </p>
+                  )}
+                </div>
+                <span
+                  className={cn(
+                    'inline-flex items-center rounded-md px-2.5 py-1 text-xs font-bold whitespace-nowrap',
+                    daysLeft <= 0
+                      ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                      : isUrgent
+                        ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+                        : isSoon
+                          ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                          : 'bg-[#40C1AC]/10 text-[#2a9d8f]',
+                  )}
+                >
+                  {daysLeft <= 0
+                    ? 'Expired'
+                    : `Expiring in ${daysLeft} Day${daysLeft === 1 ? '' : 's'}`}
                 </span>
               </div>
-              <p className='text-lg font-bold text-foreground'>
-                {chartData[activeIndex].organisationName}
-              </p>
-              <div className='grid grid-cols-3 gap-4 mt-2'>
-                <div>
-                  <p className='text-xs text-muted-foreground uppercase tracking-wider'>
-                    Amount
-                  </p>
-                  <p className='text-base font-semibold'>
+
+              {/* Metrics: Stacked List Rows */}
+              <div className='rounded-lg border divide-y overflow-hidden'>
+                {/* Amount */}
+                <div className='flex items-center justify-between gap-4 px-5 py-4 bg-muted/30'>
+                  <div className='flex items-center gap-2 text-muted-foreground min-w-0'>
+                    <Landmark className='h-4 w-4 text-emerald-500 flex-shrink-0' />
+                    <span className='text-[11px] font-medium uppercase tracking-wider'>
+                      Amount
+                    </span>
+                  </div>
+                  <span className='text-xl font-bold text-foreground tabular-nums whitespace-nowrap'>
                     {formatAmount(
                       Number(chartData[activeIndex].investmentAmount),
                       chartData[activeIndex].currency as string,
                     )}
-                  </p>
+                  </span>
                 </div>
-                <div>
-                  <p className='text-xs text-muted-foreground uppercase tracking-wider'>
-                    Rate
-                  </p>
-                  <p className='text-base font-semibold'>
+
+                {/* Rate */}
+                <div className='flex items-center justify-between gap-4 px-5 py-4'>
+                  <div className='flex items-center gap-2 text-muted-foreground min-w-0'>
+                    <Percent className='h-4 w-4 text-blue-500 flex-shrink-0' />
+                    <span className='text-[11px] font-medium uppercase tracking-wider'>
+                      Rate
+                    </span>
+                  </div>
+                  <span className='text-base font-bold text-foreground whitespace-nowrap'>
                     {chartData[activeIndex].interestRate}%
-                  </p>
+                  </span>
                 </div>
-                <div>
-                  <p className='text-xs text-muted-foreground uppercase tracking-wider'>
-                    Expiration Date
-                  </p>
-                  <p className='text-base font-semibold'>
+
+                {/* Expires */}
+                <div className='flex items-center justify-between gap-4 px-5 py-4'>
+                  <div className='flex items-center gap-2 text-muted-foreground min-w-0'>
+                    <Calendar className='h-4 w-4 text-purple-500 flex-shrink-0' />
+                    <span className='text-[11px] font-medium uppercase tracking-wider'>
+                      Expires
+                    </span>
+                  </div>
+                  <span className='text-base font-semibold text-foreground whitespace-nowrap'>
                     {chartData[activeIndex].expirationDateFormatted}
-                  </p>
+                  </span>
                 </div>
+
+                {/* Days Left */}
+                {/* <div
+                  className={cn(
+                    'flex items-center justify-between gap-4 px-5 py-4',
+                    isUrgent
+                      ? 'bg-amber-500/10'
+                      : isSoon
+                        ? 'bg-emerald-500/10'
+                        : '',
+                  )}
+                >
+                  <div className='flex items-center gap-2 text-muted-foreground min-w-0'>
+                    <Clock
+                      className={cn(
+                        'h-4 w-4 flex-shrink-0',
+                        isUrgent
+                          ? 'text-amber-500'
+                          : isSoon
+                            ? 'text-emerald-500'
+                            : 'text-indigo-500',
+                      )}
+                    />
+                    <span className='text-[11px] font-medium uppercase tracking-wider'>
+                      Days left
+                    </span>
+                  </div>
+                  <span
+                    className={cn(
+                      'text-base font-bold whitespace-nowrap',
+                      daysLeft <= 0
+                        ? 'text-red-600 dark:text-red-500'
+                        : isUrgent
+                          ? 'text-amber-600 dark:text-amber-500'
+                          : isSoon
+                            ? 'text-emerald-600 dark:text-emerald-500'
+                            : 'text-foreground',
+                    )}
+                  >
+                    {daysLeft <= 0 ? 0 : daysLeft} days
+                  </span>
+                </div> */}
               </div>
             </div>
           )}
         </div>
+
+        {/* --------------- */}
 
         <div className='mx-auto mt-2 flex justify-center flex-wrap gap-y-0'>
           {hasExpired && (
