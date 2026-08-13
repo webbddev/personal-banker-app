@@ -133,8 +133,8 @@ export function InvestmentExpirationCalendar({
             className={cn(
               props.className,
               'relative w-full h-full min-h-[--cell-size] min-w-[--cell-size] flex items-center justify-center rounded-md transition-all duration-150',
-              isSelected && 'bg-teal-600/30 text-white shadow-md scale-105',
-              !isSelected && 'hover:bg-blue-50 dark:hover:bg-blue-900/30',
+              isSelected && 'bg-muted/50 dark:bg-muted/20 border border-border shadow-sm scale-105',
+              !isSelected && 'hover:bg-muted dark:hover:bg-white/5',
               hasInvestments && 'font-bold'
             )}
             title={
@@ -145,12 +145,12 @@ export function InvestmentExpirationCalendar({
           >
             <span
               className={cn(
-                'relative text-xs sm:text-sm z-10 pb-1 font-bold',
+                'relative text-xs sm:text-sm z-10 pb-1 font-bold transition-colors',
                 hasInvestments && 'custom-underline',
-                status === 'expired' && 'text-red-600',
-                status === 'urgent' && 'text-yellow-600',
-                status === 'soon' && 'text-green-600',
-                status === 'active' && 'text-blue-600'
+                !isSelected && status === 'expired' && 'text-red-600 dark:text-red-400',
+                !isSelected && status === 'urgent' && 'text-amber-600 dark:text-amber-400',
+                !isSelected && status === 'soon' && 'text-emerald-600 dark:text-emerald-400',
+                !isSelected && status === 'active' && 'text-blue-600 dark:text-blue-400'
               )}
             >
               {day.date.getDate()}
@@ -212,12 +212,18 @@ export function InvestmentExpirationCalendar({
             month={month}
             onMonthChange={setMonth}
             weekStartsOn={1}
-            className='rounded-lg w-90% [&>div]:w-full sm:w-fit [--cell-size:10vw] sm:[--cell-size:2.25rem] md:[--cell-size:2.5rem] lg:[--cell-size:3.25rem] mx-auto flex justify-center [&_.rdp-months]:w-full [&_.rdp-month]:w-full [&_table]:w-full'
+            className='rounded-lg border border-border/50 w-90% [&>div]:w-full sm:w-fit [--cell-size:10vw] sm:[--cell-size:2.25rem] md:[--cell-size:2.5rem] lg:[--cell-size:3.25rem] mx-auto flex justify-center [&_.rdp-months]:w-full [&_.rdp-month]:w-full [&_table]:w-full bg-transparent shadow-none'
             classNames={{
               nav: 'hidden',
               month_caption: 'hidden',
+              months: 'bg-transparent',
+              month: 'bg-transparent',
+              table: 'bg-transparent',
+              tbody: 'bg-transparent',
+              head_row: 'bg-transparent',
+              row: 'bg-transparent',
+              cell: 'bg-transparent',
             }}
-            // Since we handle styling in DayButton, we don't need complex modifiers for logic anymore
             components={calendarComponents}
           />
         </div>
@@ -238,43 +244,84 @@ export function InvestmentExpirationCalendar({
           )}
         </div>
 
-        {/* Selected date details - Styled logic similar to Portfolio Overview */}
+        {/* Selected date details - Redesigned sleek UI */}
         <div className='flex-shrink-0 min-h-[100px] mt-4'>
-          <div
-            className={cn(
-              'rounded-lg border bg-card p-4 transition-all duration-300',
-              selectedDateInvestments.length > 0
-                ? 'opacity-100 translate-y-0'
-                : 'opacity-40 grayscale-[0.5] border-dashed'
-            )}
-          >
+          <div className='flex flex-col gap-3'>
             {selectedDateInvestments.length > 0 ? (
-              <div className='flex flex-col gap-1'>
-                <div className='flex items-center justify-between'>
-                  <span className='text-xs font-medium text-muted-foreground uppercase tracking-widest'>
-                    Expiring on
-                  </span>
-                  <span className='text-xs font-mono bg-muted px-2 py-0.5 rounded'>
-                    {selectedDate?.toLocaleDateString('en-GB')}
-                  </span>
-                </div>
-                <div className='space-y-3 mt-2'>
-                  {selectedDateInvestments.map((inv) => (
-                    <div key={inv.id} className='flex flex-col border-l-2 border-blue-500/30 pl-3 py-1'>
-                      <p className='text-sm font-bold text-foreground'>
+              selectedDateInvestments.map((inv) => (
+                <div
+                  key={inv.id}
+                  className='group relative flex flex-col justify-between p-4 rounded-xl border bg-card hover:border-primary/50 transition-colors shadow-sm'
+                >
+                  <div className='flex justify-between items-start mb-2'>
+                    <div>
+                      <h4 className='font-bold text-base'>
                         {inv.organisationName}
-                      </p>
-                      <p className='text-xs font-semibold text-blue-500'>
-                        {inv.investmentAmount.toLocaleString()} {inv.currency}
+                      </h4>
+                      <p className='text-[10px] text-muted-foreground uppercase tracking-widest mt-0.5'>
+                        {inv.investmentType}
                       </p>
                     </div>
-                  ))}
+                    <span
+                      className={cn(
+                        'text-xs font-bold px-2.5 py-1 rounded-md',
+                        inv.isExpired
+                          ? 'bg-red-100 text-red-700 dark:bg-red-500/10 dark:text-red-400'
+                          : inv.isExpiringIn7Days
+                            ? 'bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400'
+                            : inv.isExpiringIn30Days
+                              ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400'
+                              : 'bg-blue-100 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400',
+                      )}
+                    >
+                      {inv.isExpired
+                        ? 'Expired'
+                        : `${inv.daysUntilExpiration} days`}
+                    </span>
+                  </div>
+
+                  <div className='grid grid-cols-3 gap-4 mt-2 bg-muted/30 p-3 rounded-lg border border-border/50'>
+                    <div>
+                      <span className='text-[10px] text-muted-foreground uppercase font-medium tracking-wider'>
+                        Amount
+                      </span>
+                      <p className='font-bold text-sm text-foreground mt-0.5'>
+                        {inv.investmentAmount.toLocaleString()}{' '}
+                        <span className='text-muted-foreground text-xs'>
+                          {inv.currency}
+                        </span>
+                      </p>
+                    </div>
+                    <div>
+                      <span className='text-[10px] text-muted-foreground uppercase font-medium tracking-wider'>
+                        Interest
+                      </span>
+                      <p className='font-bold text-sm text-foreground mt-0.5'>
+                        {inv.interestRate}%
+                      </p>
+                    </div>
+                    <div>
+                      <span className='text-[10px] text-muted-foreground uppercase font-medium tracking-wider'>
+                        Expires
+                      </span>
+                      <p className='font-bold text-sm text-foreground mt-0.5 whitespace-nowrap'>
+                        {new Date(inv.expirationDate).toLocaleDateString('en-GB', {
+                          day: 'numeric',
+                          month: 'short',
+                          year: 'numeric',
+                        })}
+                      </p>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              ))
             ) : (
-              <div className='flex flex-col items-center justify-center h-full py-4 text-center'>
-                <p className='text-xs text-muted-foreground italic'>
-                  Select a highlighted date to see details
+              <div className='flex flex-col items-center justify-center h-24 rounded-xl border border-dashed text-center bg-muted/10'>
+                <p className='text-sm text-muted-foreground'>
+                  No expirations on{' '}
+                  {selectedDate
+                    ? selectedDate.toLocaleDateString('en-GB')
+                    : 'selected date'}
                 </p>
               </div>
             )}

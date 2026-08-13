@@ -193,14 +193,6 @@ export function ChartBarInteractive({
               bottom: 20,
               left: 10,
             }}
-            onMouseMove={(state) => {
-              if (state.isTooltipActive) {
-                setActiveIndex(state.activeTooltipIndex ?? null);
-              } else {
-                setActiveIndex(null);
-              }
-            }}
-            onMouseLeave={() => setActiveIndex(null)}
           >
             <CartesianGrid vertical={false} />
             <XAxis
@@ -216,36 +208,14 @@ export function ChartBarInteractive({
               tickMargin={8}
               tickFormatter={(value) => `${value.toLocaleString()}`}
             />
-            <ChartTooltip
-              cursor={false}
-              content={
-                <ChartTooltipContent
-                  formatter={(value, name, props) => (
-                    <div className='flex flex-col gap-1 rounded-lg bg-background p-2 shadow-sm text-sm lg:text-base'>
-                      <span className='font-bold'>
-                        {props.payload.organisationName}
-                      </span>
-                      <span>
-                        Amount:{' '}
-                        {formatAmount(
-                          Number(value),
-                          props.payload.currency as string,
-                        )}
-                      </span>
-                      <span>Rate: {props.payload.interestRate}%</span>
-                      <span>
-                        Expires: {props.payload.expirationDateFormatted}
-                      </span>
-                    </div>
-                  )}
-                />
-              }
-            />
+
             <Bar dataKey='investmentAmount' radius={4}>
               {chartData.map((entry, index) => (
                 <Cell
                   key={`cell-${index}`}
                   fill={entry.fill}
+                  onClick={() => setActiveIndex(index)}
+                  className='cursor-pointer hover:opacity-80 transition-opacity'
                   opacity={
                     activeIndex === null || activeIndex === index ? 1 : 0.6
                   }
@@ -291,12 +261,10 @@ export function ChartBarInteractive({
           </Button>
         </div>
 
-        {/* Selected Investment Detail Card — Sidebar Accent (Mobile-First, No Layout Shift) */}
-        {/* Selected Investment Detail Card — Sidebar Accent (Mobile-First, No Layout Shift) */}
         {/* Selected Investment Detail Card — Sidebar Accent */}
         <div
           className={cn(
-            'mt-4 rounded-xl border bg-card p-5 transition-all duration-300 border-l-4',
+            'mt-4 rounded-xl border bg-card p-5 transition-all duration-300 border-l-4 max-w-[500px] mx-auto',
             activeIndex !== null
               ? 'opacity-100 translate-y-0'
               : 'opacity-0 translate-y-2 pointer-events-none h-0 p-0 overflow-hidden border-l-0',
@@ -447,7 +415,7 @@ export function ChartBarInteractive({
               </ItemMedia>
               <ItemContent>
                 <ItemTitle className='text-xs lg:text-sm'>Expired</ItemTitle>
-              </ItemContent>
+              </ItemContent> 
             </Item>
           )}
           {isExpiringIn7Days && (
