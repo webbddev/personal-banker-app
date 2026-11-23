@@ -147,10 +147,10 @@ export function InvestmentExpirationCalendar({
               className={cn(
                 'relative text-xs sm:text-sm z-10 pb-1 font-bold transition-colors',
                 hasInvestments && 'custom-underline',
-                !isSelected && status === 'expired' && 'text-red-600 dark:text-red-400',
-                !isSelected && status === 'urgent' && 'text-amber-600 dark:text-amber-400',
-                !isSelected && status === 'soon' && 'text-emerald-600 dark:text-emerald-400',
-                !isSelected && status === 'active' && 'text-blue-600 dark:text-blue-400'
+                status === 'expired' && 'text-red-600 dark:text-red-400',
+                status === 'urgent' && 'text-amber-600 dark:text-amber-400',
+                status === 'soon' && 'text-emerald-600 dark:text-emerald-400',
+                status === 'active' && 'text-blue-600 dark:text-blue-400'
               )}
             >
               {day.date.getDate()}

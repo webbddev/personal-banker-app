@@ -10,13 +10,13 @@ export const maxDuration = 30;
 // List of trusted Moldovan financial sources
 const TRUSTED_MOLDOVAN_SOURCES = {
   banks: [
-    'https://www.victoriabank.md/ru/economii-si-investitii/depozite-la-termen/depozit-online',
+    'https://www.victoriabank.md/ru/depozite?tip=%D0%B4%D0%B5%D0%BF%D0%BE%D0%B7%D0%B8%D1%82%D1%8B',
     'https://mobiasbanca.md/ru/promo-deposit',
     'https://micb.md/ru/depozite-persoane-fizice/',
     'https://ecb.md/ru/depozity-fiziceskih-lit/',
     'https://eximbank.md/ru/deposit-types',
     'https://fincombank.com/ru/tipurile-de-depozite#filter=.online',
-    'https://www.energbank.com/ru/page/%D1%83%D1%81%D0%BB%D0%BE%D0%B2%D0%B8%D1%8F-%D0%B4%D0%B5%D0%BF%D0%BE%D0%B7%D0%B8%D1%82%D0%BE%D0%B2',
+    'https://www.energbank.com/ru/page/usloviya-depozitov',
     'https://comertbank.md/ru/services/physical_person/deposits/',
     'https://www.procreditbank.md/ru/content/proclassic_ru',
     'https://www.maib.md/ru/persoane-fizice/depozite',
