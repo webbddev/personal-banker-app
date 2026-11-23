@@ -7,8 +7,10 @@ const isProtectedRoute = createRouteMatcher([
   '/api((?!/notifications).*)', // Protect all /api except notifications
 ]);
 
-// Routes designed for external automation (n8n, scripts, etc.)
+// Routes designed for external automation and protocols (n8n, MCP, Webhooks, etc.)
 const isPublicApiRoute = createRouteMatcher([
+  '/.well-known(.*)',
+  '/api/mcp(.*)',
   '/api/v1/investments(.*)',
   '/api/notifications(.*)',
   '/api/cron(.*)',
